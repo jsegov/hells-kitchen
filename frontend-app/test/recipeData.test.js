@@ -110,5 +110,8 @@ test("formatDifficulty title-cases difficulty and falls back when missing", () =
   expect(formatDifficulty("easy")).toBe("Easy");
   expect(formatDifficulty("medium")).toBe("Medium");
   expect(formatDifficulty("")).toBe("Unrated");
+  expect(formatDifficulty("   ")).toBe("Unrated");
   expect(formatDifficulty(null)).toBe("Unrated");
+  expect(formatDifficulty(3)).toBe("Unrated");
+  expect(formatDifficulty(true)).toBe("Unrated");
 });

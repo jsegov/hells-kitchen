@@ -65,6 +65,25 @@ test("toRecipeListItem handles missing array fields defensively", () => {
   expect(item.ingredientCount).toBe(0);
 });
 
+test("toRecipeListItem normalizes non-string difficulty values", () => {
+  const item = toRecipeListItem({
+    id: "recipe-3",
+    title: "Malformed Recipe",
+    description: "A malformed recipe for testing",
+    servings: 2,
+    prepTime: "5 minutes",
+    cookTime: "0 minutes",
+    difficulty: 7,
+  });
+
+  expect(item).not.toBeNull();
+  if (!item) {
+    throw new Error("Expected a mapped recipe list item.");
+  }
+
+  expect(item.difficulty).toBe("");
+});
+
 test("toRecipeListItem returns null for empty recipe records", () => {
   expect(toRecipeListItem(null)).toBeNull();
   expect(toRecipeListItem(undefined)).toBeNull();

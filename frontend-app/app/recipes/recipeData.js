@@ -83,12 +83,20 @@ export async function getRecipes({
 }
 
 /**
- * @param {string | null | undefined} difficulty
+ * @param {unknown} difficulty
  */
 export function formatDifficulty(difficulty) {
-  if (!difficulty) {
+  if (typeof difficulty !== "string") {
     return "Unrated";
   }
 
-  return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+  const normalizedDifficulty = difficulty.trim();
+
+  if (!normalizedDifficulty) {
+    return "Unrated";
+  }
+
+  return (
+    normalizedDifficulty.charAt(0).toUpperCase() + normalizedDifficulty.slice(1)
+  );
 }

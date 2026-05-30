@@ -18,7 +18,7 @@ const DATA_PATH = path.join(__dirname, "../db/data.json");
  * @property {number} servings
  * @property {string} prepTime
  * @property {string} cookTime
- * @property {string} difficulty
+ * @property {unknown} difficulty
  * @property {RecipeIngredient[]=} ingredients
  * @property {string[]=} instructions
  * @property {string[]=} tags
@@ -59,7 +59,7 @@ const toRecipeListItem = (recipe) => {
     servings: recipe.servings,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,
-    difficulty: recipe.difficulty,
+    difficulty: typeof recipe.difficulty === "string" ? recipe.difficulty : "",
     tags: Array.isArray(recipe.tags) ? recipe.tags : [],
     ingredientCount: Array.isArray(recipe.ingredients)
       ? recipe.ingredients.length
