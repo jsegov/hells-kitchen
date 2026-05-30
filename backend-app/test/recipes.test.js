@@ -1,4 +1,8 @@
-const { getRecipeList, toRecipeListItem } = require("../src/recipes");
+const {
+  getRecipeList,
+  toRecipeListItem,
+  toRecipeListItems,
+} = require("../src/recipes");
 
 test("toRecipeListItem maps only list-safe recipe fields", () => {
   const item = toRecipeListItem({
@@ -17,6 +21,11 @@ test("toRecipeListItem maps only list-safe recipe fields", () => {
     tags: ["dinner", "quick"],
     dateAdded: "2024-01-01T00:00:00Z",
   });
+
+  expect(item).not.toBeNull();
+  if (!item) {
+    throw new Error("Expected a mapped recipe list item.");
+  }
 
   expect(Object.keys(item).sort()).toEqual([
     "cookTime",
@@ -47,8 +56,44 @@ test("toRecipeListItem handles missing array fields defensively", () => {
     difficulty: "easy",
   });
 
+  expect(item).not.toBeNull();
+  if (!item) {
+    throw new Error("Expected a mapped recipe list item.");
+  }
+
   expect(item.tags).toEqual([]);
   expect(item.ingredientCount).toBe(0);
+});
+
+test("toRecipeListItem returns null for empty recipe records", () => {
+  expect(toRecipeListItem(null)).toBeNull();
+  expect(toRecipeListItem(undefined)).toBeNull();
+});
+
+test("toRecipeListItems returns an empty list for invalid database shapes", () => {
+  expect(toRecipeListItems(null)).toEqual([]);
+  expect(toRecipeListItems({})).toEqual([]);
+  expect(toRecipeListItems({ recipes: null })).toEqual([]);
+});
+
+test("toRecipeListItems filters out invalid recipe records", () => {
+  const recipes = toRecipeListItems({
+    recipes: [
+      null,
+      {
+        id: "recipe-1",
+        title: "Test Recipe",
+        description: "A recipe for testing",
+        servings: 4,
+        prepTime: "10 minutes",
+        cookTime: "20 minutes",
+        difficulty: "easy",
+      },
+    ],
+  });
+
+  expect(recipes).toHaveLength(1);
+  expect(recipes[0].id).toBe("recipe-1");
 });
 
 test("getRecipeList returns list DTOs from the mock database", async () => {

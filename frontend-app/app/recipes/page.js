@@ -1,4 +1,5 @@
 import RecipeCard from "./RecipeCard";
+import RecipePageHeader from "./RecipePageHeader";
 import { getRecipes } from "./recipeData";
 import styles from "./page.module.css";
 
@@ -12,15 +13,10 @@ export default async function RecipesPage() {
 
   return (
     <main className={styles.page}>
-      <section className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>Recipe Manager</p>
-          <h1>Recipes</h1>
-        </div>
-        <p className={styles.count}>
-          {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
-        </p>
-      </section>
+      <RecipePageHeader
+        hasError={Boolean(error)}
+        recipeCount={recipes.length}
+      />
 
       {error ? (
         <section className={styles.state} role="alert">

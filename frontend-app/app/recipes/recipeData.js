@@ -17,7 +17,7 @@ export const DEFAULT_API_BASE_URL = "http://localhost:8080";
  * @typedef {object} RecipesResponse
  * @property {boolean} ok
  * @property {number=} status
- * @property {() => Promise<RecipeListItem[]>} json
+ * @property {() => Promise<unknown>} json
  */
 
 /**
@@ -53,8 +53,17 @@ export async function getRecipes({
       };
     }
 
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+      return {
+        recipes: [],
+        error: "Invalid data format received from the recipe service.",
+      };
+    }
+
     return {
-      recipes: await response.json(),
+      recipes: /** @type {RecipeListItem[]} */ (data),
       error: null,
     };
   } catch (error) {

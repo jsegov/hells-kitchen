@@ -63,6 +63,20 @@ test("getRecipes returns a visible error for non-2xx responses", async () => {
   });
 });
 
+test("getRecipes returns a visible error for non-array payloads", async () => {
+  const result = await getRecipes({
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({ recipes: [] }),
+    }),
+  });
+
+  expect(result).toEqual({
+    recipes: [],
+    error: "Invalid data format received from the recipe service.",
+  });
+});
+
 test("getRecipes returns a service error when fetch throws", async () => {
   const result = await getRecipes({
     fetchImpl: async () => {

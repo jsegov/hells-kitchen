@@ -44,33 +44,68 @@ const getData = async () => {
 };
 
 /**
- * @param {Recipe} recipe
- * @returns {RecipeListItem}
+ * @param {Recipe | null | undefined} recipe
+ * @returns {RecipeListItem | null}
  */
-const toRecipeListItem = (recipe) => ({
-  id: recipe.id,
-  title: recipe.title,
-  description: recipe.description,
-  servings: recipe.servings,
-  prepTime: recipe.prepTime,
-  cookTime: recipe.cookTime,
-  difficulty: recipe.difficulty,
-  tags: Array.isArray(recipe.tags) ? recipe.tags : [],
-  ingredientCount: Array.isArray(recipe.ingredients)
-    ? recipe.ingredients.length
-    : 0,
-});
+const toRecipeListItem = (recipe) => {
+  if (!recipe || typeof recipe !== "object") {
+    return null;
+  }
+
+  return {
+    id: recipe.id,
+    title: recipe.title,
+    description: recipe.description,
+    servings: recipe.servings,
+    prepTime: recipe.prepTime,
+    cookTime: recipe.cookTime,
+    difficulty: recipe.difficulty,
+    tags: Array.isArray(recipe.tags) ? recipe.tags : [],
+    ingredientCount: Array.isArray(recipe.ingredients)
+      ? recipe.ingredients.length
+      : 0,
+  };
+};
+
+/**
+ * @param {unknown} data
+ * @returns {RecipeListItem[]}
+ */
+const toRecipeListItems = (data) => {
+  if (!data || typeof data !== "object") {
+    return [];
+  }
+
+  const recipes = /** @type {{ recipes?: unknown }} */ (data).recipes;
+
+  if (!Array.isArray(recipes)) {
+    return [];
+  }
+
+  return recipes.reduce((items, recipe) => {
+    const item = toRecipeListItem(
+      /** @type {Recipe | null | undefined} */ (recipe),
+    );
+
+    if (item) {
+      items.push(item);
+    }
+
+    return items;
+  }, /** @type {RecipeListItem[]} */ ([]));
+};
 
 /**
  * @returns {Promise<RecipeListItem[]>}
  */
 const getRecipeList = async () => {
   const data = await getData();
-  return data.recipes.map(toRecipeListItem);
+  return toRecipeListItems(data);
 };
 
 module.exports = {
   getData,
   getRecipeList,
   toRecipeListItem,
+  toRecipeListItems,
 };
