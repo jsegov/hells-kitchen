@@ -53,7 +53,15 @@ export async function getRecipes({
       };
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      return {
+        recipes: [],
+        error: "Invalid data format received from the recipe service.",
+      };
+    }
 
     if (!Array.isArray(data)) {
       return {
