@@ -11,6 +11,22 @@ const DATA_PATH = path.join(__dirname, "../db/data.json");
  */
 
 /**
+ * @typedef {object} Nutrition
+ * @property {number} calories
+ * @property {number} protein
+ * @property {number} carbs
+ * @property {number} fat
+ */
+
+/**
+ * @typedef {object} Ingredient
+ * @property {string} id
+ * @property {string} name
+ * @property {string} category
+ * @property {Nutrition=} nutrition
+ */
+
+/**
  * @typedef {object} Recipe
  * @property {string} id
  * @property {string} title
@@ -38,9 +54,221 @@ const DATA_PATH = path.join(__dirname, "../db/data.json");
  * @property {number} ingredientCount
  */
 
+/**
+ * @typedef {object} RecipeIngredientDetail
+ * @property {string} ingredientId
+ * @property {string} name
+ * @property {string} amount
+ * @property {string} unit
+ * @property {string} category
+ * @property {Nutrition} nutrition
+ */
+
+/**
+ * @typedef {object} RecipeNutritionSummary
+ * @property {Nutrition} total
+ * @property {Nutrition} perServing
+ * @property {string[]} missingIngredientIds
+ */
+
+/**
+ * @typedef {object} RecipeDetail
+ * @property {string} id
+ * @property {string} title
+ * @property {string} description
+ * @property {number} servings
+ * @property {string} prepTime
+ * @property {string} cookTime
+ * @property {string} difficulty
+ * @property {string[]} tags
+ * @property {string[]} instructions
+ * @property {RecipeIngredientDetail[]} ingredients
+ * @property {RecipeNutritionSummary} nutrition
+ */
+
+/** @type {Array<keyof Nutrition>} */
+const NUTRITION_FIELDS = ["calories", "protein", "carbs", "fat"];
+
 const getData = async () => {
   const data = await fs.readFile(DATA_PATH, "utf8");
   return JSON.parse(data);
+};
+
+/**
+ * @returns {Nutrition}
+ */
+const createEmptyNutrition = () => ({
+  calories: 0,
+  protein: 0,
+  carbs: 0,
+  fat: 0,
+});
+
+/**
+ * @param {number} value
+ */
+const roundNutritionValue = (value) => Math.round(value * 10) / 10;
+
+/**
+ * @param {Nutrition} nutrition
+ * @returns {Nutrition}
+ */
+const roundNutrition = (nutrition) => ({
+  calories: roundNutritionValue(nutrition.calories),
+  protein: roundNutritionValue(nutrition.protein),
+  carbs: roundNutritionValue(nutrition.carbs),
+  fat: roundNutritionValue(nutrition.fat),
+});
+
+/**
+ * @param {unknown} nutrition
+ * @param {string} field
+ */
+const getNutritionValue = (nutrition, field) => {
+  if (!nutrition || typeof nutrition !== "object") {
+    return 0;
+  }
+
+  const value = /** @type {Record<string, unknown>} */ (nutrition)[field];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+};
+
+/**
+ * @param {unknown} amount
+ */
+const parseRecipeAmount = (amount) => {
+  if (typeof amount === "number") {
+    return Number.isFinite(amount) ? amount : 0;
+  }
+
+  if (typeof amount !== "string") {
+    return 0;
+  }
+
+  const normalizedAmount = amount.trim();
+
+  if (!normalizedAmount) {
+    return 0;
+  }
+
+  const numericAmount = Number(normalizedAmount);
+
+  if (Number.isFinite(numericAmount)) {
+    return numericAmount;
+  }
+
+  const fractionMatch = normalizedAmount.match(
+    /^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/,
+  );
+
+  if (!fractionMatch) {
+    return 0;
+  }
+
+  const numerator = Number(fractionMatch[1]);
+  const denominator = Number(fractionMatch[2]);
+
+  if (
+    !Number.isFinite(numerator) ||
+    !Number.isFinite(denominator) ||
+    denominator === 0
+  ) {
+    return 0;
+  }
+
+  return numerator / denominator;
+};
+
+/**
+ * @param {string} ingredientId
+ */
+const formatIngredientName = (ingredientId) => {
+  const fallbackName = ingredientId.split("_").filter(Boolean).join(" ").trim();
+
+  if (!fallbackName) {
+    return "Unknown ingredient";
+  }
+
+  return fallbackName.replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
+/**
+ * @param {Nutrition} nutrition
+ * @param {number} multiplier
+ * @returns {Nutrition}
+ */
+const multiplyNutrition = (nutrition, multiplier) => {
+  const scaledNutrition = createEmptyNutrition();
+
+  for (const field of NUTRITION_FIELDS) {
+    scaledNutrition[field] = getNutritionValue(nutrition, field) * multiplier;
+  }
+
+  return roundNutrition(scaledNutrition);
+};
+
+/**
+ * @param {Nutrition} target
+ * @param {Nutrition} source
+ */
+const addNutrition = (target, source) => {
+  for (const field of NUTRITION_FIELDS) {
+    target[field] += getNutritionValue(source, field);
+  }
+};
+
+/**
+ * @param {Nutrition} nutrition
+ * @param {number} servings
+ */
+const divideNutrition = (nutrition, servings) => {
+  if (servings <= 0) {
+    return createEmptyNutrition();
+  }
+
+  return roundNutrition({
+    calories: nutrition.calories / servings,
+    protein: nutrition.protein / servings,
+    carbs: nutrition.carbs / servings,
+    fat: nutrition.fat / servings,
+  });
+};
+
+/**
+ * @param {unknown} data
+ * @returns {Map<string, Ingredient>}
+ */
+const toIngredientMap = (data) => {
+  /** @type {Map<string, Ingredient>} */
+  const ingredientMap = new Map();
+
+  if (!data || typeof data !== "object") {
+    return ingredientMap;
+  }
+
+  const ingredients = /** @type {{ ingredients?: unknown }} */ (data)
+    .ingredients;
+
+  if (!Array.isArray(ingredients)) {
+    return ingredientMap;
+  }
+
+  for (const ingredient of ingredients) {
+    if (!ingredient || typeof ingredient !== "object") {
+      continue;
+    }
+
+    const typedIngredient = /** @type {Partial<Ingredient>} */ (ingredient);
+
+    if (typeof typedIngredient.id === "string") {
+      ingredientMap.set(
+        typedIngredient.id,
+        /** @type {Ingredient} */ (ingredient),
+      );
+    }
+  }
+
+  return ingredientMap;
 };
 
 /**
@@ -96,6 +324,92 @@ const toRecipeListItems = (data) => {
 };
 
 /**
+ * @param {RecipeIngredient} recipeIngredient
+ * @param {Map<string, Ingredient>} ingredientMap
+ * @returns {{ detail: RecipeIngredientDetail, isMissingIngredient: boolean }}
+ */
+const toRecipeIngredientDetail = (recipeIngredient, ingredientMap) => {
+  const ingredient = ingredientMap.get(recipeIngredient.ingredientId);
+  const amountMultiplier = parseRecipeAmount(recipeIngredient.amount);
+  const nutrition = ingredient?.nutrition
+    ? multiplyNutrition(ingredient.nutrition, amountMultiplier)
+    : createEmptyNutrition();
+
+  return {
+    detail: {
+      ingredientId: recipeIngredient.ingredientId,
+      name:
+        ingredient?.name || formatIngredientName(recipeIngredient.ingredientId),
+      amount: recipeIngredient.amount,
+      unit: recipeIngredient.unit,
+      category: ingredient?.category || "",
+      nutrition,
+    },
+    isMissingIngredient: !ingredient,
+  };
+};
+
+/**
+ * @param {Recipe | null | undefined} recipe
+ * @param {Map<string, Ingredient>} ingredientMap
+ * @returns {RecipeDetail | null}
+ */
+const toRecipeDetail = (recipe, ingredientMap) => {
+  if (!recipe || typeof recipe !== "object") {
+    return null;
+  }
+
+  const totalNutrition = createEmptyNutrition();
+  /** @type {Set<string>} */
+  const missingIngredientIds = new Set();
+  const ingredients = Array.isArray(recipe.ingredients)
+    ? recipe.ingredients.reduce((items, recipeIngredient) => {
+        if (
+          !recipeIngredient ||
+          typeof recipeIngredient !== "object" ||
+          typeof recipeIngredient.ingredientId !== "string"
+        ) {
+          return items;
+        }
+
+        const { detail, isMissingIngredient } = toRecipeIngredientDetail(
+          recipeIngredient,
+          ingredientMap,
+        );
+
+        addNutrition(totalNutrition, detail.nutrition);
+
+        if (isMissingIngredient) {
+          missingIngredientIds.add(detail.ingredientId);
+        }
+
+        items.push(detail);
+        return items;
+      }, /** @type {RecipeIngredientDetail[]} */ ([]))
+    : [];
+  const servings = typeof recipe.servings === "number" ? recipe.servings : 0;
+  const roundedTotalNutrition = roundNutrition(totalNutrition);
+
+  return {
+    id: recipe.id,
+    title: recipe.title,
+    description: recipe.description,
+    servings: recipe.servings,
+    prepTime: recipe.prepTime,
+    cookTime: recipe.cookTime,
+    difficulty: typeof recipe.difficulty === "string" ? recipe.difficulty : "",
+    tags: Array.isArray(recipe.tags) ? recipe.tags : [],
+    instructions: Array.isArray(recipe.instructions) ? recipe.instructions : [],
+    ingredients,
+    nutrition: {
+      total: roundedTotalNutrition,
+      perServing: divideNutrition(roundedTotalNutrition, servings),
+      missingIngredientIds: Array.from(missingIngredientIds),
+    },
+  };
+};
+
+/**
  * @returns {Promise<RecipeListItem[]>}
  */
 const getRecipeList = async () => {
@@ -103,9 +417,44 @@ const getRecipeList = async () => {
   return toRecipeListItems(data);
 };
 
+/**
+ * @param {string} id
+ * @returns {Promise<RecipeDetail | null>}
+ */
+const getRecipeDetail = async (id) => {
+  const data = await getData();
+
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  const recipes = /** @type {{ recipes?: unknown }} */ (data).recipes;
+
+  if (!Array.isArray(recipes)) {
+    return null;
+  }
+
+  const recipe = recipes.find((recipeItem) => {
+    if (!recipeItem || typeof recipeItem !== "object") {
+      return false;
+    }
+
+    return /** @type {Partial<Recipe>} */ (recipeItem).id === id;
+  });
+
+  return toRecipeDetail(
+    /** @type {Recipe | null | undefined} */ (recipe),
+    toIngredientMap(data),
+  );
+};
+
 module.exports = {
   getData,
+  getRecipeDetail,
   getRecipeList,
+  parseRecipeAmount,
+  toIngredientMap,
+  toRecipeDetail,
   toRecipeListItem,
   toRecipeListItems,
 };
