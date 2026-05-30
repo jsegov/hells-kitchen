@@ -86,9 +86,71 @@ test("toRecipeListItem normalizes non-string difficulty values", () => {
   expect(item.difficulty).toBe("");
 });
 
+test("toRecipeListItem normalizes malformed list-safe scalar fields", () => {
+  const item = toRecipeListItem(
+    /** @type {*} */ ({
+      id: "recipe-4",
+      title: "Malformed List Recipe",
+      description: null,
+      servings: Number.POSITIVE_INFINITY,
+      prepTime: false,
+      cookTime: 42,
+      difficulty: 7,
+      tags: ["dinner", 42, ""],
+      ingredients: [
+        { ingredientId: "flour" },
+        { ingredientId: "" },
+        { ingredientId: "salt" },
+        {},
+        null,
+      ],
+    }),
+  );
+
+  expect(item).not.toBeNull();
+  if (!item) {
+    throw new Error("Expected a mapped recipe list item.");
+  }
+
+  expect(item).toMatchObject({
+    description: "",
+    servings: 0,
+    prepTime: "",
+    cookTime: "",
+    difficulty: "",
+    tags: ["dinner", ""],
+    ingredientCount: 2,
+  });
+});
+
 test("toRecipeListItem returns null for empty recipe records", () => {
   expect(toRecipeListItem(null)).toBeNull();
   expect(toRecipeListItem(undefined)).toBeNull();
+});
+
+test("toRecipeListItem returns null when required list identity fields are missing", () => {
+  expect(
+    toRecipeListItem({
+      id: "",
+      title: "Missing ID Recipe",
+      description: "A recipe without an ID",
+      servings: 1,
+      prepTime: "5 minutes",
+      cookTime: "0 minutes",
+      difficulty: "easy",
+    }),
+  ).toBeNull();
+  expect(
+    toRecipeListItem({
+      id: "missing-title",
+      title: "   ",
+      description: "A recipe without a title",
+      servings: 1,
+      prepTime: "5 minutes",
+      cookTime: "0 minutes",
+      difficulty: "easy",
+    }),
+  ).toBeNull();
 });
 
 test("toRecipeListItems returns an empty list for invalid database shapes", () => {
@@ -244,31 +306,31 @@ test("getRecipeDetail returns a full recipe detail DTO from the mock database", 
   });
   expect(recipe.ingredients[2]).toEqual({
     ingredientId: "basil",
-    name: "Basil",
+    name: "Fresh Basil",
     amount: "10",
     unit: "leaves",
-    category: "",
+    category: "herb",
     nutrition: {
-      calories: 0,
-      protein: 0,
-      carbs: 0,
-      fat: 0,
+      calories: 2,
+      protein: 0.2,
+      carbs: 0.2,
+      fat: 0.1,
     },
   });
   expect(recipe.nutrition).toEqual({
     total: {
-      calories: 3667.5,
-      protein: 211.5,
-      carbs: 263.5,
-      fat: 199.4,
+      calories: 3669.5,
+      protein: 211.7,
+      carbs: 263.7,
+      fat: 199.5,
     },
     perServing: {
-      calories: 916.9,
+      calories: 917.4,
       protein: 52.9,
       carbs: 65.9,
       fat: 49.9,
     },
-    missingIngredientIds: ["basil"],
+    missingIngredientIds: [],
   });
 });
 

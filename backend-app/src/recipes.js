@@ -129,11 +129,21 @@ const toSafeString = (value) => (typeof value === "string" ? value : "");
 const toSafeNumber = (value) =>
   typeof value === "number" && Number.isFinite(value) ? value : 0;
 
+// Backend lowercases filter terms for case-insensitive matching. The frontend
+// (recipeData.js normalizeFilterValues) trims only, preserving the user's
+// original casing for the filter input display — the duplication is intentional
+// and the two are deliberately not identical.
 /**
  * @param {unknown} value
  */
 const toSearchText = (value) =>
   typeof value === "string" ? value.trim().toLowerCase() : "";
+
+/**
+ * @param {unknown} value
+ */
+const isNonEmptyString = (value) =>
+  typeof value === "string" && value.trim().length > 0;
 
 /**
  * @param {unknown} value
@@ -459,18 +469,31 @@ const toRecipeListItem = (recipe) => {
     return null;
   }
 
+  if (!isNonEmptyString(recipe.id) || !isNonEmptyString(recipe.title)) {
+    return null;
+  }
+
+  const ingredients = Array.isArray(recipe.ingredients)
+    ? recipe.ingredients
+    : [];
+
   return {
     id: recipe.id,
     title: recipe.title,
-    description: recipe.description,
-    servings: recipe.servings,
-    prepTime: recipe.prepTime,
-    cookTime: recipe.cookTime,
+    description: toSafeString(recipe.description),
+    servings: toSafeNumber(recipe.servings),
+    prepTime: toSafeString(recipe.prepTime),
+    cookTime: toSafeString(recipe.cookTime),
     difficulty: typeof recipe.difficulty === "string" ? recipe.difficulty : "",
-    tags: Array.isArray(recipe.tags) ? recipe.tags : [],
-    ingredientCount: Array.isArray(recipe.ingredients)
-      ? recipe.ingredients.length
-      : 0,
+    tags: Array.isArray(recipe.tags)
+      ? recipe.tags.filter((tag) => typeof tag === "string")
+      : [],
+    ingredientCount: ingredients.filter(
+      (ingredient) =>
+        ingredient &&
+        typeof ingredient === "object" &&
+        isNonEmptyString(ingredient.ingredientId),
+    ).length,
   };
 };
 

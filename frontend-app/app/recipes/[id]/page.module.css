@@ -288,3 +288,88 @@
     width: fit-content;
   }
 }
+
+/* Loading skeleton */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.skeleton {
+  display: block;
+  border-radius: 6px;
+  background: #e2e8f0;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.skeletonStack {
+  display: grid;
+  gap: 14px;
+}
+
+.skeletonBackLink {
+  width: 132px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.skeletonEyebrow {
+  width: 120px;
+  height: 12px;
+}
+
+.skeletonTitle {
+  width: 70%;
+  height: 36px;
+}
+
+.skeletonLine {
+  width: 100%;
+  height: 16px;
+}
+
+.skeletonLineShort {
+  width: 50%;
+  height: 16px;
+}
+
+.skeletonMetric {
+  width: 100%;
+  height: 26px;
+}
+
+.skeletonPanelTitle {
+  width: 160px;
+  height: 22px;
+}
+
+.skeletonRows {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

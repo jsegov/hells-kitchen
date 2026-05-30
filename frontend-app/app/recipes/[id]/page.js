@@ -4,10 +4,34 @@ import RecipeDetail from "./RecipeDetail";
 import { getRecipe } from "../recipeData";
 import styles from "./page.module.css";
 
-export const metadata = {
-  title: "Recipe Detail",
-  description: "View recipe ingredients, instructions, tags, and nutrition.",
-};
+/**
+ * @param {{ params: Promise<{ id: string }> }} props
+ */
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const { recipe, notFound: recipeNotFound } = await getRecipe(id);
+
+  if (recipe) {
+    return {
+      title: recipe.title,
+      description:
+        recipe.description ||
+        "View recipe ingredients, instructions, tags, and nutrition.",
+    };
+  }
+
+  if (recipeNotFound) {
+    return {
+      title: "Recipe Not Found",
+      description: "The requested recipe could not be found.",
+    };
+  }
+
+  return {
+    title: "Recipe Unavailable",
+    description: "Recipe details are currently unavailable.",
+  };
+}
 
 /**
  * @param {{ params: Promise<{ id: string }> }} props

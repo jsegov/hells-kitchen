@@ -78,6 +78,10 @@ function getApiBaseUrl(apiBaseUrl = process.env.API_BASE_URL) {
   return (apiBaseUrl || DEFAULT_API_BASE_URL).replace(/\/$/, "");
 }
 
+// Trims only — intentionally preserves the user's original casing for the
+// filter input display. The backend (recipes.js toSearchText) lowercases for
+// case-insensitive matching, so this normalization is duplicated by design but
+// deliberately not identical.
 /**
  * @param {unknown} value
  * @returns {string[]}
@@ -199,6 +203,35 @@ function isNutrition(value) {
 
 /**
  * @param {unknown} value
+ * @returns {value is RecipeListItem}
+ */
+function isRecipeListItem(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const recipe = /** @type {Partial<RecipeListItem>} */ (value);
+
+  return (
+    typeof recipe.id === "string" &&
+    recipe.id.trim().length > 0 &&
+    typeof recipe.title === "string" &&
+    recipe.title.trim().length > 0 &&
+    typeof recipe.description === "string" &&
+    typeof recipe.servings === "number" &&
+    Number.isFinite(recipe.servings) &&
+    typeof recipe.prepTime === "string" &&
+    typeof recipe.cookTime === "string" &&
+    typeof recipe.difficulty === "string" &&
+    typeof recipe.ingredientCount === "number" &&
+    Number.isFinite(recipe.ingredientCount) &&
+    Array.isArray(recipe.tags) &&
+    recipe.tags.every((tag) => typeof tag === "string")
+  );
+}
+
+/**
+ * @param {unknown} value
  * @returns {value is RecipeIngredientDetail}
  */
 function isRecipeIngredientDetail(value) {
@@ -301,7 +334,7 @@ export async function getRecipes({
       };
     }
 
-    if (!Array.isArray(data)) {
+    if (!Array.isArray(data) || !data.every(isRecipeListItem)) {
       return {
         recipes: [],
         error: "Invalid data format received from the recipe service.",
