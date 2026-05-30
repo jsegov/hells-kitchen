@@ -270,6 +270,69 @@ test("toRecipeDetail supports fractional ingredient amounts", () => {
   });
 });
 
+test("toRecipeDetail defensively maps malformed scalar detail fields", () => {
+  const recipe = toRecipeDetail(
+    /** @type {*} */ ({
+      id: 7,
+      title: null,
+      description: undefined,
+      servings: Number.NaN,
+      prepTime: false,
+      cookTime: 42,
+      difficulty: "medium",
+      ingredients: [{ ingredientId: "test_oil", amount: 2, unit: undefined }],
+      instructions: ["Serve"],
+      tags: ["test"],
+    }),
+    new Map([
+      [
+        "test_oil",
+        {
+          id: "test_oil",
+          name: "Test Oil",
+          category: "oil",
+          nutrition: {
+            calories: 100,
+            protein: 2,
+            carbs: 4,
+            fat: 8,
+          },
+        },
+      ],
+    ]),
+  );
+
+  expect(recipe).not.toBeNull();
+  if (!recipe) {
+    throw new Error("Expected a recipe detail DTO.");
+  }
+
+  expect(recipe).toMatchObject({
+    id: "",
+    title: "",
+    description: "",
+    servings: 0,
+    prepTime: "",
+    cookTime: "",
+  });
+  expect(recipe.ingredients[0]).toMatchObject({
+    amount: "2",
+    unit: "",
+    nutrition: {
+      calories: 200,
+      protein: 4,
+      carbs: 8,
+      fat: 16,
+    },
+  });
+  expect(recipe.nutrition.perServing).toEqual({
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+  });
+});
+
 test("toRecipeDetail handles missing ingredient metadata without crashing", () => {
   const recipe = toRecipeDetail(
     {

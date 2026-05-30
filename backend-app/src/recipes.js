@@ -6,8 +6,8 @@ const DATA_PATH = path.join(__dirname, "../db/data.json");
 /**
  * @typedef {object} RecipeIngredient
  * @property {string} ingredientId
- * @property {string} amount
- * @property {string} unit
+ * @property {unknown} amount
+ * @property {unknown} unit
  */
 
 /**
@@ -103,6 +103,17 @@ const createEmptyNutrition = () => ({
   carbs: 0,
   fat: 0,
 });
+
+/**
+ * @param {unknown} value
+ */
+const toSafeString = (value) => (typeof value === "string" ? value : "");
+
+/**
+ * @param {unknown} value
+ */
+const toSafeNumber = (value) =>
+  typeof value === "number" && Number.isFinite(value) ? value : 0;
 
 /**
  * @param {number} value
@@ -222,7 +233,11 @@ const addNutrition = (target, source) => {
  * @param {number} servings
  */
 const divideNutrition = (nutrition, servings) => {
-  if (servings <= 0) {
+  if (
+    typeof servings !== "number" ||
+    !Number.isFinite(servings) ||
+    servings <= 0
+  ) {
     return createEmptyNutrition();
   }
 
@@ -331,6 +346,10 @@ const toRecipeListItems = (data) => {
 const toRecipeIngredientDetail = (recipeIngredient, ingredientMap) => {
   const ingredient = ingredientMap.get(recipeIngredient.ingredientId);
   const amountMultiplier = parseRecipeAmount(recipeIngredient.amount);
+  const amount =
+    typeof recipeIngredient.amount === "number"
+      ? String(recipeIngredient.amount)
+      : toSafeString(recipeIngredient.amount);
   const nutrition = ingredient?.nutrition
     ? multiplyNutrition(ingredient.nutrition, amountMultiplier)
     : createEmptyNutrition();
@@ -340,8 +359,8 @@ const toRecipeIngredientDetail = (recipeIngredient, ingredientMap) => {
       ingredientId: recipeIngredient.ingredientId,
       name:
         ingredient?.name || formatIngredientName(recipeIngredient.ingredientId),
-      amount: recipeIngredient.amount,
-      unit: recipeIngredient.unit,
+      amount,
+      unit: toSafeString(recipeIngredient.unit),
       category: ingredient?.category || "",
       nutrition,
     },
@@ -387,16 +406,16 @@ const toRecipeDetail = (recipe, ingredientMap) => {
         return items;
       }, /** @type {RecipeIngredientDetail[]} */ ([]))
     : [];
-  const servings = typeof recipe.servings === "number" ? recipe.servings : 0;
+  const servings = toSafeNumber(recipe.servings);
   const roundedTotalNutrition = roundNutrition(totalNutrition);
 
   return {
-    id: recipe.id,
-    title: recipe.title,
-    description: recipe.description,
-    servings: recipe.servings,
-    prepTime: recipe.prepTime,
-    cookTime: recipe.cookTime,
+    id: toSafeString(recipe.id),
+    title: toSafeString(recipe.title),
+    description: toSafeString(recipe.description),
+    servings,
+    prepTime: toSafeString(recipe.prepTime),
+    cookTime: toSafeString(recipe.cookTime),
     difficulty: typeof recipe.difficulty === "string" ? recipe.difficulty : "",
     tags: Array.isArray(recipe.tags) ? recipe.tags : [],
     instructions: Array.isArray(recipe.instructions) ? recipe.instructions : [],
