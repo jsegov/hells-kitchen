@@ -20,7 +20,7 @@
 - Backend defaults to `http://localhost:8080`.
 - Frontend defaults to `http://localhost:3000`; Next.js may choose another port if 3000 is already in use.
 - Frontend server-side API calls should read `process.env.API_BASE_URL` and default to `http://localhost:8080`.
-- Backend CORS should use the `CORS_ORIGIN` comma-separated allowlist when set, otherwise allow local frontend origins on ports `3000` and `3001`.
+- Backend CORS should use the `CORS_ORIGIN` comma-separated allowlist when set, support `*` as an allow-any-origin wildcard, and otherwise allow local frontend origins on ports `3000` and `3001`.
 
 ## Architecture Notes
 

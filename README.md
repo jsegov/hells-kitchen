@@ -42,7 +42,7 @@ The application uses `backend-app/db/data.json` as a mock database
 #### Environment variables
 
 - `API_BASE_URL`: frontend server-side API base URL. Defaults to `http://localhost:8080`.
-- `CORS_ORIGIN`: optional comma-separated backend CORS allowlist. Defaults to local frontend origins on ports `3000` and `3001`.
+- `CORS_ORIGIN`: optional comma-separated backend CORS allowlist. Defaults to local frontend origins on ports `3000` and `3001`; use `*` to allow any origin.
 
 #### Quality gates
 
@@ -84,7 +84,7 @@ cd frontend-app && npm run build
 - API design and implementation
 - Error handling and edge cases
 - Performance considerations
-- TypeScript/JavaScript best practices 
+- TypeScript/JavaScript best practices
 
 ## Submission
 1. Update this README with a new section below called `Candidate Notes:
@@ -95,7 +95,7 @@ cd frontend-app && npm run build
    - Known limitations or bugs
    - Additional features you'd add with more time
  
-
+ 
 2. Send us (via email to scott.nguyen@sprx.tax & anthony.difalco@sprx.tax):
    - A zip file of the entire project (frontend and backend)
    - A link to a deployed version of the application (bonus points)

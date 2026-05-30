@@ -49,6 +49,10 @@ test("isCorsOriginAllowed only allows configured origins", () => {
   ).toBe(false);
 });
 
+test("isCorsOriginAllowed supports wildcard origins", () => {
+  expect(isCorsOriginAllowed("https://other.example", ["*"])).toBe(true);
+});
+
 test("createCorsOptions allows originless and disallowed requests without CORS headers", async () => {
   await expect(resolveCorsOrigin(undefined, undefined)).resolves.toBe(false);
   await expect(
@@ -63,4 +67,7 @@ test("createCorsOptions enables CORS headers for allowed origins", async () => {
   await expect(
     resolveCorsOrigin("https://recipes.example", "https://recipes.example"),
   ).resolves.toBe(true);
+  await expect(resolveCorsOrigin("https://other.example", "*")).resolves.toBe(
+    true,
+  );
 });

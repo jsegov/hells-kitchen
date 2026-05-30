@@ -27,7 +27,9 @@ const getAllowedCorsOrigins = (corsOrigin = process.env.CORS_ORIGIN) => {
 const isCorsOriginAllowed = (
   origin,
   allowedOrigins = getAllowedCorsOrigins(),
-) => typeof origin === "string" && allowedOrigins.includes(origin);
+) =>
+  typeof origin === "string" &&
+  (allowedOrigins.includes("*") || allowedOrigins.includes(origin));
 
 /**
  * @param {string | undefined} corsOrigin
