@@ -71,7 +71,7 @@ test("getRecipesUrl encodes active recipe filters", () => {
   expect(
     getRecipesUrl("http://example.test/", {
       name: " Pizza ",
-      tag: ["vegetarian", "dinner"],
+      tag: "vegetarian, dinner",
       ingredient: "diced tomatoes",
     }),
   ).toBe(
@@ -79,16 +79,16 @@ test("getRecipesUrl encodes active recipe filters", () => {
   );
 });
 
-test("normalizeRecipeFilters trims strings and ignores malformed values", () => {
+test("normalizeRecipeFilters trims and splits strings while ignoring malformed values", () => {
   expect(
     normalizeRecipeFilters({
       name: "  salad  ",
-      tag: ["vegetarian", "", 7],
+      tag: ["vegetarian, dinner", "", 7],
       ingredient: null,
     }),
   ).toEqual({
     name: ["salad"],
-    tag: ["vegetarian"],
+    tag: ["vegetarian", "dinner"],
     ingredient: [],
   });
   expect(hasRecipeFilters({ name: "   " })).toBe(false);

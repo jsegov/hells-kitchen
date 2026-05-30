@@ -154,22 +154,23 @@ test("getRecipeList filters recipes by tag", async () => {
 
 test("getRecipeList filters recipes by ingredient id, name, and fallback name", async () => {
   const tomatoRecipes = await getRecipeList({ ingredient: "diced tomatoes" });
-  const basilRecipes = await getRecipeList({ ingredient: "basil" });
+  const soySauceRecipes = await getRecipeList({ ingredient: "soy sauce" });
 
   expect(tomatoRecipes.map((recipe) => recipe.title)).toEqual([
     "Classic Margherita Pizza",
     "Greek Salad",
   ]);
-  expect(basilRecipes.map((recipe) => recipe.title)).toEqual([
-    "Classic Margherita Pizza",
+  expect(soySauceRecipes.map((recipe) => recipe.title)).toEqual([
+    "Chicken Stir-Fry",
+    "Stir-Fried Tofu",
   ]);
 });
 
-test("getRecipeList combines filters and repeated values with AND semantics", async () => {
+test("getRecipeList combines filters, repeated values, and comma-separated values with AND semantics", async () => {
   const recipes = await getRecipeList({
     name: "salad",
     tag: "vegetarian",
-    ingredient: ["tomato", "feta"],
+    ingredient: "tomato, feta",
   });
 
   expect(recipes).toHaveLength(1);

@@ -141,8 +141,7 @@ const toSearchText = (value) =>
  */
 const normalizeFilterValues = (value) => {
   if (typeof value === "string") {
-    const normalizedValue = toSearchText(value);
-    return normalizedValue ? [normalizedValue] : [];
+    return value.split(",").map(toSearchText).filter(Boolean);
   }
 
   if (!Array.isArray(value)) {
@@ -398,7 +397,7 @@ const getRecipeIngredientSearchValues = (recipeIngredient, ingredientMap) => {
 
   return [
     ingredientId,
-    formatIngredientName(ingredientId),
+    ingredientId.replace(/_/g, " "),
     ingredient?.name || "",
     ingredient?.category || "",
   ]

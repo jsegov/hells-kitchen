@@ -84,8 +84,10 @@ function getApiBaseUrl(apiBaseUrl = process.env.API_BASE_URL) {
  */
 function normalizeFilterValues(value) {
   if (typeof value === "string") {
-    const normalizedValue = value.trim();
-    return normalizedValue ? [normalizedValue] : [];
+    return value
+      .split(",")
+      .map((filterValue) => filterValue.trim())
+      .filter(Boolean);
   }
 
   if (!Array.isArray(value)) {
