@@ -5,6 +5,8 @@ import {
   getRecipeUrl,
   getRecipes,
   getRecipesUrl,
+  hasRecipeFilters,
+  normalizeRecipeFilters,
 } from "../app/recipes/recipeData";
 
 const recipeDetail = {
@@ -65,6 +67,34 @@ test("getRecipeUrl builds an encoded detail API URL", () => {
   );
 });
 
+test("getRecipesUrl encodes active recipe filters", () => {
+  expect(
+    getRecipesUrl("http://example.test/", {
+      name: " Pizza ",
+      tag: ["vegetarian", "dinner"],
+      ingredient: "diced tomatoes",
+    }),
+  ).toBe(
+    "http://example.test/api/recipes?name=Pizza&tag=vegetarian&tag=dinner&ingredient=diced+tomatoes",
+  );
+});
+
+test("normalizeRecipeFilters trims strings and ignores malformed values", () => {
+  expect(
+    normalizeRecipeFilters({
+      name: "  salad  ",
+      tag: ["vegetarian", "", 7],
+      ingredient: null,
+    }),
+  ).toEqual({
+    name: ["salad"],
+    tag: ["vegetarian"],
+    ingredient: [],
+  });
+  expect(hasRecipeFilters({ name: "   " })).toBe(false);
+  expect(hasRecipeFilters({ ingredient: "tomato" })).toBe(true);
+});
+
 test("getRecipes fetches recipes with no-store caching", async () => {
   const recipeList = [
     {
@@ -96,6 +126,29 @@ test("getRecipes fetches recipes with no-store caching", async () => {
     recipes: recipeList,
     error: null,
   });
+});
+
+test("getRecipes fetches filtered recipes with no-store caching", async () => {
+  const fetchImpl = jest.fn(async () => ({
+    ok: true,
+    json: async () => [],
+  }));
+
+  await getRecipes({
+    apiBaseUrl: "http://api.test",
+    filters: {
+      name: "Greek Salad",
+      ingredient: "feta",
+    },
+    fetchImpl,
+  });
+
+  expect(fetchImpl).toHaveBeenCalledWith(
+    "http://api.test/api/recipes?name=Greek+Salad&ingredient=feta",
+    {
+      cache: "no-store",
+    },
+  );
 });
 
 test("getRecipes returns a visible error for non-2xx responses", async () => {

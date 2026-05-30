@@ -58,6 +58,20 @@ export const DEFAULT_API_BASE_URL = "http://localhost:8080";
  */
 
 /**
+ * @typedef {object} RecipeFilterInput
+ * @property {unknown=} name
+ * @property {unknown=} tag
+ * @property {unknown=} ingredient
+ */
+
+/**
+ * @typedef {object} RecipeFilters
+ * @property {string[]} name
+ * @property {string[]} tag
+ * @property {string[]} ingredient
+ */
+
+/**
  * @param {string=} apiBaseUrl
  */
 function getApiBaseUrl(apiBaseUrl = process.env.API_BASE_URL) {
@@ -65,10 +79,86 @@ function getApiBaseUrl(apiBaseUrl = process.env.API_BASE_URL) {
 }
 
 /**
- * @param {string=} apiBaseUrl
+ * @param {unknown} value
+ * @returns {string[]}
  */
-export function getRecipesUrl(apiBaseUrl = process.env.API_BASE_URL) {
-  return `${getApiBaseUrl(apiBaseUrl)}/api/recipes`;
+function normalizeFilterValues(value) {
+  if (typeof value === "string") {
+    const normalizedValue = value.trim();
+    return normalizedValue ? [normalizedValue] : [];
+  }
+
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap(normalizeFilterValues);
+}
+
+/**
+ * @param {RecipeFilterInput=} filters
+ * @returns {RecipeFilters}
+ */
+export function normalizeRecipeFilters(filters = {}) {
+  if (!filters || typeof filters !== "object") {
+    return {
+      name: [],
+      tag: [],
+      ingredient: [],
+    };
+  }
+
+  return {
+    name: normalizeFilterValues(filters.name),
+    tag: normalizeFilterValues(filters.tag),
+    ingredient: normalizeFilterValues(filters.ingredient),
+  };
+}
+
+/**
+ * @param {RecipeFilterInput=} filters
+ */
+export function hasRecipeFilters(filters = {}) {
+  const normalizedFilters = normalizeRecipeFilters(filters);
+
+  return (
+    normalizedFilters.name.length > 0 ||
+    normalizedFilters.tag.length > 0 ||
+    normalizedFilters.ingredient.length > 0
+  );
+}
+
+/**
+ * @param {RecipeFilterInput=} filters
+ */
+function getRecipesQueryString(filters = {}) {
+  const normalizedFilters = normalizeRecipeFilters(filters);
+  const params = new URLSearchParams();
+
+  for (const value of normalizedFilters.name) {
+    params.append("name", value);
+  }
+
+  for (const value of normalizedFilters.tag) {
+    params.append("tag", value);
+  }
+
+  for (const value of normalizedFilters.ingredient) {
+    params.append("ingredient", value);
+  }
+
+  return params.toString();
+}
+
+/**
+ * @param {string=} apiBaseUrl
+ * @param {RecipeFilterInput=} filters
+ */
+export function getRecipesUrl(apiBaseUrl = process.env.API_BASE_URL, filters) {
+  const recipesUrl = `${getApiBaseUrl(apiBaseUrl)}/api/recipes`;
+  const queryString = getRecipesQueryString(filters);
+
+  return queryString ? `${recipesUrl}?${queryString}` : recipesUrl;
 }
 
 /**
@@ -179,15 +269,16 @@ function isRecipeDetail(value) {
 }
 
 /**
- * @param {{ apiBaseUrl?: string, fetchImpl?: RecipesFetch }} [options]
+ * @param {{ apiBaseUrl?: string, filters?: RecipeFilterInput, fetchImpl?: RecipesFetch }} [options]
  * @returns {Promise<{ recipes: RecipeListItem[], error: string | null }>}
  */
 export async function getRecipes({
   apiBaseUrl,
+  filters,
   fetchImpl = /** @type {RecipesFetch} */ (globalThis.fetch),
 } = {}) {
   try {
-    const response = await fetchImpl(getRecipesUrl(apiBaseUrl), {
+    const response = await fetchImpl(getRecipesUrl(apiBaseUrl, filters), {
       cache: "no-store",
     });
 

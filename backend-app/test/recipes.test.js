@@ -136,6 +136,68 @@ test("getRecipeList returns list DTOs from the mock database", async () => {
   ]);
 });
 
+test("getRecipeList filters recipes by name", async () => {
+  const recipes = await getRecipeList({ name: "PIZZA" });
+
+  expect(recipes).toHaveLength(1);
+  expect(recipes[0].title).toBe("Classic Margherita Pizza");
+});
+
+test("getRecipeList filters recipes by tag", async () => {
+  const recipes = await getRecipeList({ tag: "vegetarian" });
+
+  expect(recipes).toHaveLength(5);
+  expect(recipes.every((recipe) => recipe.tags.includes("vegetarian"))).toBe(
+    true,
+  );
+});
+
+test("getRecipeList filters recipes by ingredient id, name, and fallback name", async () => {
+  const tomatoRecipes = await getRecipeList({ ingredient: "diced tomatoes" });
+  const basilRecipes = await getRecipeList({ ingredient: "basil" });
+
+  expect(tomatoRecipes.map((recipe) => recipe.title)).toEqual([
+    "Classic Margherita Pizza",
+    "Greek Salad",
+  ]);
+  expect(basilRecipes.map((recipe) => recipe.title)).toEqual([
+    "Classic Margherita Pizza",
+  ]);
+});
+
+test("getRecipeList combines filters and repeated values with AND semantics", async () => {
+  const recipes = await getRecipeList({
+    name: "salad",
+    tag: "vegetarian",
+    ingredient: ["tomato", "feta"],
+  });
+
+  expect(recipes).toHaveLength(1);
+  expect(recipes[0].title).toBe("Greek Salad");
+});
+
+test("getRecipeList ignores empty and malformed filter values", async () => {
+  const recipes = await getRecipeList({
+    name: {
+      toString() {
+        throw new Error("Filter values must not be coerced.");
+      },
+    },
+    tag: ["", "dinner", 42],
+    ingredient: null,
+  });
+
+  expect(recipes.map((recipe) => recipe.title)).toEqual([
+    "Classic Margherita Pizza",
+    "Chicken Stir-Fry",
+    "Beef Tacos",
+    "Sushi Roll",
+    "Pasta Carbonara",
+    "Grilled Salmon with Asparagus",
+    "Almond-Crusted Chicken",
+  ]);
+});
+
 test("getRecipeDetail returns a full recipe detail DTO from the mock database", async () => {
   const recipe = await getRecipeDetail("1");
 

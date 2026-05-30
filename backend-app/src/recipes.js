@@ -55,6 +55,20 @@ const DATA_PATH = path.join(__dirname, "../db/data.json");
  */
 
 /**
+ * @typedef {object} RecipeListFilters
+ * @property {unknown=} name
+ * @property {unknown=} tag
+ * @property {unknown=} ingredient
+ */
+
+/**
+ * @typedef {object} NormalizedRecipeListFilters
+ * @property {string[]} names
+ * @property {string[]} tags
+ * @property {string[]} ingredients
+ */
+
+/**
  * @typedef {object} RecipeIngredientDetail
  * @property {string} ingredientId
  * @property {string} name
@@ -114,6 +128,57 @@ const toSafeString = (value) => (typeof value === "string" ? value : "");
  */
 const toSafeNumber = (value) =>
   typeof value === "number" && Number.isFinite(value) ? value : 0;
+
+/**
+ * @param {unknown} value
+ */
+const toSearchText = (value) =>
+  typeof value === "string" ? value.trim().toLowerCase() : "";
+
+/**
+ * @param {unknown} value
+ * @returns {string[]}
+ */
+const normalizeFilterValues = (value) => {
+  if (typeof value === "string") {
+    const normalizedValue = toSearchText(value);
+    return normalizedValue ? [normalizedValue] : [];
+  }
+
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap(normalizeFilterValues);
+};
+
+/**
+ * @param {RecipeListFilters=} filters
+ * @returns {NormalizedRecipeListFilters}
+ */
+const normalizeRecipeListFilters = (filters = {}) => {
+  if (!filters || typeof filters !== "object") {
+    return {
+      names: [],
+      tags: [],
+      ingredients: [],
+    };
+  }
+
+  return {
+    names: normalizeFilterValues(filters.name),
+    tags: normalizeFilterValues(filters.tag),
+    ingredients: normalizeFilterValues(filters.ingredient),
+  };
+};
+
+/**
+ * @param {NormalizedRecipeListFilters} filters
+ */
+const hasActiveRecipeListFilters = (filters) =>
+  filters.names.length > 0 ||
+  filters.tags.length > 0 ||
+  filters.ingredients.length > 0;
 
 /**
  * @param {number} value
@@ -287,6 +352,106 @@ const toIngredientMap = (data) => {
 };
 
 /**
+ * @param {string[]} values
+ * @param {string[]} terms
+ */
+const matchesAllTerms = (values, terms) =>
+  terms.every((term) => values.some((value) => value.includes(term)));
+
+/**
+ * @param {Recipe | null | undefined} recipe
+ * @param {string[]} nameTerms
+ */
+const matchesRecipeName = (recipe, nameTerms) => {
+  if (!nameTerms.length) {
+    return true;
+  }
+
+  return matchesAllTerms([toSearchText(recipe?.title)], nameTerms);
+};
+
+/**
+ * @param {Recipe | null | undefined} recipe
+ * @param {string[]} tagTerms
+ */
+const matchesRecipeTags = (recipe, tagTerms) => {
+  if (!tagTerms.length) {
+    return true;
+  }
+
+  const tags = Array.isArray(recipe?.tags) ? recipe.tags.map(toSearchText) : [];
+  return matchesAllTerms(tags, tagTerms);
+};
+
+/**
+ * @param {RecipeIngredient} recipeIngredient
+ * @param {Map<string, Ingredient>} ingredientMap
+ */
+const getRecipeIngredientSearchValues = (recipeIngredient, ingredientMap) => {
+  const ingredientId = toSafeString(recipeIngredient.ingredientId);
+
+  if (!ingredientId) {
+    return [];
+  }
+
+  const ingredient = ingredientMap.get(ingredientId);
+
+  return [
+    ingredientId,
+    formatIngredientName(ingredientId),
+    ingredient?.name || "",
+    ingredient?.category || "",
+  ]
+    .map(toSearchText)
+    .filter(Boolean);
+};
+
+/**
+ * @param {Recipe | null | undefined} recipe
+ * @param {string[]} ingredientTerms
+ * @param {Map<string, Ingredient>} ingredientMap
+ */
+const matchesRecipeIngredients = (recipe, ingredientTerms, ingredientMap) => {
+  if (!ingredientTerms.length) {
+    return true;
+  }
+
+  const ingredients = Array.isArray(recipe?.ingredients)
+    ? recipe.ingredients
+    : [];
+  const ingredientValues = ingredients.flatMap((recipeIngredient) => {
+    if (!recipeIngredient || typeof recipeIngredient !== "object") {
+      return [];
+    }
+
+    return getRecipeIngredientSearchValues(recipeIngredient, ingredientMap);
+  });
+
+  return matchesAllTerms(ingredientValues, ingredientTerms);
+};
+
+/**
+ * @param {Recipe | null | undefined} recipe
+ * @param {NormalizedRecipeListFilters} filters
+ * @param {Map<string, Ingredient>} ingredientMap
+ */
+const matchesRecipeListFilters = (recipe, filters, ingredientMap) => {
+  if (!hasActiveRecipeListFilters(filters)) {
+    return true;
+  }
+
+  if (!recipe || typeof recipe !== "object") {
+    return false;
+  }
+
+  return (
+    matchesRecipeName(recipe, filters.names) &&
+    matchesRecipeTags(recipe, filters.tags) &&
+    matchesRecipeIngredients(recipe, filters.ingredients, ingredientMap)
+  );
+};
+
+/**
  * @param {Recipe | null | undefined} recipe
  * @returns {RecipeListItem | null}
  */
@@ -312,9 +477,10 @@ const toRecipeListItem = (recipe) => {
 
 /**
  * @param {unknown} data
+ * @param {RecipeListFilters=} filters
  * @returns {RecipeListItem[]}
  */
-const toRecipeListItems = (data) => {
+const toRecipeListItems = (data, filters = {}) => {
   if (!data || typeof data !== "object") {
     return [];
   }
@@ -325,7 +491,20 @@ const toRecipeListItems = (data) => {
     return [];
   }
 
+  const ingredientMap = toIngredientMap(data);
+  const normalizedFilters = normalizeRecipeListFilters(filters);
+
   return recipes.reduce((items, recipe) => {
+    if (
+      !matchesRecipeListFilters(
+        /** @type {Recipe | null | undefined} */ (recipe),
+        normalizedFilters,
+        ingredientMap,
+      )
+    ) {
+      return items;
+    }
+
     const item = toRecipeListItem(
       /** @type {Recipe | null | undefined} */ (recipe),
     );
@@ -429,11 +608,12 @@ const toRecipeDetail = (recipe, ingredientMap) => {
 };
 
 /**
+ * @param {RecipeListFilters=} filters
  * @returns {Promise<RecipeListItem[]>}
  */
-const getRecipeList = async () => {
+const getRecipeList = async (filters = {}) => {
   const data = await getData();
-  return toRecipeListItems(data);
+  return toRecipeListItems(data, filters);
 };
 
 /**
