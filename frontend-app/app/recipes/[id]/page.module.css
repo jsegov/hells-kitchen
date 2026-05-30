@@ -1,0 +1,290 @@
+.page {
+  width: min(1180px, 100%);
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.nav {
+  margin-bottom: 20px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f2937;
+  font-weight: 700;
+  padding: 10px 12px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.backLink:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.backLink:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 24px;
+  align-items: stretch;
+  border: 1px solid #dbe3ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 28px;
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.07);
+}
+
+.heroCopy {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero h1,
+.state h1 {
+  color: #111827;
+  font-size: 2.45rem;
+  line-height: 1;
+}
+
+.description {
+  max-width: 680px;
+  margin-top: 12px;
+  color: #475569;
+  font-size: 1.03rem;
+  line-height: 1.55;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+  list-style: none;
+}
+
+.tags li {
+  border: 1px solid #d9e2ec;
+  border-radius: 999px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 9px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metrics div,
+.nutritionGrid div {
+  min-width: 0;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 10px;
+}
+
+.metrics dt,
+.nutritionGrid dt {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.metrics dd,
+.nutritionGrid dd {
+  margin-top: 3px;
+  color: #111827;
+  font-weight: 800;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 20px;
+  align-items: start;
+}
+
+.panel {
+  border: 1px solid #dbe3ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 24px;
+}
+
+.panel h2 {
+  color: #111827;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.ingredients,
+.instructions {
+  margin-top: 18px;
+}
+
+.ingredients {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+}
+
+.ingredients li {
+  display: grid;
+  grid-template-columns: minmax(90px, 120px) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+}
+
+.ingredientAmount {
+  color: #0369a1;
+  font-weight: 800;
+}
+
+.ingredientName {
+  color: #111827;
+  font-weight: 700;
+}
+
+.ingredientCategory {
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 6px 8px;
+  text-transform: uppercase;
+}
+
+.instructions {
+  display: grid;
+  gap: 14px;
+  padding-left: 22px;
+  color: #1f2937;
+  line-height: 1.55;
+}
+
+.instructions li::marker {
+  color: #0369a1;
+  font-weight: 800;
+}
+
+.nutritionStack {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.nutritionGroup h3 {
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.nutritionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.nutritionNote,
+.emptyState,
+.state p {
+  color: #475569;
+  line-height: 1.5;
+}
+
+.nutritionNote {
+  border-top: 1px solid #e2e8f0;
+  margin-top: 18px;
+  padding-top: 14px;
+  font-size: 0.9rem;
+}
+
+.emptyState {
+  margin-top: 14px;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid #dbe3ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 28px;
+}
+
+@media (max-width: 840px) {
+  .hero,
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .contentGrid {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 32px 16px 48px;
+  }
+
+  .hero,
+  .panel,
+  .state {
+    padding: 20px;
+  }
+
+  .hero h1,
+  .state h1 {
+    font-size: 2rem;
+  }
+
+  .metrics,
+  .nutritionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ingredients li {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .ingredientCategory {
+    width: fit-content;
+  }
+}

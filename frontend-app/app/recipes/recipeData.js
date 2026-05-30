@@ -14,6 +14,39 @@ export const DEFAULT_API_BASE_URL = "http://localhost:8080";
  */
 
 /**
+ * @typedef {object} Nutrition
+ * @property {number} calories
+ * @property {number} protein
+ * @property {number} carbs
+ * @property {number} fat
+ */
+
+/**
+ * @typedef {object} RecipeIngredientDetail
+ * @property {string} ingredientId
+ * @property {string} name
+ * @property {string} amount
+ * @property {string} unit
+ * @property {string} category
+ * @property {Nutrition} nutrition
+ */
+
+/**
+ * @typedef {object} RecipeDetail
+ * @property {string} id
+ * @property {string} title
+ * @property {string} description
+ * @property {number} servings
+ * @property {string} prepTime
+ * @property {string} cookTime
+ * @property {string} difficulty
+ * @property {string[]} tags
+ * @property {string[]} instructions
+ * @property {RecipeIngredientDetail[]} ingredients
+ * @property {{ total: Nutrition, perServing: Nutrition, missingIngredientIds: string[] }} nutrition
+ */
+
+/**
  * @typedef {object} RecipesResponse
  * @property {boolean} ok
  * @property {number=} status
@@ -27,10 +60,122 @@ export const DEFAULT_API_BASE_URL = "http://localhost:8080";
 /**
  * @param {string=} apiBaseUrl
  */
-export function getRecipesUrl(apiBaseUrl = process.env.API_BASE_URL) {
-  const baseUrl = apiBaseUrl || DEFAULT_API_BASE_URL;
+function getApiBaseUrl(apiBaseUrl = process.env.API_BASE_URL) {
+  return (apiBaseUrl || DEFAULT_API_BASE_URL).replace(/\/$/, "");
+}
 
-  return `${baseUrl.replace(/\/$/, "")}/api/recipes`;
+/**
+ * @param {string=} apiBaseUrl
+ */
+export function getRecipesUrl(apiBaseUrl = process.env.API_BASE_URL) {
+  return `${getApiBaseUrl(apiBaseUrl)}/api/recipes`;
+}
+
+/**
+ * @param {string} id
+ * @param {string=} apiBaseUrl
+ */
+export function getRecipeUrl(id, apiBaseUrl = process.env.API_BASE_URL) {
+  return `${getApiBaseUrl(apiBaseUrl)}/api/recipes/${encodeURIComponent(id)}`;
+}
+
+/**
+ * @param {unknown} value
+ */
+function isObject(value) {
+  return Boolean(value) && typeof value === "object";
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is Nutrition}
+ */
+function isNutrition(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const nutrition = /** @type {Partial<Nutrition>} */ (value);
+
+  return (
+    typeof nutrition.calories === "number" &&
+    typeof nutrition.protein === "number" &&
+    typeof nutrition.carbs === "number" &&
+    typeof nutrition.fat === "number"
+  );
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is RecipeIngredientDetail}
+ */
+function isRecipeIngredientDetail(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const ingredient = /** @type {Partial<RecipeIngredientDetail>} */ (value);
+
+  return (
+    typeof ingredient.ingredientId === "string" &&
+    typeof ingredient.name === "string" &&
+    typeof ingredient.amount === "string" &&
+    typeof ingredient.unit === "string" &&
+    typeof ingredient.category === "string" &&
+    isNutrition(ingredient.nutrition)
+  );
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is RecipeDetail["nutrition"]}
+ */
+function isRecipeNutritionSummary(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const nutrition = /** @type {Partial<RecipeDetail["nutrition"]>} */ (value);
+
+  return (
+    isNutrition(nutrition.total) &&
+    isNutrition(nutrition.perServing) &&
+    Array.isArray(nutrition.missingIngredientIds) &&
+    nutrition.missingIngredientIds.every(
+      (ingredientId) => typeof ingredientId === "string",
+    )
+  );
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is RecipeDetail}
+ */
+function isRecipeDetail(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const recipe = /** @type {Partial<RecipeDetail>} */ (value);
+
+  return (
+    typeof recipe.id === "string" &&
+    typeof recipe.title === "string" &&
+    typeof recipe.description === "string" &&
+    typeof recipe.servings === "number" &&
+    typeof recipe.prepTime === "string" &&
+    typeof recipe.cookTime === "string" &&
+    typeof recipe.difficulty === "string" &&
+    Array.isArray(recipe.tags) &&
+    recipe.tags.every((tag) => typeof tag === "string") &&
+    Array.isArray(recipe.instructions) &&
+    recipe.instructions.every(
+      (instruction) => typeof instruction === "string",
+    ) &&
+    Array.isArray(recipe.ingredients) &&
+    recipe.ingredients.every(isRecipeIngredientDetail) &&
+    isRecipeNutritionSummary(recipe.nutrition)
+  );
 }
 
 /**
@@ -78,6 +223,72 @@ export async function getRecipes({
     return {
       recipes: [],
       error: "Unable to reach the recipe service.",
+    };
+  }
+}
+
+/**
+ * @param {string} id
+ * @param {{ apiBaseUrl?: string, fetchImpl?: RecipesFetch }} [options]
+ * @returns {Promise<{ recipe: RecipeDetail | null, error: string | null, notFound: boolean }>}
+ */
+export async function getRecipe(
+  id,
+  {
+    apiBaseUrl,
+    fetchImpl = /** @type {RecipesFetch} */ (globalThis.fetch),
+  } = {},
+) {
+  try {
+    const response = await fetchImpl(getRecipeUrl(id, apiBaseUrl), {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return {
+          recipe: null,
+          error: null,
+          notFound: true,
+        };
+      }
+
+      return {
+        recipe: null,
+        error: `Unable to load recipe (${response.status})`,
+        notFound: false,
+      };
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      return {
+        recipe: null,
+        error: "Invalid data format received from the recipe service.",
+        notFound: false,
+      };
+    }
+
+    if (!isRecipeDetail(data)) {
+      return {
+        recipe: null,
+        error: "Invalid data format received from the recipe service.",
+        notFound: false,
+      };
+    }
+
+    return {
+      recipe: data,
+      error: null,
+      notFound: false,
+    };
+  } catch {
+    return {
+      recipe: null,
+      error: "Unable to reach the recipe service.",
+      notFound: false,
     };
   }
 }
