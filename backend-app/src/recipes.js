@@ -129,6 +129,10 @@ const toSafeString = (value) => (typeof value === "string" ? value : "");
 const toSafeNumber = (value) =>
   typeof value === "number" && Number.isFinite(value) ? value : 0;
 
+// Backend lowercases filter terms for case-insensitive matching. The frontend
+// (recipeData.js normalizeFilterValues) trims only, preserving the user's
+// original casing for the filter input display — the duplication is intentional
+// and the two are deliberately not identical.
 /**
  * @param {unknown} value
  */

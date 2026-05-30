@@ -306,31 +306,31 @@ test("getRecipeDetail returns a full recipe detail DTO from the mock database", 
   });
   expect(recipe.ingredients[2]).toEqual({
     ingredientId: "basil",
-    name: "Basil",
+    name: "Fresh Basil",
     amount: "10",
     unit: "leaves",
-    category: "",
+    category: "herb",
     nutrition: {
-      calories: 0,
-      protein: 0,
-      carbs: 0,
-      fat: 0,
+      calories: 2,
+      protein: 0.2,
+      carbs: 0.2,
+      fat: 0.1,
     },
   });
   expect(recipe.nutrition).toEqual({
     total: {
-      calories: 3667.5,
-      protein: 211.5,
-      carbs: 263.5,
-      fat: 199.4,
+      calories: 3669.5,
+      protein: 211.7,
+      carbs: 263.7,
+      fat: 199.5,
     },
     perServing: {
-      calories: 916.9,
+      calories: 917.4,
       protein: 52.9,
       carbs: 65.9,
       fat: 49.9,
     },
-    missingIngredientIds: ["basil"],
+    missingIngredientIds: [],
   });
 });
 

@@ -12,7 +12,8 @@ app.use(express.json());
 app.get("/api/recipes", async (req, res) => {
   try {
     res.json(await getRecipeList(req.query));
-  } catch {
+  } catch (error) {
+    console.error("Failed to fetch recipes", error);
     res.status(500).json({ error: "Failed to fetch recipes" });
   }
 });
@@ -27,7 +28,8 @@ app.get("/api/recipes/:id", async (req, res) => {
     }
 
     res.json(recipe);
-  } catch {
+  } catch (error) {
+    console.error("Failed to fetch recipe", error);
     res.status(500).json({ error: "Failed to fetch recipe" });
   }
 });

@@ -762,6 +762,80 @@
       "nutrition": { "calories": 4, "protein": 0.2, "carbs": 1, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
+    },
+    {
+      "id": "basil",
+      "name": "Fresh Basil",
+      "category": "herb",
+      "nutrition": {
+        "calories": 0.2,
+        "protein": 0.02,
+        "carbs": 0.02,
+        "fat": 0.01
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"]
+    },
+    {
+      "id": "butter",
+      "name": "Butter",
+      "category": "dairy",
+      "nutrition": {
+        "calories": 1628,
+        "protein": 1.9,
+        "carbs": 0.1,
+        "fat": 184
+      },
+      "commonAllergens": ["dairy"],
+      "dietary": ["vegetarian", "gluten-free"]
+    },
+    {
+      "id": "brown_sugar",
+      "name": "Brown Sugar",
+      "category": "sweetener",
+      "nutrition": { "calories": 836, "protein": 0, "carbs": 216, "fat": 0 },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"]
+    },
+    {
+      "id": "white_sugar",
+      "name": "Granulated Sugar",
+      "category": "sweetener",
+      "nutrition": { "calories": 774, "protein": 0, "carbs": 200, "fat": 0 },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"]
+    },
+    {
+      "id": "broccoli",
+      "name": "Broccoli",
+      "category": "vegetable",
+      "nutrition": { "calories": 31, "protein": 2.5, "carbs": 6, "fat": 0.3 },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"]
+    },
+    {
+      "id": "carrot",
+      "name": "Carrot",
+      "category": "vegetable",
+      "nutrition": { "calories": 25, "protein": 0.6, "carbs": 6, "fat": 0.1 },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"]
+    },
+    {
+      "id": "soy_sauce",
+      "name": "Soy Sauce",
+      "category": "condiment",
+      "nutrition": { "calories": 8, "protein": 1.3, "carbs": 0.8, "fat": 0 },
+      "commonAllergens": ["soy", "gluten"],
+      "dietary": ["vegan", "vegetarian"]
+    },
+    {
+      "id": "ginger",
+      "name": "Fresh Ginger",
+      "category": "aromatic",
+      "nutrition": { "calories": 5, "protein": 0.1, "carbs": 1.1, "fat": 0.1 },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"]
     }
   ]
 }

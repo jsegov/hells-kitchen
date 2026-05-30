@@ -297,3 +297,91 @@
     grid-column: 1 / -1;
   }
 }
+
+/* Loading skeleton + error boundary */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.skeleton {
+  display: block;
+  border-radius: 6px;
+  background: #e2e8f0;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.skeletonSubtitle {
+  width: 140px;
+  height: 18px;
+}
+
+.skeletonInput {
+  min-height: 44px;
+  border-radius: 8px;
+}
+
+.skeletonButton {
+  width: 96px;
+  min-height: 44px;
+  border-radius: 8px;
+}
+
+.skeletonTitle {
+  width: 60%;
+  height: 18px;
+}
+
+.skeletonPill {
+  width: 56px;
+  height: 24px;
+  border-radius: 999px;
+}
+
+.skeletonLine {
+  width: 100%;
+  height: 14px;
+}
+
+.skeletonLineShort {
+  width: 60%;
+  height: 14px;
+}
+
+.skeletonMetric {
+  width: 100%;
+  height: 26px;
+}
+
+.errorActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

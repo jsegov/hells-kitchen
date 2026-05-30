@@ -78,6 +78,10 @@ function getApiBaseUrl(apiBaseUrl = process.env.API_BASE_URL) {
   return (apiBaseUrl || DEFAULT_API_BASE_URL).replace(/\/$/, "");
 }
 
+// Trims only — intentionally preserves the user's original casing for the
+// filter input display. The backend (recipes.js toSearchText) lowercases for
+// case-insensitive matching, so this normalization is duplicated by design but
+// deliberately not identical.
 /**
  * @param {unknown} value
  * @returns {string[]}
