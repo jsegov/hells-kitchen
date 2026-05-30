@@ -34,6 +34,97 @@
   font-weight: 700;
 }
 
+.filters {
+  margin-bottom: 24px;
+  border: 1px solid #dbe3ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 20px;
+}
+
+.filtersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filtersHeader h2 {
+  color: #111827;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.clearFilters {
+  color: #2563eb;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.clearFilters:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+.filterForm {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.filterField {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.filterField label {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.filterField input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  font: inherit;
+  padding: 0 12px;
+}
+
+.filterField input:focus {
+  border-color: #2563eb;
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+}
+
+.searchButton {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 0 18px;
+}
+
+.searchButton:hover {
+  background: #1d4ed8;
+}
+
+.searchButton:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -178,7 +269,31 @@
     font-size: 2rem;
   }
 
+  .filtersHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filterForm {
+    grid-template-columns: 1fr;
+  }
+
+  .searchButton {
+    width: 100%;
+  }
+
   .grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .filterForm {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .searchButton {
+    grid-column: 1 / -1;
   }
 }

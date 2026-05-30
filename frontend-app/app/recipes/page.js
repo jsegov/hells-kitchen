@@ -1,6 +1,12 @@
+import RecipeEmptyState from "./RecipeEmptyState";
+import RecipeFilters from "./RecipeFilters";
 import RecipeCard from "./RecipeCard";
 import RecipePageHeader from "./RecipePageHeader";
-import { getRecipes } from "./recipeData";
+import {
+  getRecipes,
+  hasRecipeFilters,
+  normalizeRecipeFilters,
+} from "./recipeData";
 import styles from "./page.module.css";
 
 export const metadata = {
@@ -8,8 +14,13 @@ export const metadata = {
   description: "Browse recipes and their basic information.",
 };
 
-export default async function RecipesPage() {
-  const { recipes, error } = await getRecipes();
+/**
+ * @param {{ searchParams?: Promise<import("./recipeData").RecipeFilterInput> }} props
+ */
+export default async function RecipesPage({ searchParams }) {
+  const filters = normalizeRecipeFilters(await searchParams);
+  const hasActiveFilters = hasRecipeFilters(filters);
+  const { recipes, error } = await getRecipes({ filters });
 
   return (
     <main className={styles.page}>
@@ -17,6 +28,8 @@ export default async function RecipesPage() {
         hasError={Boolean(error)}
         recipeCount={recipes.length}
       />
+
+      <RecipeFilters filters={filters} />
 
       {error ? (
         <section className={styles.state} role="alert">
@@ -26,10 +39,7 @@ export default async function RecipesPage() {
       ) : null}
 
       {!error && recipes.length === 0 ? (
-        <section className={styles.state}>
-          <h2>No recipes found</h2>
-          <p>Add recipes to the mock database to see them here.</p>
-        </section>
+        <RecipeEmptyState hasActiveFilters={hasActiveFilters} />
       ) : null}
 
       {!error && recipes.length > 0 ? (
