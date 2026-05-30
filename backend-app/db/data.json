@@ -9,11 +9,11 @@
       "cookTime": "15 minutes",
       "difficulty": "easy",
       "ingredients": [
-        {"ingredientId": "tomato", "amount": "2", "unit": "cups"},
-        {"ingredientId": "mozzarella", "amount": "8", "unit": "oz"},
-        {"ingredientId": "basil", "amount": "10", "unit": "leaves"},
-        {"ingredientId": "flour", "amount": "2.5", "unit": "cups"},
-        {"ingredientId": "olive_oil", "amount": "2", "unit": "tbsp"}
+        { "ingredientId": "tomato", "amount": "2", "unit": "cups" },
+        { "ingredientId": "mozzarella", "amount": "8", "unit": "oz" },
+        { "ingredientId": "basil", "amount": "10", "unit": "leaves" },
+        { "ingredientId": "flour", "amount": "2.5", "unit": "cups" },
+        { "ingredientId": "olive_oil", "amount": "2", "unit": "tbsp" }
       ],
       "instructions": [
         "Prepare pizza dough with flour",
@@ -34,11 +34,11 @@
       "cookTime": "12 minutes",
       "difficulty": "easy",
       "ingredients": [
-        {"ingredientId": "flour", "amount": "2.25", "unit": "cups"},
-        {"ingredientId": "butter", "amount": "1", "unit": "cup"},
-        {"ingredientId": "brown_sugar", "amount": "0.75", "unit": "cup"},
-        {"ingredientId": "white_sugar", "amount": "0.75", "unit": "cup"},
-        {"ingredientId": "chocolate_chips", "amount": "2", "unit": "cups"}
+        { "ingredientId": "flour", "amount": "2.25", "unit": "cups" },
+        { "ingredientId": "butter", "amount": "1", "unit": "cup" },
+        { "ingredientId": "brown_sugar", "amount": "0.75", "unit": "cup" },
+        { "ingredientId": "white_sugar", "amount": "0.75", "unit": "cup" },
+        { "ingredientId": "chocolate_chips", "amount": "2", "unit": "cups" }
       ],
       "instructions": [
         "Cream butter and sugars",
@@ -58,11 +58,11 @@
       "cookTime": "15 minutes",
       "difficulty": "medium",
       "ingredients": [
-        {"ingredientId": "chicken_breast", "amount": "1", "unit": "lb"},
-        {"ingredientId": "broccoli", "amount": "2", "unit": "cups"},
-        {"ingredientId": "carrot", "amount": "2", "unit": "medium"},
-        {"ingredientId": "soy_sauce", "amount": "3", "unit": "tbsp"},
-        {"ingredientId": "ginger", "amount": "1", "unit": "tbsp"}
+        { "ingredientId": "chicken_breast", "amount": "1", "unit": "lb" },
+        { "ingredientId": "broccoli", "amount": "2", "unit": "cups" },
+        { "ingredientId": "carrot", "amount": "2", "unit": "medium" },
+        { "ingredientId": "soy_sauce", "amount": "3", "unit": "tbsp" },
+        { "ingredientId": "ginger", "amount": "1", "unit": "tbsp" }
       ],
       "instructions": [
         "Cut chicken into bite-sized pieces",
@@ -83,11 +83,11 @@
       "cookTime": "25 minutes",
       "difficulty": "easy",
       "ingredients": [
-        {"ingredientId": "ground_beef", "amount": "1", "unit": "lb"},
-        {"ingredientId": "corn_tortillas", "amount": "12", "unit": "pieces"},
-        {"ingredientId": "onion", "amount": "1", "unit": "medium"},
-        {"ingredientId": "cilantro", "amount": "0.5", "unit": "cup"},
-        {"ingredientId": "lime", "amount": "2", "unit": "whole"}
+        { "ingredientId": "ground_beef", "amount": "1", "unit": "lb" },
+        { "ingredientId": "corn_tortillas", "amount": "12", "unit": "pieces" },
+        { "ingredientId": "onion", "amount": "1", "unit": "medium" },
+        { "ingredientId": "cilantro", "amount": "0.5", "unit": "cup" },
+        { "ingredientId": "lime", "amount": "2", "unit": "whole" }
       ],
       "instructions": [
         "Brown the ground beef",
@@ -108,11 +108,11 @@
       "cookTime": "0 minutes",
       "difficulty": "easy",
       "ingredients": [
-        {"ingredientId": "cucumber", "amount": "1", "unit": "large"},
-        {"ingredientId": "tomato", "amount": "3", "unit": "medium"},
-        {"ingredientId": "feta_cheese", "amount": "200", "unit": "g"},
-        {"ingredientId": "red_onion", "amount": "1", "unit": "small"},
-        {"ingredientId": "olive_oil", "amount": "3", "unit": "tbsp"}
+        { "ingredientId": "cucumber", "amount": "1", "unit": "large" },
+        { "ingredientId": "tomato", "amount": "3", "unit": "medium" },
+        { "ingredientId": "feta_cheese", "amount": "200", "unit": "g" },
+        { "ingredientId": "red_onion", "amount": "1", "unit": "small" },
+        { "ingredientId": "olive_oil", "amount": "3", "unit": "tbsp" }
       ],
       "instructions": [
         "Chop vegetables",
@@ -133,11 +133,11 @@
       "cookTime": "20 minutes",
       "difficulty": "hard",
       "ingredients": [
-        {"ingredientId": "sushi_rice", "amount": "2", "unit": "cups"},
-        {"ingredientId": "nori", "amount": "4", "unit": "sheets"},
-        {"ingredientId": "avocado", "amount": "1", "unit": "whole"},
-        {"ingredientId": "cucumber", "amount": "1", "unit": "medium"},
-        {"ingredientId": "crab_meat", "amount": "200", "unit": "g"}
+        { "ingredientId": "sushi_rice", "amount": "2", "unit": "cups" },
+        { "ingredientId": "nori", "amount": "4", "unit": "sheets" },
+        { "ingredientId": "avocado", "amount": "1", "unit": "whole" },
+        { "ingredientId": "cucumber", "amount": "1", "unit": "medium" },
+        { "ingredientId": "crab_meat", "amount": "200", "unit": "g" }
       ],
       "instructions": [
         "Cook sushi rice",
@@ -158,11 +158,11 @@
       "cookTime": "35 minutes",
       "difficulty": "medium",
       "ingredients": [
-        {"ingredientId": "potato", "amount": "3", "unit": "medium"},
-        {"ingredientId": "cauliflower", "amount": "1", "unit": "head"},
-        {"ingredientId": "coconut_milk", "amount": "400", "unit": "ml"},
-        {"ingredientId": "curry_powder", "amount": "2", "unit": "tbsp"},
-        {"ingredientId": "chickpeas", "amount": "1", "unit": "can"}
+        { "ingredientId": "potato", "amount": "3", "unit": "medium" },
+        { "ingredientId": "cauliflower", "amount": "1", "unit": "head" },
+        { "ingredientId": "coconut_milk", "amount": "400", "unit": "ml" },
+        { "ingredientId": "curry_powder", "amount": "2", "unit": "tbsp" },
+        { "ingredientId": "chickpeas", "amount": "1", "unit": "can" }
       ],
       "instructions": [
         "Chop vegetables",
@@ -183,11 +183,11 @@
       "cookTime": "0 minutes",
       "difficulty": "easy",
       "ingredients": [
-        {"ingredientId": "mixed_berries", "amount": "2", "unit": "cups"},
-        {"ingredientId": "banana", "amount": "1", "unit": "medium"},
-        {"ingredientId": "greek_yogurt", "amount": "1", "unit": "cup"},
-        {"ingredientId": "honey", "amount": "2", "unit": "tbsp"},
-        {"ingredientId": "granola", "amount": "0.5", "unit": "cup"}
+        { "ingredientId": "mixed_berries", "amount": "2", "unit": "cups" },
+        { "ingredientId": "banana", "amount": "1", "unit": "medium" },
+        { "ingredientId": "greek_yogurt", "amount": "1", "unit": "cup" },
+        { "ingredientId": "honey", "amount": "2", "unit": "tbsp" },
+        { "ingredientId": "granola", "amount": "0.5", "unit": "cup" }
       ],
       "instructions": [
         "Blend fruits and yogurt",
@@ -208,11 +208,11 @@
       "cookTime": "20 minutes",
       "difficulty": "medium",
       "ingredients": [
-        {"ingredientId": "spaghetti", "amount": "1", "unit": "lb"},
-        {"ingredientId": "pancetta", "amount": "200", "unit": "g"},
-        {"ingredientId": "eggs", "amount": "3", "unit": "large"},
-        {"ingredientId": "parmesan", "amount": "1", "unit": "cup"},
-        {"ingredientId": "black_pepper", "amount": "2", "unit": "tsp"}
+        { "ingredientId": "spaghetti", "amount": "1", "unit": "lb" },
+        { "ingredientId": "pancetta", "amount": "200", "unit": "g" },
+        { "ingredientId": "eggs", "amount": "3", "unit": "large" },
+        { "ingredientId": "parmesan", "amount": "1", "unit": "cup" },
+        { "ingredientId": "black_pepper", "amount": "2", "unit": "tsp" }
       ],
       "instructions": [
         "Cook pasta al dente",
@@ -233,11 +233,11 @@
       "cookTime": "20 minutes",
       "difficulty": "easy",
       "ingredients": [
-        {"ingredientId": "quinoa", "amount": "1", "unit": "cup"},
-        {"ingredientId": "sweet_potato", "amount": "1", "unit": "large"},
-        {"ingredientId": "kale", "amount": "2", "unit": "cups"},
-        {"ingredientId": "chickpeas", "amount": "1", "unit": "can"},
-        {"ingredientId": "tahini", "amount": "2", "unit": "tbsp"}
+        { "ingredientId": "quinoa", "amount": "1", "unit": "cup" },
+        { "ingredientId": "sweet_potato", "amount": "1", "unit": "large" },
+        { "ingredientId": "kale", "amount": "2", "unit": "cups" },
+        { "ingredientId": "chickpeas", "amount": "1", "unit": "can" },
+        { "ingredientId": "tahini", "amount": "2", "unit": "tbsp" }
       ],
       "instructions": [
         "Cook quinoa",
@@ -258,10 +258,10 @@
       "cookTime": "15 minutes",
       "difficulty": "medium",
       "ingredients": [
-        {"ingredientId": "shrimp", "amount": "1", "unit": "lb"},
-        {"ingredientId": "spaghetti", "amount": "1", "unit": "lb"},
-        {"ingredientId": "olive_oil", "amount": "3", "unit": "tbsp"},
-        {"ingredientId": "parmesan", "amount": "0.5", "unit": "cup"}
+        { "ingredientId": "shrimp", "amount": "1", "unit": "lb" },
+        { "ingredientId": "spaghetti", "amount": "1", "unit": "lb" },
+        { "ingredientId": "olive_oil", "amount": "3", "unit": "tbsp" },
+        { "ingredientId": "parmesan", "amount": "0.5", "unit": "cup" }
       ],
       "instructions": [
         "Cook pasta according to package",
@@ -281,9 +281,9 @@
       "cookTime": "15 minutes",
       "difficulty": "medium",
       "ingredients": [
-        {"ingredientId": "tofu", "amount": "14", "unit": "oz"},
-        {"ingredientId": "bell_pepper", "amount": "2", "unit": "medium"},
-        {"ingredientId": "soy_sauce", "amount": "3", "unit": "tbsp"}
+        { "ingredientId": "tofu", "amount": "14", "unit": "oz" },
+        { "ingredientId": "bell_pepper", "amount": "2", "unit": "medium" },
+        { "ingredientId": "soy_sauce", "amount": "3", "unit": "tbsp" }
       ],
       "instructions": [
         "Press and cube tofu",
@@ -303,11 +303,11 @@
       "cookTime": "20 minutes",
       "difficulty": "medium",
       "ingredients": [
-        {"ingredientId": "salmon_fillet", "amount": "1.5", "unit": "lb"},
-        {"ingredientId": "asparagus", "amount": "1", "unit": "bunch"},
-        {"ingredientId": "lemon", "amount": "1", "unit": "whole"},
-        {"ingredientId": "garlic", "amount": "3", "unit": "cloves"},
-        {"ingredientId": "olive_oil", "amount": "2", "unit": "tbsp"}
+        { "ingredientId": "salmon_fillet", "amount": "1.5", "unit": "lb" },
+        { "ingredientId": "asparagus", "amount": "1", "unit": "bunch" },
+        { "ingredientId": "lemon", "amount": "1", "unit": "whole" },
+        { "ingredientId": "garlic", "amount": "3", "unit": "cloves" },
+        { "ingredientId": "olive_oil", "amount": "2", "unit": "tbsp" }
       ],
       "instructions": [
         "Preheat grill to medium-high",
@@ -328,10 +328,10 @@
       "cookTime": "20 minutes",
       "difficulty": "medium",
       "ingredients": [
-        {"ingredientId": "chicken_breast", "amount": "1.5", "unit": "lb"},
-        {"ingredientId": "almonds", "amount": "1", "unit": "cup"},
-        {"ingredientId": "eggs", "amount": "2", "unit": "large"},
-        {"ingredientId": "olive_oil", "amount": "3", "unit": "tbsp"}
+        { "ingredientId": "chicken_breast", "amount": "1.5", "unit": "lb" },
+        { "ingredientId": "almonds", "amount": "1", "unit": "cup" },
+        { "ingredientId": "eggs", "amount": "2", "unit": "large" },
+        { "ingredientId": "olive_oil", "amount": "3", "unit": "tbsp" }
       ],
       "instructions": [
         "Grind almonds into fine crumbs",
@@ -352,11 +352,11 @@
       "cookTime": "15 minutes",
       "difficulty": "easy",
       "ingredients": [
-        {"ingredientId": "spaghetti", "amount": "1", "unit": "lb"},
-        {"ingredientId": "garlic", "amount": "6", "unit": "cloves"},
-        {"ingredientId": "lemon", "amount": "2", "unit": "whole"},
-        {"ingredientId": "olive_oil", "amount": "1/3", "unit": "cup"},
-        {"ingredientId": "parmesan", "amount": "1/2", "unit": "cup"}
+        { "ingredientId": "spaghetti", "amount": "1", "unit": "lb" },
+        { "ingredientId": "garlic", "amount": "6", "unit": "cloves" },
+        { "ingredientId": "lemon", "amount": "2", "unit": "whole" },
+        { "ingredientId": "olive_oil", "amount": "1/3", "unit": "cup" },
+        { "ingredientId": "parmesan", "amount": "1/2", "unit": "cup" }
       ],
       "instructions": [
         "Cook pasta al dente",
@@ -439,7 +439,7 @@
       "id": "ground_beef",
       "name": "Ground Beef",
       "category": "protein",
-      "nutrition": {"calories": 250, "protein": 26, "carbs": 0, "fat": 17},
+      "nutrition": { "calories": 250, "protein": 26, "carbs": 0, "fat": 17 },
       "commonAllergens": [],
       "dietary": ["keto", "high-protein"]
     },
@@ -447,7 +447,7 @@
       "id": "corn_tortillas",
       "name": "Corn Tortillas",
       "category": "grain",
-      "nutrition": {"calories": 120, "protein": 2, "carbs": 23, "fat": 1},
+      "nutrition": { "calories": 120, "protein": 2, "carbs": 23, "fat": 1 },
       "commonAllergens": [],
       "dietary": ["gluten-free"]
     },
@@ -455,7 +455,7 @@
       "id": "onion",
       "name": "Yellow Onion",
       "category": "vegetable",
-      "nutrition": {"calories": 40, "protein": 1, "carbs": 9, "fat": 0},
+      "nutrition": { "calories": 40, "protein": 1, "carbs": 9, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -463,7 +463,7 @@
       "id": "cilantro",
       "name": "Fresh Cilantro",
       "category": "herb",
-      "nutrition": {"calories": 5, "protein": 0.5, "carbs": 1, "fat": 0},
+      "nutrition": { "calories": 5, "protein": 0.5, "carbs": 1, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -471,7 +471,7 @@
       "id": "lime",
       "name": "Fresh Lime",
       "category": "fruit",
-      "nutrition": {"calories": 20, "protein": 0, "carbs": 7, "fat": 0},
+      "nutrition": { "calories": 20, "protein": 0, "carbs": 7, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -479,7 +479,7 @@
       "id": "cucumber",
       "name": "Cucumber",
       "category": "vegetable",
-      "nutrition": {"calories": 8, "protein": 0.5, "carbs": 2, "fat": 0},
+      "nutrition": { "calories": 8, "protein": 0.5, "carbs": 2, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -487,7 +487,7 @@
       "id": "feta_cheese",
       "name": "Feta Cheese",
       "category": "dairy",
-      "nutrition": {"calories": 264, "protein": 14, "carbs": 4, "fat": 21},
+      "nutrition": { "calories": 264, "protein": 14, "carbs": 4, "fat": 21 },
       "commonAllergens": ["dairy"],
       "dietary": ["vegetarian"]
     },
@@ -495,7 +495,7 @@
       "id": "red_onion",
       "name": "Red Onion",
       "category": "vegetable",
-      "nutrition": {"calories": 40, "protein": 1, "carbs": 9, "fat": 0},
+      "nutrition": { "calories": 40, "protein": 1, "carbs": 9, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -503,7 +503,7 @@
       "id": "olive_oil",
       "name": "Extra Virgin Olive Oil",
       "category": "oil",
-      "nutrition": {"calories": 120, "protein": 0, "carbs": 0, "fat": 14},
+      "nutrition": { "calories": 120, "protein": 0, "carbs": 0, "fat": 14 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -511,7 +511,7 @@
       "id": "sushi_rice",
       "name": "Sushi Rice",
       "category": "grain",
-      "nutrition": {"calories": 130, "protein": 2, "carbs": 28, "fat": 0},
+      "nutrition": { "calories": 130, "protein": 2, "carbs": 28, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan"]
     },
@@ -519,7 +519,7 @@
       "id": "nori",
       "name": "Nori Sheets",
       "category": "seaweed",
-      "nutrition": {"calories": 10, "protein": 1, "carbs": 2, "fat": 0},
+      "nutrition": { "calories": 10, "protein": 1, "carbs": 2, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -527,7 +527,7 @@
       "id": "avocado",
       "name": "Avocado",
       "category": "fruit",
-      "nutrition": {"calories": 160, "protein": 2, "carbs": 9, "fat": 15},
+      "nutrition": { "calories": 160, "protein": 2, "carbs": 9, "fat": 15 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -535,7 +535,7 @@
       "id": "crab_meat",
       "name": "Imitation Crab Meat",
       "category": "seafood",
-      "nutrition": {"calories": 80, "protein": 6, "carbs": 13, "fat": 0.5},
+      "nutrition": { "calories": 80, "protein": 6, "carbs": 13, "fat": 0.5 },
       "commonAllergens": ["shellfish"],
       "dietary": []
     },
@@ -543,7 +543,7 @@
       "id": "potato",
       "name": "Potato",
       "category": "vegetable",
-      "nutrition": {"calories": 110, "protein": 3, "carbs": 26, "fat": 0},
+      "nutrition": { "calories": 110, "protein": 3, "carbs": 26, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -551,7 +551,7 @@
       "id": "cauliflower",
       "name": "Cauliflower",
       "category": "vegetable",
-      "nutrition": {"calories": 25, "protein": 2, "carbs": 5, "fat": 0},
+      "nutrition": { "calories": 25, "protein": 2, "carbs": 5, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -559,7 +559,7 @@
       "id": "coconut_milk",
       "name": "Coconut Milk",
       "category": "dairy-alternative",
-      "nutrition": {"calories": 120, "protein": 1, "carbs": 1, "fat": 12},
+      "nutrition": { "calories": 120, "protein": 1, "carbs": 1, "fat": 12 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -567,7 +567,7 @@
       "id": "curry_powder",
       "name": "Curry Powder",
       "category": "spice",
-      "nutrition": {"calories": 20, "protein": 1, "carbs": 4, "fat": 0},
+      "nutrition": { "calories": 20, "protein": 1, "carbs": 4, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -575,7 +575,7 @@
       "id": "chickpeas",
       "name": "Chickpeas",
       "category": "legume",
-      "nutrition": {"calories": 120, "protein": 6, "carbs": 22, "fat": 2},
+      "nutrition": { "calories": 120, "protein": 6, "carbs": 22, "fat": 2 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -583,7 +583,7 @@
       "id": "mixed_berries",
       "name": "Mixed Berries",
       "category": "fruit",
-      "nutrition": {"calories": 70, "protein": 1, "carbs": 17, "fat": 0},
+      "nutrition": { "calories": 70, "protein": 1, "carbs": 17, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -591,7 +591,7 @@
       "id": "banana",
       "name": "Banana",
       "category": "fruit",
-      "nutrition": {"calories": 105, "protein": 1, "carbs": 27, "fat": 0},
+      "nutrition": { "calories": 105, "protein": 1, "carbs": 27, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -599,7 +599,7 @@
       "id": "greek_yogurt",
       "name": "Greek Yogurt",
       "category": "dairy",
-      "nutrition": {"calories": 130, "protein": 12, "carbs": 9, "fat": 4},
+      "nutrition": { "calories": 130, "protein": 12, "carbs": 9, "fat": 4 },
       "commonAllergens": ["dairy"],
       "dietary": ["vegetarian"]
     },
@@ -607,7 +607,7 @@
       "id": "honey",
       "name": "Honey",
       "category": "sweetener",
-      "nutrition": {"calories": 60, "protein": 0, "carbs": 17, "fat": 0},
+      "nutrition": { "calories": 60, "protein": 0, "carbs": 17, "fat": 0 },
       "commonAllergens": [],
       "dietary": []
     },
@@ -615,7 +615,7 @@
       "id": "granola",
       "name": "Granola",
       "category": "cereal",
-      "nutrition": {"calories": 120, "protein": 3, "carbs": 24, "fat": 6},
+      "nutrition": { "calories": 120, "protein": 3, "carbs": 24, "fat": 6 },
       "commonAllergens": ["nuts"],
       "dietary": ["vegetarian"]
     },
@@ -623,7 +623,7 @@
       "id": "spaghetti",
       "name": "Spaghetti",
       "category": "pasta",
-      "nutrition": {"calories": 200, "protein": 7, "carbs": 42, "fat": 1},
+      "nutrition": { "calories": 200, "protein": 7, "carbs": 42, "fat": 1 },
       "commonAllergens": ["gluten", "wheat"],
       "dietary": ["vegan"]
     },
@@ -631,7 +631,7 @@
       "id": "pancetta",
       "name": "Pancetta",
       "category": "meat",
-      "nutrition": {"calories": 194, "protein": 13, "carbs": 0, "fat": 15},
+      "nutrition": { "calories": 194, "protein": 13, "carbs": 0, "fat": 15 },
       "commonAllergens": [],
       "dietary": ["keto"]
     },
@@ -639,7 +639,7 @@
       "id": "eggs",
       "name": "Large Eggs",
       "category": "protein",
-      "nutrition": {"calories": 70, "protein": 6, "carbs": 0, "fat": 5},
+      "nutrition": { "calories": 70, "protein": 6, "carbs": 0, "fat": 5 },
       "commonAllergens": ["eggs"],
       "dietary": ["vegetarian", "gluten-free"]
     },
@@ -647,7 +647,7 @@
       "id": "parmesan",
       "name": "Parmesan Cheese",
       "category": "dairy",
-      "nutrition": {"calories": 110, "protein": 10, "carbs": 0, "fat": 7},
+      "nutrition": { "calories": 110, "protein": 10, "carbs": 0, "fat": 7 },
       "commonAllergens": ["dairy"],
       "dietary": ["vegetarian", "gluten-free"]
     },
@@ -655,7 +655,7 @@
       "id": "black_pepper",
       "name": "Black Pepper",
       "category": "spice",
-      "nutrition": {"calories": 5, "protein": 0, "carbs": 1, "fat": 0},
+      "nutrition": { "calories": 5, "protein": 0, "carbs": 1, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -663,7 +663,7 @@
       "id": "quinoa",
       "name": "Quinoa",
       "category": "grain",
-      "nutrition": {"calories": 120, "protein": 4, "carbs": 21, "fat": 2},
+      "nutrition": { "calories": 120, "protein": 4, "carbs": 21, "fat": 2 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -671,7 +671,7 @@
       "id": "sweet_potato",
       "name": "Sweet Potato",
       "category": "vegetable",
-      "nutrition": {"calories": 103, "protein": 2, "carbs": 24, "fat": 0},
+      "nutrition": { "calories": 103, "protein": 2, "carbs": 24, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -679,7 +679,7 @@
       "id": "kale",
       "name": "Kale",
       "category": "vegetable",
-      "nutrition": {"calories": 33, "protein": 3, "carbs": 6, "fat": 0},
+      "nutrition": { "calories": 33, "protein": 3, "carbs": 6, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -687,7 +687,7 @@
       "id": "tahini",
       "name": "Tahini",
       "category": "condiment",
-      "nutrition": {"calories": 89, "protein": 3, "carbs": 3, "fat": 8},
+      "nutrition": { "calories": 89, "protein": 3, "carbs": 3, "fat": 8 },
       "commonAllergens": ["sesame"],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -695,7 +695,7 @@
       "id": "shrimp",
       "name": "Raw Shrimp",
       "category": "seafood",
-      "nutrition": {"calories": 85, "protein": 20, "carbs": 0, "fat": 1},
+      "nutrition": { "calories": 85, "protein": 20, "carbs": 0, "fat": 1 },
       "commonAllergens": ["shellfish"],
       "dietary": ["keto", "high-protein"]
     },
@@ -703,7 +703,7 @@
       "id": "bell_pepper",
       "name": "Bell Pepper",
       "category": "vegetable",
-      "nutrition": {"calories": 30, "protein": 1, "carbs": 7, "fat": 0},
+      "nutrition": { "calories": 30, "protein": 1, "carbs": 7, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -711,7 +711,7 @@
       "id": "peanut_butter",
       "name": "Peanut Butter",
       "category": "spread",
-      "nutrition": {"calories": 190, "protein": 7, "carbs": 7, "fat": 16},
+      "nutrition": { "calories": 190, "protein": 7, "carbs": 7, "fat": 16 },
       "commonAllergens": ["peanuts"],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -719,7 +719,7 @@
       "id": "tofu",
       "name": "Firm Tofu",
       "category": "protein",
-      "nutrition": {"calories": 70, "protein": 8, "carbs": 2, "fat": 4},
+      "nutrition": { "calories": 70, "protein": 8, "carbs": 2, "fat": 4 },
       "commonAllergens": ["soy"],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -727,7 +727,7 @@
       "id": "salmon_fillet",
       "name": "Fresh Salmon Fillet",
       "category": "protein",
-      "nutrition": {"calories": 208, "protein": 22, "carbs": 0, "fat": 13},
+      "nutrition": { "calories": 208, "protein": 22, "carbs": 0, "fat": 13 },
       "commonAllergens": ["fish"],
       "dietary": ["keto", "high-protein"]
     },
@@ -735,7 +735,7 @@
       "id": "asparagus",
       "name": "Fresh Asparagus",
       "category": "vegetable",
-      "nutrition": {"calories": 20, "protein": 2.2, "carbs": 3.9, "fat": 0.2},
+      "nutrition": { "calories": 20, "protein": 2.2, "carbs": 3.9, "fat": 0.2 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -743,7 +743,7 @@
       "id": "almonds",
       "name": "Raw Almonds",
       "category": "nuts",
-      "nutrition": {"calories": 164, "protein": 6, "carbs": 6, "fat": 14},
+      "nutrition": { "calories": 164, "protein": 6, "carbs": 6, "fat": 14 },
       "commonAllergens": ["tree nuts"],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -751,7 +751,7 @@
       "id": "lemon",
       "name": "Fresh Lemon",
       "category": "fruit",
-      "nutrition": {"calories": 17, "protein": 0.6, "carbs": 5.4, "fat": 0.2},
+      "nutrition": { "calories": 17, "protein": 0.6, "carbs": 5.4, "fat": 0.2 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     },
@@ -759,7 +759,7 @@
       "id": "garlic",
       "name": "Fresh Garlic",
       "category": "vegetable",
-      "nutrition": {"calories": 4, "protein": 0.2, "carbs": 1, "fat": 0},
+      "nutrition": { "calories": 4, "protein": 0.2, "carbs": 1, "fat": 0 },
       "commonAllergens": [],
       "dietary": ["vegan", "gluten-free"]
     }
