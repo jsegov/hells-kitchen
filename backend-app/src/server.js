@@ -1,11 +1,12 @@
 const express = require("express");
 const cors = require("cors");
+const { createCorsOptions } = require("./cors");
 const { getRecipeDetail, getRecipeList } = require("./recipes");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors());
+app.use(cors(createCorsOptions()));
 app.use(express.json());
 
 app.get("/api/recipes", async (req, res) => {

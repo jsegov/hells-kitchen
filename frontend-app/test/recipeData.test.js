@@ -180,6 +180,32 @@ test("getRecipes returns a visible error for non-array payloads", async () => {
   });
 });
 
+test("getRecipes returns a visible error for invalid list items", async () => {
+  const result = await getRecipes({
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => [
+        {
+          id: "1",
+          title: "Classic Margherita Pizza",
+          description: "Traditional Italian pizza with fresh basil",
+          servings: 4,
+          prepTime: "20 minutes",
+          cookTime: "15 minutes",
+          difficulty: "easy",
+          ingredientCount: 5,
+          tags: ["italian", 42],
+        },
+      ],
+    }),
+  });
+
+  expect(result).toEqual({
+    recipes: [],
+    error: "Invalid data format received from the recipe service.",
+  });
+});
+
 test("getRecipes returns a data format error when JSON parsing fails", async () => {
   const result = await getRecipes({
     fetchImpl: async () => ({

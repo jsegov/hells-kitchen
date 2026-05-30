@@ -3,7 +3,7 @@
 ## Project Overview
 
 - Recipe Manager is a full-stack take-home app with a Next.js frontend and an Express backend.
-- The actual app folders are `frontend-app` and `backend-app`. Some README setup text still refers to `frontend` and `backend`.
+- The app folders are `frontend-app` and `backend-app`.
 - The mock database is `backend-app/db/data.json`.
 - Core requirements are listed in `README.md`; implement only the requested requirement unless the user expands scope.
 
@@ -20,15 +20,18 @@
 - Backend defaults to `http://localhost:8080`.
 - Frontend defaults to `http://localhost:3000`; Next.js may choose another port if 3000 is already in use.
 - Frontend server-side API calls should read `process.env.API_BASE_URL` and default to `http://localhost:8080`.
+- Backend CORS should use the `CORS_ORIGIN` comma-separated allowlist when set, otherwise allow local frontend origins on ports `3000` and `3001`.
 
 ## Architecture Notes
 
 - `backend-app/src/server.js` owns Express routes and JSON data access.
 - Keep backend response mapping in helper functions instead of returning raw JSON records directly.
-- `GET /api/recipes` is the recipe list endpoint and should return list-safe fields, not full detail-only data.
-- Future detail work should add `GET /api/recipes/:id` rather than overloading the list endpoint.
-- Future search/filter work should extend `GET /api/recipes` with query parameters while preserving the list DTO shape.
+- `GET /api/recipes` is the recipe list endpoint and returns list-safe fields only: id, title, description, servings, prep time, cook time, difficulty, tags, and ingredient count.
+- `GET /api/recipes` supports `name`, `tag`, and `ingredient` query parameters. Preserve its list DTO shape when extending filters.
+- `GET /api/recipes/:id` is the detail endpoint and returns ingredients, instructions, tags, and calculated nutrition.
+- Backend list DTO mapping should reject records without non-empty string `id` and `title`, normalize malformed scalar fields, keep tags string-only, and count only valid ingredient references.
 - `frontend-app/app` uses the Next.js App Router. Pages are Server Components by default unless interactivity requires a Client Component.
+- Frontend API helpers should validate backend payload shapes at runtime before rendering and show visible error states for invalid data.
 - Route-specific styles should use CSS modules. Keep `app/globals.css` limited to global tokens and resets.
 
 ## Code Style
@@ -49,6 +52,7 @@
 - Run frontend quality gates: `cd frontend-app && npm run check`
 - `npm run check` includes strict JavaScript typechecking, ESLint, Prettier format checking, and Jest.
 - For backend API changes, smoke test with `curl` and inspect JSON with `jq` when available.
+- For backend CORS changes, smoke test allowed and disallowed `Origin` headers.
 - For frontend changes, also run `npm run build` in `frontend-app`.
 - Frontend build-time linting is disabled in `next.config.mjs`; use `npm run lint` or `npm run check` instead.
 - For UI changes, start both servers and verify the affected route in a browser at desktop and mobile widths.
