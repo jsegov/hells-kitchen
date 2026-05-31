@@ -6,6 +6,7 @@ import {
   RECIPE_SORT_OPTIONS,
   RECIPE_SORT_ORDERS,
   getOptionLabel,
+  splitSortToken,
 } from "../../lib/recipeOptions";
 
 /**
@@ -56,7 +57,7 @@ import {
  * @property {RecipeIngredientDetail[]} ingredients
  * @property {string[]} dietary
  * @property {string[]} allergens
- * @property {{ total: Nutrition, perServing: Nutrition, missingIngredientIds: string[] }} nutrition
+ * @property {{ total: Nutrition, perServing: Nutrition, missingIngredientIds: string[], unconvertedIngredientIds: string[] }} nutrition
  */
 
 /**
@@ -86,8 +87,24 @@ import {
  */
 
 /**
+ * @typedef {object} RecipeFacetOption
+ * @property {string} value
+ * @property {string} label
+ * @property {number} count
+ */
+
+/**
+ * @typedef {object} RecipeFacets
+ * @property {RecipeFacetOption[]} tags
+ * @property {RecipeFacetOption[]} ingredients
+ * @property {RecipeFacetOption[]} diets
+ * @property {RecipeFacetOption[]} allergens
+ */
+
+/**
  * @typedef {object} RecipeDataLayer
  * @property {(filters?: RecipeFilterInput, sort?: RecipeSort) => Promise<unknown[]>} getRecipeList
+ * @property {(filters?: RecipeFilterInput) => Promise<unknown>} getRecipeFacets
  * @property {(id: string) => Promise<unknown>} getRecipeDetail
  */
 
@@ -175,17 +192,19 @@ export function normalizeRecipeSort(input = {}) {
     return DEFAULT_RECIPE_SORT;
   }
 
-  const sortValue = normalizeSortValue(
-    /** @type {{ sort?: unknown }} */ (input).sort,
-  );
+  // The sort dropdown submits a combined `${sort}-${order}` token; fall back to
+  // legacy separate `sort`/`order` params for back-compat (matches lib/recipes).
+  const rawSort = /** @type {{ sort?: unknown }} */ (input).sort;
+  const combined = splitSortToken(rawSort);
+  const sortValue = combined ? combined.sort : normalizeSortValue(rawSort);
 
   if (!SORT_VALUES.has(sortValue)) {
     return DEFAULT_RECIPE_SORT;
   }
 
-  const orderValue = normalizeSortValue(
-    /** @type {{ order?: unknown }} */ (input).order,
-  );
+  const orderValue = combined
+    ? combined.order
+    : normalizeSortValue(/** @type {{ order?: unknown }} */ (input).order);
 
   return {
     sort: sortValue,
@@ -308,6 +327,10 @@ function isRecipeNutritionSummary(value) {
     Array.isArray(nutrition.missingIngredientIds) &&
     nutrition.missingIngredientIds.every(
       (ingredientId) => typeof ingredientId === "string",
+    ) &&
+    Array.isArray(nutrition.unconvertedIngredientIds) &&
+    nutrition.unconvertedIngredientIds.every(
+      (ingredientId) => typeof ingredientId === "string",
     )
   );
 }
@@ -348,7 +371,7 @@ function isRecipeDetail(value) {
 }
 
 /**
- * @param {{ filters?: RecipeFilterInput, sort?: RecipeSort, dataLayer?: RecipeDataLayer }} [options]
+ * @param {{ filters?: RecipeFilterInput, sort?: RecipeSort, dataLayer?: Pick<RecipeDataLayer, "getRecipeList"> }} [options]
  * @returns {Promise<{ recipes: RecipeListItem[], error: string | null }>}
  */
 export async function getRecipes({
@@ -379,8 +402,99 @@ export async function getRecipes({
 }
 
 /**
+ * @param {unknown} value
+ * @returns {value is RecipeFacetOption}
+ */
+function isRecipeFacetOption(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const option = /** @type {Partial<RecipeFacetOption>} */ (value);
+
+  return (
+    typeof option.value === "string" &&
+    typeof option.label === "string" &&
+    typeof option.count === "number" &&
+    Number.isFinite(option.count)
+  );
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is RecipeFacetOption[]}
+ */
+function isFacetOptionArray(value) {
+  return Array.isArray(value) && value.every(isRecipeFacetOption);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is RecipeFacets}
+ */
+function isRecipeFacets(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const facets = /** @type {Partial<RecipeFacets>} */ (value);
+
+  return (
+    isFacetOptionArray(facets.tags) &&
+    isFacetOptionArray(facets.ingredients) &&
+    isFacetOptionArray(facets.diets) &&
+    isFacetOptionArray(facets.allergens)
+  );
+}
+
+/** @type {RecipeFacets} */
+const EMPTY_FACETS = { tags: [], ingredients: [], diets: [], allergens: [] };
+
+/**
+ * Tag labels arrive raw (lowercase) from the data layer; diet/allergen labels
+ * are already display-ready option labels and ingredient labels are names. This
+ * capitalizes tag labels so all four facets read uniformly in the UI.
+ *
+ * @param {RecipeFacets} facets
+ * @returns {RecipeFacets}
+ */
+function toDisplayFacets(facets) {
+  return {
+    ...facets,
+    tags: facets.tags.map((option) => ({
+      ...option,
+      label: formatTagLabel(option.value),
+    })),
+  };
+}
+
+/**
+ * @param {{ filters?: RecipeFilterInput, dataLayer?: Pick<RecipeDataLayer, "getRecipeFacets"> }} [options]
+ * @returns {Promise<{ facets: RecipeFacets, error: string | null }>}
+ */
+export async function getRecipeFacets({
+  filters,
+  dataLayer = /** @type {RecipeDataLayer} */ (recipeLib),
+} = {}) {
+  try {
+    const data = await dataLayer.getRecipeFacets(filters);
+
+    if (!isRecipeFacets(data)) {
+      return {
+        facets: EMPTY_FACETS,
+        error: "Invalid data format received from the recipe service.",
+      };
+    }
+
+    return { facets: toDisplayFacets(data), error: null };
+  } catch {
+    return { facets: EMPTY_FACETS, error: "Unable to load recipe filters." };
+  }
+}
+
+/**
  * @param {string} id
- * @param {{ dataLayer?: RecipeDataLayer }} [options]
+ * @param {{ dataLayer?: Pick<RecipeDataLayer, "getRecipeDetail"> }} [options]
  * @returns {Promise<{ recipe: RecipeDetail | null, error: string | null, notFound: boolean }>}
  */
 export async function getRecipe(
@@ -437,6 +551,17 @@ export function formatDifficulty(difficulty) {
   return (
     normalizedDifficulty.charAt(0).toUpperCase() + normalizedDifficulty.slice(1)
   );
+}
+
+/**
+ * @param {string} value
+ */
+export function formatTagLabel(value) {
+  if (typeof value !== "string" || !value.trim()) {
+    return "";
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 /**

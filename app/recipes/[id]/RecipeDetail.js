@@ -36,6 +36,8 @@ function Metric({ label, value }) {
 export default function RecipeDetail({ recipe }) {
   const missingIngredientNames =
     recipe.nutrition.missingIngredientIds.map(formatIngredientId);
+  const unconvertedIngredientNames =
+    recipe.nutrition.unconvertedIngredientIds.map(formatIngredientId);
   const allergenLabels = recipe.allergens.map(formatAllergenLabel);
 
   return (
@@ -96,6 +98,7 @@ export default function RecipeDetail({ recipe }) {
           <ServingSizeControls
             missingIngredientNames={missingIngredientNames}
             recipe={recipe}
+            unconvertedIngredientNames={unconvertedIngredientNames}
           />
 
           <section

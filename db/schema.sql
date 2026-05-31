@@ -8,9 +8,15 @@ CREATE TABLE IF NOT EXISTS ingredients (
   protein NUMERIC NOT NULL DEFAULT 0,
   carbs NUMERIC NOT NULL DEFAULT 0,
   fat NUMERIC NOT NULL DEFAULT 0,
+  nutrition_basis TEXT NOT NULL DEFAULT 'per_100g',
+  unit_weights JSONB NOT NULL DEFAULT '{}'::jsonb,
   dietary TEXT[] NOT NULL DEFAULT '{}',
   allergens TEXT[] NOT NULL DEFAULT '{}'
 );
+
+ALTER TABLE ingredients
+  ADD COLUMN IF NOT EXISTS nutrition_basis TEXT NOT NULL DEFAULT 'per_100g',
+  ADD COLUMN IF NOT EXISTS unit_weights JSONB NOT NULL DEFAULT '{}'::jsonb;
 
 CREATE TABLE IF NOT EXISTS recipes (
   id TEXT PRIMARY KEY,

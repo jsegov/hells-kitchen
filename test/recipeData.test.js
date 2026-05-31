@@ -1,6 +1,7 @@
 import {
   formatDifficulty,
   getRecipe,
+  getRecipeFacets,
   getRecipes,
   hasRecipeFilters,
   normalizeRecipeFilters,
@@ -63,6 +64,7 @@ const recipeDetail = {
       fat: 0.1,
     },
     missingIngredientIds: [],
+    unconvertedIngredientIds: [],
   },
 };
 
@@ -101,6 +103,55 @@ test("normalizeRecipeSort accepts known single values and falls back defensively
   expect(normalizeRecipeSort({ sort: "title", order: "sideways" })).toEqual({
     sort: "title",
     order: "asc",
+  });
+});
+
+test("normalizeRecipeSort parses the combined dropdown token", () => {
+  expect(normalizeRecipeSort({ sort: "prep-time-asc" })).toEqual({
+    sort: "prep-time",
+    order: "asc",
+  });
+  expect(
+    normalizeRecipeSort({ sort: "difficulty-desc", order: "asc" }),
+  ).toEqual({ sort: "difficulty", order: "desc" });
+});
+
+test("getRecipeFacets validates shape and capitalizes tag labels", async () => {
+  const dataLayer = {
+    getRecipeFacets: jest.fn(async () => ({
+      tags: [{ value: "vegan", label: "vegan", count: 3 }],
+      ingredients: [{ value: "tomato", label: "Diced Tomatoes", count: 2 }],
+      diets: [{ value: "vegan", label: "Vegan", count: 3 }],
+      allergens: [{ value: "dairy", label: "Dairy", count: 4 }],
+    })),
+  };
+
+  const result = await getRecipeFacets({
+    filters: { diet: "vegan" },
+    dataLayer,
+  });
+
+  expect(dataLayer.getRecipeFacets).toHaveBeenCalledWith({ diet: "vegan" });
+  expect(result.error).toBeNull();
+  expect(result.facets.tags[0].label).toBe("Vegan");
+  expect(result.facets.ingredients[0].label).toBe("Diced Tomatoes");
+});
+
+test("getRecipeFacets returns empty facets and an error on malformed data", async () => {
+  const dataLayer = {
+    getRecipeFacets: jest.fn(async () => ({ tags: [{ value: "x" }] })),
+  };
+
+  const result = await getRecipeFacets({ dataLayer });
+
+  expect(result.error).toBe(
+    "Invalid data format received from the recipe service.",
+  );
+  expect(result.facets).toEqual({
+    tags: [],
+    ingredients: [],
+    diets: [],
+    allergens: [],
   });
 });
 

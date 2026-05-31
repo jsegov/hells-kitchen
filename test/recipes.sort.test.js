@@ -70,6 +70,21 @@ test("normalizes recipe sort options defensively", () => {
   });
 });
 
+test("normalizes the combined sort token from the single dropdown", () => {
+  expect(normalizeRecipeListSort({ sort: "date-added-desc" })).toEqual({
+    sort: "date-added",
+    order: "desc",
+  });
+  expect(normalizeRecipeListSort({ sort: "curated-asc" })).toEqual({
+    sort: "curated",
+    order: "asc",
+  });
+  // A combined token wins over a stray legacy order param.
+  expect(normalizeRecipeListSort({ sort: "title-desc", order: "asc" })).toEqual(
+    { sort: "title", order: "desc" },
+  );
+});
+
 test("parses duration strings for in-memory sort parity", () => {
   expect(parseDurationMinutes("0 minutes")).toBe(0);
   expect(parseDurationMinutes("1 hour 15 minutes")).toBe(75);

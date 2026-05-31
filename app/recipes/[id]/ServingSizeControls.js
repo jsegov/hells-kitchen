@@ -81,11 +81,12 @@ function createServingPresets(servings) {
 }
 
 /**
- * @param {{ recipe: Pick<import("../recipeData").RecipeDetail, "servings" | "ingredients" | "nutrition">, missingIngredientNames: string[] }} props
+ * @param {{ recipe: Pick<import("../recipeData").RecipeDetail, "servings" | "ingredients" | "nutrition">, missingIngredientNames: string[], unconvertedIngredientNames: string[] }} props
  */
 export default function ServingSizeControls({
   recipe,
   missingIngredientNames,
+  unconvertedIngredientNames,
 }) {
   const originalServings = toValidServings(recipe.servings);
   const [targetServings, setTargetServings] = useState(
@@ -120,6 +121,14 @@ export default function ServingSizeControls({
     () => createServingPresets(recipe.servings),
     [recipe.servings],
   );
+  const nutritionExclusionNote = [
+    missingIngredientNames.length ? missingIngredientNames.join(", ") : "",
+    unconvertedIngredientNames.length
+      ? `unconverted amounts for ${unconvertedIngredientNames.join(", ")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" and ");
 
   return (
     <>
@@ -201,9 +210,9 @@ export default function ServingSizeControls({
           <NutritionGroup title="Total" nutrition={scaledNutrition.total} />
         </div>
 
-        {missingIngredientNames.length ? (
+        {nutritionExclusionNote ? (
           <p className={styles.nutritionNote}>
-            Nutrition excludes {missingIngredientNames.join(", ")}.
+            Nutrition excludes {nutritionExclusionNote}.
           </p>
         ) : null}
       </aside>

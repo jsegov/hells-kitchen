@@ -23,6 +23,24 @@ const toSafeNumber = (value) =>
 const toStringArray = (value) =>
   Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
 
+const toUnitWeightsJson = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return "{}";
+  }
+
+  const unitWeights = {};
+
+  for (const [unit, weight] of Object.entries(value)) {
+    const numericWeight = Number(weight);
+
+    if (unit && Number.isFinite(numericWeight) && numericWeight > 0) {
+      unitWeights[unit] = numericWeight;
+    }
+  }
+
+  return JSON.stringify(unitWeights);
+};
+
 const getDifficultyRank = (value) =>
   DIFFICULTY_RANKS.get(toSafeString(value).trim().toLowerCase()) ?? null;
 
@@ -66,6 +84,8 @@ const createSeedQueries = (sql, seedData) => {
         protein,
         carbs,
         fat,
+        nutrition_basis,
+        unit_weights,
         dietary,
         allergens
       )
@@ -77,6 +97,8 @@ const createSeedQueries = (sql, seedData) => {
         ${toSafeNumber(nutrition?.protein)},
         ${toSafeNumber(nutrition?.carbs)},
         ${toSafeNumber(nutrition?.fat)},
+        ${toSafeString(ingredient?.nutritionBasis) || "per_100g"},
+        ${toUnitWeightsJson(ingredient?.unitWeights)}::jsonb,
         ${toStringArray(ingredient?.dietary)},
         ${toStringArray(ingredient?.commonAllergens)}
       )

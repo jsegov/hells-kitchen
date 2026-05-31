@@ -59,6 +59,7 @@ const recipe = {
       fat: 0.1,
     },
     missingIngredientIds: ["basil"],
+    unconvertedIngredientIds: [],
   },
 };
 
@@ -136,6 +137,25 @@ test("renders ingredients, instructions, tags, and nutrition", () => {
   ).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "Total" })).toBeInTheDocument();
   expect(screen.getByText("Nutrition excludes Basil.")).toBeInTheDocument();
+});
+
+test("surfaces unconverted nutrition ingredients", () => {
+  render(
+    <RecipeDetail
+      recipe={{
+        ...recipe,
+        nutrition: {
+          ...recipe.nutrition,
+          missingIngredientIds: [],
+          unconvertedIngredientIds: ["tomato"],
+        },
+      }}
+    />,
+  );
+
+  expect(
+    screen.getByText("Nutrition excludes unconverted amounts for Tomato."),
+  ).toBeInTheDocument();
 });
 
 test("rescales ingredients and nutrition from one serving control", () => {
