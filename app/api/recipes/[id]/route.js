@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRecipeDetail } from "../../../../lib/recipes";
+import { CACHE_HEADERS, NO_STORE_HEADERS } from "../../../../lib/apiCache";
 
 /**
  * @param {Request} _request
@@ -11,15 +12,18 @@ export async function GET(_request, { params }) {
     const recipe = await getRecipeDetail(id);
 
     if (!recipe) {
-      return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Recipe not found" },
+        { status: 404, headers: NO_STORE_HEADERS },
+      );
     }
 
-    return NextResponse.json(recipe);
+    return NextResponse.json(recipe, { headers: CACHE_HEADERS });
   } catch (error) {
     console.error("Failed to fetch recipe", error);
     return NextResponse.json(
       { error: "Failed to fetch recipe" },
-      { status: 500 },
+      { status: 500, headers: NO_STORE_HEADERS },
     );
   }
 }

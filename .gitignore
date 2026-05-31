@@ -27,6 +27,7 @@
 /claude
 /.claude/
 VERCEL_DEPLOYMENT_PLAN.md
+ADVANCED_FEATURES_PLAN.md
 
 # debug
 npm-debug.log*

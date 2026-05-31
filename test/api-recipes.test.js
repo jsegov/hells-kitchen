@@ -13,6 +13,8 @@ describeWithDb("GET /api/recipes", () => {
     const data = await res.json();
 
     expect(res.status).toBe(200);
+    expect(res.headers.get("Cache-Control")).toContain("s-maxage=3600");
+    expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(Array.isArray(data)).toBe(true);
     expect(data).toHaveLength(15);
   });
@@ -49,6 +51,8 @@ describeWithDb("GET /api/recipes/[id]", () => {
     const data = await res.json();
 
     expect(res.status).toBe(200);
+    expect(res.headers.get("Cache-Control")).toContain("s-maxage=3600");
+    expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(data.title).toBe("Classic Margherita Pizza");
   });
 
@@ -59,5 +63,6 @@ describeWithDb("GET /api/recipes/[id]", () => {
     );
 
     expect(res.status).toBe(404);
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
   });
 });
