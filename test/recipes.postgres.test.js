@@ -41,6 +41,16 @@ describeWithDb("Neon-backed recipe repository", () => {
     expect(recipes[0].title).toBe("Classic Margherita Pizza");
   });
 
+  test("filters recipes by multiple name terms with AND semantics", async () => {
+    const recipes = await getRecipeList({ name: "classic, pizza" });
+    const emptyRecipes = await getRecipeList({ name: "classic, salad" });
+
+    expect(recipes.map((recipe) => recipe.title)).toEqual([
+      "Classic Margherita Pizza",
+    ]);
+    expect(emptyRecipes).toEqual([]);
+  });
+
   test("filters recipes by tag", async () => {
     const recipes = await getRecipeList({ tag: "vegetarian" });
 
@@ -50,17 +60,41 @@ describeWithDb("Neon-backed recipe repository", () => {
     );
   });
 
-  test("filters recipes by ingredient id, name, and fallback name", async () => {
+  test("filters recipes by multiple tag terms with AND semantics", async () => {
+    const recipes = await getRecipeList({ tag: "dinner, vegetarian" });
+    const emptyRecipes = await getRecipeList({ tag: "dinner, vegan" });
+
+    expect(recipes.map((recipe) => recipe.title)).toEqual([
+      "Classic Margherita Pizza",
+    ]);
+    expect(emptyRecipes).toEqual([]);
+  });
+
+  test("filters recipes by ingredient id, name, fallback name, and category", async () => {
     const tomatoRecipes = await getRecipeList({ ingredient: "diced tomatoes" });
+    const soySauceIdRecipes = await getRecipeList({ ingredient: "soy_sauce" });
     const soySauceRecipes = await getRecipeList({ ingredient: "soy sauce" });
+    const proteinRecipes = await getRecipeList({ ingredient: "protein" });
 
     expect(tomatoRecipes.map((recipe) => recipe.title)).toEqual([
       "Classic Margherita Pizza",
       "Greek Salad",
     ]);
+    expect(soySauceIdRecipes.map((recipe) => recipe.title)).toEqual([
+      "Chicken Stir-Fry",
+      "Stir-Fried Tofu",
+    ]);
     expect(soySauceRecipes.map((recipe) => recipe.title)).toEqual([
       "Chicken Stir-Fry",
       "Stir-Fried Tofu",
+    ]);
+    expect(proteinRecipes.map((recipe) => recipe.title)).toEqual([
+      "Chicken Stir-Fry",
+      "Beef Tacos",
+      "Pasta Carbonara",
+      "Stir-Fried Tofu",
+      "Grilled Salmon with Asparagus",
+      "Almond-Crusted Chicken",
     ]);
   });
 
@@ -91,6 +125,16 @@ describeWithDb("Neon-backed recipe repository", () => {
       "Grilled Salmon with Asparagus",
       "Almond-Crusted Chicken",
     ]);
+  });
+
+  test("returns an empty list for unsatisfied AND combinations", async () => {
+    const recipes = await getRecipeList({
+      name: "pizza",
+      tag: "vegan",
+      ingredient: "soy sauce",
+    });
+
+    expect(recipes).toEqual([]);
   });
 
   test("returns a full recipe detail DTO with matching nutrition", async () => {

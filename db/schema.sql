@@ -42,6 +42,10 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients (
 CREATE INDEX IF NOT EXISTS idx_recipes_sort_order ON recipes (sort_order);
 CREATE INDEX IF NOT EXISTS idx_recipes_tags ON recipes USING GIN (tags);
 CREATE INDEX IF NOT EXISTS idx_recipes_title_trgm ON recipes USING GIN (title gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_ingredients_name_trgm ON ingredients USING GIN (name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_ingredients_category_trgm ON ingredients USING GIN (category gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_ingredients_dietary ON ingredients USING GIN (dietary);
 CREATE INDEX IF NOT EXISTS idx_ri_recipe ON recipe_ingredients (recipe_id);
 CREATE INDEX IF NOT EXISTS idx_ri_ingredient ON recipe_ingredients (ingredient_id);
+CREATE INDEX IF NOT EXISTS idx_ri_ingredient_id_trgm ON recipe_ingredients USING GIN (ingredient_id gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_ri_ingredient_id_fallback_trgm ON recipe_ingredients USING GIN ((replace(ingredient_id, '_', ' ')) gin_trgm_ops);

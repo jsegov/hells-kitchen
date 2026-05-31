@@ -27,6 +27,18 @@ describeWithDb("GET /api/recipes", () => {
     expect(data).toHaveLength(1);
     expect(data[0].title).toBe("Classic Margherita Pizza");
   });
+
+  it("filters recipes with combined name, tag, and ingredient terms", async () => {
+    const res = await listGET(
+      new Request(
+        "http://localhost/api/recipes?name=salad&tag=vegetarian&ingredient=tomato&ingredient=feta",
+      ),
+    );
+    const data = /** @type {{ title: string }[]} */ (await res.json());
+
+    expect(res.status).toBe(200);
+    expect(data.map((recipe) => recipe.title)).toEqual(["Greek Salad"]);
+  });
 });
 
 describeWithDb("GET /api/recipes/[id]", () => {
