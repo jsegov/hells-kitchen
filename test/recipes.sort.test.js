@@ -1,4 +1,5 @@
 import {
+  createRecipeListOrderClause,
   createRecipeRepository,
   normalizeRecipeListSort,
   parseDurationMinutes,
@@ -68,6 +69,15 @@ test("normalizes recipe sort options defensively", () => {
     sort: "servings",
     order: "asc",
   });
+});
+
+test("falls back safely when a SQL sort expression is missing", () => {
+  expect(
+    createRecipeListOrderClause({
+      sort: "missing-expression",
+      order: "desc",
+    }),
+  ).toBe("ORDER BY r.sort_order ASC, r.id ASC");
 });
 
 test("normalizes the combined sort token from the single dropdown", () => {
