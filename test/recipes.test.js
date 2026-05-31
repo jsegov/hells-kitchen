@@ -1,10 +1,14 @@
 import {
-  getRecipeDetail,
-  getRecipeList,
+  createRecipeRepository,
   toRecipeDetail,
   toRecipeListItem,
   toRecipeListItems,
 } from "../lib/recipes";
+import recipeDatabase from "../db/data.json";
+
+const { getRecipeDetail, getRecipeList } = createRecipeRepository(
+  async () => recipeDatabase,
+);
 
 test("toRecipeListItem maps only list-safe recipe fields", () => {
   const item = toRecipeListItem({

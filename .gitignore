@@ -24,6 +24,9 @@
 # misc
 .DS_Store
 *.pem
+/claude
+/.claude/
+VERCEL_DEPLOYMENT_PLAN.md
 
 # debug
 npm-debug.log*
