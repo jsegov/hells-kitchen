@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import RecipeDetail from "./RecipeDetail";
-import { getRecipe } from "../recipeData";
+import { getRecipe, getRecipes } from "../recipeData";
 import styles from "./page.module.css";
+
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const { recipes } = await getRecipes();
+  return recipes.map((recipe) => ({ id: recipe.id }));
+}
 
 /**
  * @param {{ params: Promise<{ id: string }> }} props

@@ -179,4 +179,18 @@ describeWithDb("Neon-backed recipe repository", () => {
   test("returns null for unknown recipe IDs", async () => {
     await expect(getRecipeDetail("not-real")).resolves.toBeNull();
   });
+
+  test("returns detail ingredients in seed order with no dropped refs", async () => {
+    const recipe = await getRecipeDetail("1");
+
+    expect(recipe).not.toBeNull();
+    if (!recipe) {
+      throw new Error("Expected a recipe detail DTO.");
+    }
+
+    expect(
+      recipe.ingredients.map((ingredient) => ingredient.ingredientId),
+    ).toEqual(["tomato", "mozzarella", "basil", "flour", "olive_oil"]);
+    expect(recipe.nutrition.missingIngredientIds).toEqual([]);
+  });
 });

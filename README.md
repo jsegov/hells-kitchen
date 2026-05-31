@@ -11,7 +11,7 @@ Create a recipe management application that allows users to view, search, and or
 - `/recipes` displays recipe list cards and supports filtering by recipe name, tags, and ingredients through query parameters.
 - `/recipes/:id` displays ingredients with quantities, cooking instructions, tags, and nutrition totals/per-serving values calculated from ingredients.
 - Next.js Route Handlers expose `GET /api/recipes` for list-safe recipe data and `GET /api/recipes/:id` for full recipe detail data. Server Components call the same data layer (`lib/recipes.js`) directly, with no internal HTTP hop.
-- The mock database is `db/data.json`.
+- Runtime data is served from Neon Postgres. `db/data.json` is retained as seed data for local and preview databases.
 
 ## Tips
 
@@ -26,26 +26,30 @@ Create a recipe management application that allows users to view, search, and or
 
 ```
 npm ci
+npm run db:reset # Applies schema and seeds Neon from db/data.json
 npm run dev # Starts the Next.js app (pages + API) on port 3000, or the next available port
 ```
 
-Requires Node.js 20.9.0 or newer.
+Requires Node.js 20.9.0 or newer. For Vercel-linked projects, pull environment variables with `vercel env pull .env.local` before running database commands.
 
 #### Database setup
 
-```
-The application uses `db/data.json` as a mock database
-```
+The application uses Neon Postgres at runtime. `db/data.json` is the seed source of truth, and `npm run db:reset` runs both `db:migrate` and `db:seed`.
 
 #### Environment variables
 
-No environment variables are required for local development. (`API_BASE_URL` and `CORS_ORIGIN` are obsolete now that the API runs in-process within the Next.js app — there is no cross-service URL and no CORS.)
+- `DATABASE_URL` is required for the app runtime and DB-backed tests.
+- `DATABASE_URL_UNPOOLED` is required for `npm run db:migrate`, `npm run db:seed`, and `npm run db:reset`.
+- `API_BASE_URL` and `CORS_ORIGIN` are obsolete now that the API runs in-process within the Next.js app.
 
 #### Quality gates
 
 ```
-npm run check
+npm run check      # Fast non-DB gate: typecheck, lint, format check, unit/render tests
+npm run test:db    # DB-backed repository and API route tests; requires DATABASE_URL
 npm run build
+npm audit --omit=dev
+npm run check:full # Full deploy/PR gate combining all of the above
 ```
 
 **Note: The original Next.js + Express scaffold has been consolidated into a single Next.js app; the Express backend was folded into Route Handlers.**
