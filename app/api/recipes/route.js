@@ -12,9 +12,22 @@ export async function GET(request) {
       name: searchParams.getAll("name"),
       tag: searchParams.getAll("tag"),
       ingredient: searchParams.getAll("ingredient"),
+      diet: searchParams.getAll("diet"),
+      exclude: searchParams.getAll("exclude"),
+    };
+    /**
+     * @param {string} key
+     */
+    const getSingleParam = (key) => {
+      const values = searchParams.getAll(key);
+      return values.length === 1 ? values[0] : undefined;
+    };
+    const sort = {
+      sort: getSingleParam("sort"),
+      order: getSingleParam("order"),
     };
 
-    return NextResponse.json(await getRecipeList(filters), {
+    return NextResponse.json(await getRecipeList(filters, sort), {
       headers: CACHE_HEADERS,
     });
   } catch (error) {

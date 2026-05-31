@@ -4,7 +4,11 @@ import { dirname, join } from "node:path";
 
 import { neon } from "@neondatabase/serverless";
 
-import { parseRecipeAmount } from "../lib/recipes.js";
+import {
+  normalizeNutritionUnit,
+  parseDurationMinutes,
+  parseRecipeAmount,
+} from "../lib/recipes.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataPath = join(__dirname, "data.json");
@@ -23,15 +27,23 @@ const toSafeNumber = (value) =>
 const toStringArray = (value) =>
   Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
 
-const parseTimeMinutes = (value) => {
-  const match = toSafeString(value).match(/\d+(?:\.\d+)?/);
-
-  if (!match) {
-    return null;
+const toUnitWeightsJson = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return "{}";
   }
 
-  const minutes = Number(match[0]);
-  return Number.isFinite(minutes) ? Math.round(minutes) : null;
+  const unitWeights = {};
+
+  for (const [unit, weight] of Object.entries(value)) {
+    const normalizedUnit = normalizeNutritionUnit(unit);
+    const numericWeight = Number(weight);
+
+    if (normalizedUnit && Number.isFinite(numericWeight) && numericWeight > 0) {
+      unitWeights[normalizedUnit] = numericWeight;
+    }
+  }
+
+  return JSON.stringify(unitWeights);
 };
 
 const getDifficultyRank = (value) =>
@@ -77,6 +89,8 @@ const createSeedQueries = (sql, seedData) => {
         protein,
         carbs,
         fat,
+        nutrition_basis,
+        unit_weights,
         dietary,
         allergens
       )
@@ -88,6 +102,8 @@ const createSeedQueries = (sql, seedData) => {
         ${toSafeNumber(nutrition?.protein)},
         ${toSafeNumber(nutrition?.carbs)},
         ${toSafeNumber(nutrition?.fat)},
+        ${toSafeString(ingredient?.nutritionBasis) || "per_100g"},
+        ${toUnitWeightsJson(ingredient?.unitWeights)}::jsonb,
         ${toStringArray(ingredient?.dietary)},
         ${toStringArray(ingredient?.commonAllergens)}
       )
@@ -120,8 +136,8 @@ const createSeedQueries = (sql, seedData) => {
         ${toSafeNumber(recipe?.servings)},
         ${toSafeString(recipe?.prepTime)},
         ${toSafeString(recipe?.cookTime)},
-        ${parseTimeMinutes(recipe?.prepTime)},
-        ${parseTimeMinutes(recipe?.cookTime)},
+        ${parseDurationMinutes(recipe?.prepTime)},
+        ${parseDurationMinutes(recipe?.cookTime)},
         ${toSafeString(recipe?.difficulty)},
         ${getDifficultyRank(recipe?.difficulty)},
         ${toStringArray(recipe?.instructions)},

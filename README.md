@@ -104,3 +104,55 @@ npm run check:full # Full deploy/PR gate combining all of the above
    - A link to a deployed version of the application (bonus points)
 
 Good luck! We're excited to see your implementation.
+
+## Candidate Notes
+
+#### Setup instructions
+
+No new setup requirements were added. Use the existing commands documented above.
+
+#### Implementation choices
+
+- Advanced list features share one `getRecipeList(filters, sort)` contract across the in-memory repository, Neon-backed repository, API route, and `/recipes` page.
+- Sort keys are defensively normalized and mapped to whitelisted SQL expressions; in-memory sorting uses matching parsers/comparators with nulls sorted last and stable curated-order tie breaks.
+- Dietary suitability is derived from ingredient metadata rather than recipe tags. Vegan ingredients imply vegetarian suitability; positive diet claims fail closed when ingredient metadata is missing.
+- Allergen exclusion uses exact tokens, not substring matching, and missing ingredient metadata fails safe when an allergen exclusion is active.
+- Serving-size scaling lives in a browser-safe pure math module and one client component that owns the target serving count for both ingredient quantities and nutrition totals.
+
+##### Find-recipes panel redesign
+
+- The filter panel presents one free-text search box (recipe name) plus four uniform multi-select facets — tag, ingredient, diet, and allergen — because all four are constrained, known vocabularies. Short lists (diet, allergen) render inline as toggle chips; long lists (tag, ingredient) gain a type-to-filter box. Every applied filter also appears as a removable chip above the results with a "Clear all" escape hatch.
+- The ingredient filter now matches by exact **ingredient id** instead of name substring, so a pick-list value like "Potato" can no longer also match "Sweet Potato" (or "Butter" → "Peanut Butter"). `name` stays a free-text title search.
+- Sort key and direction are merged into one dropdown with plain-language labels ("Difficulty: easiest", "Newest", "A–Z") submitted as a combined `sort=key-order` token; `normalizeRecipeListSort`/`normalizeRecipeSort` still accept the legacy separate `sort`/`order` params.
+- Per-facet result counts come from a new `getRecipeFacets(filters)` data-layer function (cached and dual-path like `getRecipeList`). Counts are drill-down ("results if you also pick this") and reuse the list matcher over the catalog, so a count can never disagree with the list it previews.
+- `RecipeFilters` is a progressively-enhanced client island: the real GET form is the no-JS baseline; with JS, desktop applies filters instantly via `router.replace` on change while mobile collapses the panel into a drawer that batches and applies with one button. Chip removal links are plain server-rendered anchors that work either way.
+
+#### Completed features
+
+- Sorting by curated order, title, prep time, cook time, difficulty, servings, and date added, with ascending/descending order — exposed as one plain-language dropdown.
+- Uniform multi-select facets for tag, ingredient, diet, and allergen, with type-to-filter for the long lists and per-option result counts.
+- Dietary filters for vegetarian, vegan, gluten-free, keto, and high-protein.
+- Allergen exclusion for dairy, eggs, fish, gluten, nuts, peanuts, sesame, shellfish, soy, tree nuts, and wheat.
+- Removable active-filter chips with "Clear all", a mobile filter drawer, and instant desktop filtering layered over a no-JS GET form.
+- Derived dietary badges on recipe cards and detail pages.
+- Detail-page allergen summary with a verification note.
+- Serving-size control with presets and numeric input that scales ingredients and nutrition together.
+- Additional unit/render/API/DB coverage for sorting, dietary derivation, allergen filtering, facet counts, and serving-size math.
+
+#### Assumptions
+
+- Recipe scaling is linear. Seasoning, leavening, and cook times still require cook judgment.
+- Current seed data is small enough that dietary/allergen post-filtering after SQL text filtering is appropriate and keeps derivation logic shared.
+- The hardcoded diet/allergen option lists intentionally define the public filter surface; tests guard against seed-data drift.
+
+#### Known limitations or bugs
+
+- Ingredient amounts that are ambiguous or not safely parseable, such as ranges or mixed numbers, are displayed unchanged during scaling.
+- Nutrition scaling starts from the validated recipe total exposed by the data layer, which is already rounded to one decimal place.
+- Allergen handling is informational and should not be treated as a medical safety guarantee.
+
+#### Additional features with more time
+
+- Parent/child allergen rules, such as optionally expanding nuts into peanuts and tree nuts.
+- Persisted favorite recipes or saved filter presets.
+- A shopping-list generator that combines scaled ingredients across selected recipes.

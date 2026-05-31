@@ -11,6 +11,9 @@ const recipe = {
   difficulty: "easy",
   ingredientCount: 5,
   tags: ["italian", "vegetarian", "dinner"],
+  dateAdded: "2024-01-15T10:30:00Z",
+  dietary: ["vegetarian"],
+  allergens: ["dairy", "gluten", "wheat"],
 };
 
 test("renders the recipe list card basic information", () => {
@@ -46,4 +49,14 @@ test("renders tags with an accessible label", () => {
   expect(within(tags).getByText("italian")).toBeInTheDocument();
   expect(within(tags).getByText("vegetarian")).toBeInTheDocument();
   expect(within(tags).getByText("dinner")).toBeInTheDocument();
+});
+
+test("renders derived dietary badges with an accessible label", () => {
+  render(<RecipeCard recipe={recipe} />);
+
+  const badges = screen.getByRole("list", {
+    name: "Classic Margherita Pizza dietary suitability",
+  });
+
+  expect(within(badges).getByText("Vegetarian")).toBeInTheDocument();
 });

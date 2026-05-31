@@ -33,7 +33,7 @@ describeWithDb("GET /api/recipes", () => {
   it("filters recipes with combined name, tag, and ingredient terms", async () => {
     const res = await listGET(
       new Request(
-        "http://localhost/api/recipes?name=salad&tag=vegetarian&ingredient=tomato&ingredient=feta",
+        "http://localhost/api/recipes?name=salad&tag=vegetarian&ingredient=tomato&ingredient=feta_cheese",
       ),
     );
     const data = /** @type {{ title: string }[]} */ (await res.json());

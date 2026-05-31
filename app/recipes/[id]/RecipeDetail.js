@@ -1,17 +1,12 @@
 import Link from "next/link";
-import { formatDifficulty } from "../recipeData";
+import {
+  formatAllergenLabel,
+  formatDietaryLabel,
+  formatDifficulty,
+} from "../recipeData";
+import Metric from "./Metric";
+import ServingSizeControls from "./ServingSizeControls";
 import styles from "./page.module.css";
-
-/**
- * @param {number} value
- */
-function formatNutritionNumber(value) {
-  if (!Number.isFinite(value)) {
-    return "0";
-  }
-
-  return Number.isInteger(value) ? String(value) : value.toFixed(1);
-}
 
 /**
  * @param {string} ingredientId
@@ -25,52 +20,14 @@ function formatIngredientId(ingredientId) {
 }
 
 /**
- * @param {{ label: string, value: string | number }} props
- */
-function Metric({ label, value }) {
-  return (
-    <div>
-      <dt>{label}</dt>
-      <dd>{value}</dd>
-    </div>
-  );
-}
-
-/**
- * @param {{ title: string, nutrition: import("../recipeData").Nutrition }} props
- */
-function NutritionGroup({ title, nutrition }) {
-  return (
-    <section className={styles.nutritionGroup} aria-label={title}>
-      <h3>{title}</h3>
-      <dl className={styles.nutritionGrid}>
-        <Metric
-          label="Calories"
-          value={formatNutritionNumber(nutrition.calories)}
-        />
-        <Metric
-          label="Protein"
-          value={`${formatNutritionNumber(nutrition.protein)}g`}
-        />
-        <Metric
-          label="Carbs"
-          value={`${formatNutritionNumber(nutrition.carbs)}g`}
-        />
-        <Metric
-          label="Fat"
-          value={`${formatNutritionNumber(nutrition.fat)}g`}
-        />
-      </dl>
-    </section>
-  );
-}
-
-/**
  * @param {{ recipe: import("../recipeData").RecipeDetail }} props
  */
 export default function RecipeDetail({ recipe }) {
   const missingIngredientNames =
     recipe.nutrition.missingIngredientIds.map(formatIngredientId);
+  const unconvertedIngredientNames =
+    recipe.nutrition.unconvertedIngredientIds.map(formatIngredientId);
+  const allergenLabels = recipe.allergens.map(formatAllergenLabel);
 
   return (
     <>
@@ -94,6 +51,25 @@ export default function RecipeDetail({ recipe }) {
                 ))}
               </ul>
             ) : null}
+
+            {recipe.dietary.length ? (
+              <ul
+                className={styles.dietaryBadges}
+                aria-label={`${recipe.title} dietary suitability`}
+              >
+                {recipe.dietary.map((diet) => (
+                  <li key={diet}>{formatDietaryLabel(diet)}</li>
+                ))}
+              </ul>
+            ) : null}
+
+            <p className={styles.allergenLine}>
+              <span>Contains:</span>{" "}
+              {allergenLabels.length
+                ? allergenLabels.join(", ")
+                : "No listed common allergens"}
+              . Always verify ingredients yourself.
+            </p>
           </div>
 
           <dl className={styles.metrics}>
@@ -103,38 +79,15 @@ export default function RecipeDetail({ recipe }) {
             />
             <Metric label="Prep" value={recipe.prepTime} />
             <Metric label="Cook" value={recipe.cookTime} />
-            <Metric label="Serves" value={recipe.servings} />
           </dl>
         </header>
 
         <div className={styles.contentGrid}>
-          <section
-            className={styles.panel}
-            aria-labelledby="ingredients-heading"
-          >
-            <h2 id="ingredients-heading">Ingredients</h2>
-            {recipe.ingredients.length ? (
-              <ul className={styles.ingredients}>
-                {recipe.ingredients.map((ingredient, index) => (
-                  <li key={`${ingredient.ingredientId}-${index}`}>
-                    <span className={styles.ingredientAmount}>
-                      {ingredient.amount} {ingredient.unit}
-                    </span>
-                    <span className={styles.ingredientName}>
-                      {ingredient.name}
-                    </span>
-                    {ingredient.category ? (
-                      <span className={styles.ingredientCategory}>
-                        {ingredient.category}
-                      </span>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className={styles.emptyState}>No ingredients listed.</p>
-            )}
-          </section>
+          <ServingSizeControls
+            missingIngredientNames={missingIngredientNames}
+            recipe={recipe}
+            unconvertedIngredientNames={unconvertedIngredientNames}
+          />
 
           <section
             className={styles.panel}
@@ -151,26 +104,6 @@ export default function RecipeDetail({ recipe }) {
               <p className={styles.emptyState}>No instructions listed.</p>
             )}
           </section>
-
-          <aside className={styles.panel} aria-labelledby="nutrition-heading">
-            <h2 id="nutrition-heading">Nutrition</h2>
-            <div className={styles.nutritionStack}>
-              <NutritionGroup
-                title="Per serving"
-                nutrition={recipe.nutrition.perServing}
-              />
-              <NutritionGroup
-                title="Total"
-                nutrition={recipe.nutrition.total}
-              />
-            </div>
-
-            {missingIngredientNames.length ? (
-              <p className={styles.nutritionNote}>
-                Nutrition excludes {missingIngredientNames.join(", ")}.
-              </p>
-            ) : null}
-          </aside>
         </div>
       </article>
     </>

@@ -34,8 +34,11 @@ test("toRecipeListItem maps only list-safe recipe fields", () => {
   }
 
   expect(Object.keys(item).sort()).toEqual([
+    "allergens",
     "cookTime",
+    "dateAdded",
     "description",
+    "dietary",
     "difficulty",
     "id",
     "ingredientCount",
@@ -48,7 +51,9 @@ test("toRecipeListItem maps only list-safe recipe fields", () => {
   expect(item.tags).toEqual(["dinner", "quick"]);
   expect(item).not.toHaveProperty("instructions");
   expect(item).not.toHaveProperty("ingredients");
-  expect(item).not.toHaveProperty("dateAdded");
+  expect(item.dateAdded).toBe("2024-01-01T00:00:00Z");
+  expect(item.dietary).toEqual([]);
+  expect(item.allergens).toEqual([]);
 });
 
 test("toRecipeListItem handles missing array fields defensively", () => {
@@ -69,6 +74,36 @@ test("toRecipeListItem handles missing array fields defensively", () => {
 
   expect(item.tags).toEqual([]);
   expect(item.ingredientCount).toBe(0);
+});
+
+test("toRecipeListItem can reuse a precomputed dietary profile", () => {
+  const item = toRecipeListItem(
+    {
+      id: "recipe-profile",
+      title: "Profile Recipe",
+      description: "A recipe with a reusable profile",
+      servings: 2,
+      prepTime: "5 minutes",
+      cookTime: "0 minutes",
+      difficulty: "easy",
+      ingredients: [{ ingredientId: "milk", amount: "1", unit: "cup" }],
+      tags: [],
+    },
+    new Map(),
+    {
+      dietary: ["vegetarian"],
+      allergens: ["dairy"],
+      hasMissingIngredients: false,
+    },
+  );
+
+  expect(item).not.toBeNull();
+  if (!item) {
+    throw new Error("Expected a mapped recipe list item.");
+  }
+
+  expect(item.dietary).toEqual(["vegetarian"]);
+  expect(item.allergens).toEqual(["dairy"]);
 });
 
 test("toRecipeListItem normalizes non-string difficulty values", () => {
@@ -190,8 +225,11 @@ test("getRecipeList returns list DTOs from the mock database", async () => {
   expect(recipes[0].title).toBe("Classic Margherita Pizza");
   expect(recipes[0].ingredientCount).toBe(5);
   expect(Object.keys(recipes[0]).sort()).toEqual([
+    "allergens",
     "cookTime",
+    "dateAdded",
     "description",
+    "dietary",
     "difficulty",
     "id",
     "ingredientCount",
@@ -218,9 +256,9 @@ test("getRecipeList filters recipes by tag", async () => {
   );
 });
 
-test("getRecipeList filters recipes by ingredient id, name, and fallback name", async () => {
-  const tomatoRecipes = await getRecipeList({ ingredient: "diced tomatoes" });
-  const soySauceRecipes = await getRecipeList({ ingredient: "soy sauce" });
+test("getRecipeList filters recipes by exact ingredient id", async () => {
+  const tomatoRecipes = await getRecipeList({ ingredient: "tomato" });
+  const soySauceRecipes = await getRecipeList({ ingredient: "soy_sauce" });
 
   expect(tomatoRecipes.map((recipe) => recipe.title)).toEqual([
     "Classic Margherita Pizza",
@@ -232,11 +270,26 @@ test("getRecipeList filters recipes by ingredient id, name, and fallback name", 
   ]);
 });
 
+test("getRecipeList ingredient facet matches by id, not name substring", async () => {
+  // "potato" must not also match "sweet_potato" (the substring collision the
+  // facet exists to avoid), and an ingredient name is no longer a valid term.
+  const potato = await getRecipeList({ ingredient: "potato" });
+  const sweetPotato = await getRecipeList({ ingredient: "sweet_potato" });
+  const byName = await getRecipeList({ ingredient: "diced tomatoes" });
+
+  expect(
+    potato.every(
+      (recipe) => !sweetPotato.some((other) => other.id === recipe.id),
+    ),
+  ).toBe(true);
+  expect(byName).toHaveLength(0);
+});
+
 test("getRecipeList combines filters, repeated values, and comma-separated values with AND semantics", async () => {
   const recipes = await getRecipeList({
     name: "salad",
     tag: "vegetarian",
-    ingredient: "tomato, feta",
+    ingredient: "tomato, feta_cheese",
   });
 
   expect(recipes).toHaveLength(1);
@@ -274,8 +327,10 @@ test("getRecipeDetail returns a full recipe detail DTO from the mock database", 
   }
 
   expect(Object.keys(recipe).sort()).toEqual([
+    "allergens",
     "cookTime",
     "description",
+    "dietary",
     "difficulty",
     "id",
     "ingredients",
@@ -287,6 +342,8 @@ test("getRecipeDetail returns a full recipe detail DTO from the mock database", 
     "title",
   ]);
   expect(recipe).not.toHaveProperty("dateAdded");
+  expect(recipe.dietary).toEqual(["vegetarian"]);
+  expect(recipe.allergens).toEqual(["dairy", "gluten", "wheat"]);
   expect(recipe.title).toBe("Classic Margherita Pizza");
   expect(recipe.instructions).toEqual([
     "Prepare pizza dough with flour",
@@ -302,10 +359,10 @@ test("getRecipeDetail returns a full recipe detail DTO from the mock database", 
     unit: "cups",
     category: "vegetable",
     nutrition: {
-      calories: 50,
-      protein: 3,
-      carbs: 10,
-      fat: 0.4,
+      calories: 120,
+      protein: 7.2,
+      carbs: 24,
+      fat: 1,
     },
   });
   expect(recipe.ingredients[2]).toEqual({
@@ -315,27 +372,49 @@ test("getRecipeDetail returns a full recipe detail DTO from the mock database", 
     unit: "leaves",
     category: "herb",
     nutrition: {
-      calories: 2,
+      calories: 1.2,
       protein: 0.2,
-      carbs: 0.2,
-      fat: 0.1,
+      carbs: 0.1,
+      fat: 0,
     },
   });
   expect(recipe.nutrition).toEqual({
     total: {
-      calories: 3669.5,
-      protein: 211.7,
-      carbs: 263.7,
-      fat: 199.5,
+      calories: 2132.4,
+      protein: 89.5,
+      carbs: 267,
+      fat: 78.7,
     },
     perServing: {
-      calories: 917.4,
-      protein: 52.9,
-      carbs: 65.9,
-      fat: 49.9,
+      calories: 533.1,
+      protein: 22.4,
+      carbs: 66.8,
+      fat: 19.7,
     },
     missingIngredientIds: [],
+    unconvertedIngredientIds: [],
   });
+});
+
+test("seeded recipe nutrition is fully converted and plausible", async () => {
+  const recipes = await Promise.all(
+    recipeDatabase.recipes.map((recipe) => getRecipeDetail(recipe.id)),
+  );
+
+  for (const recipe of recipes) {
+    expect(recipe).not.toBeNull();
+    expect(recipe?.nutrition.missingIngredientIds).toEqual([]);
+    expect(recipe?.nutrition.unconvertedIngredientIds).toEqual([]);
+  }
+
+  const byTitle = new Map(
+    recipes.map((recipe) => [recipe?.title, recipe?.nutrition.perServing]),
+  );
+
+  expect(byTitle.get("Greek Salad")?.calories).toBeLessThan(500);
+  expect(byTitle.get("Sushi Roll")?.calories).toBeLessThan(350);
+  expect(byTitle.get("Vegetable Curry")?.calories).toBeLessThan(500);
+  expect(byTitle.get("Pasta Carbonara")?.calories).toBeLessThan(1000);
 });
 
 test("getRecipeDetail returns null for missing recipe IDs", async () => {
@@ -368,6 +447,10 @@ test("toRecipeDetail supports fractional ingredient amounts", () => {
             protein: 2,
             carbs: 4,
             fat: 8,
+          },
+          nutritionBasis: "per_100g",
+          unitWeights: {
+            cup: 100,
           },
         },
       ],
@@ -426,6 +509,10 @@ test("toRecipeDetail defensively maps malformed scalar detail fields", () => {
             carbs: 4,
             fat: 8,
           },
+          nutritionBasis: "per_100g",
+          unitWeights: {
+            cup: 100,
+          },
         },
       ],
     ]),
@@ -448,10 +535,10 @@ test("toRecipeDetail defensively maps malformed scalar detail fields", () => {
     amount: "2",
     unit: "",
     nutrition: {
-      calories: 200,
-      protein: 4,
-      carbs: 8,
-      fat: 16,
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
     },
   });
   expect(recipe.nutrition.perServing).toEqual({
@@ -460,6 +547,7 @@ test("toRecipeDetail defensively maps malformed scalar detail fields", () => {
     carbs: 0,
     fat: 0,
   });
+  expect(recipe.nutrition.unconvertedIngredientIds).toEqual(["test_oil"]);
 });
 
 test("toRecipeDetail handles missing ingredient metadata without crashing", () => {
@@ -500,4 +588,5 @@ test("toRecipeDetail handles missing ingredient metadata without crashing", () =
     },
   });
   expect(recipe.nutrition.missingIngredientIds).toEqual(["mystery_item"]);
+  expect(recipe.nutrition.unconvertedIngredientIds).toEqual([]);
 });

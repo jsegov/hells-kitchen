@@ -69,8 +69,14 @@
 }
 
 .filterForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.searchRow {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   align-items: end;
   gap: 12px;
 }
@@ -88,7 +94,8 @@
   text-transform: uppercase;
 }
 
-.filterField input {
+.filterField input,
+.filterField select {
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--border-strong);
@@ -99,9 +106,119 @@
   padding: 0 12px;
 }
 
-.filterField input:focus {
+.filterField select {
+  appearance: none;
+}
+
+.filterField input:focus,
+.filterField select:focus {
   border-color: var(--accent);
   outline: 3px solid rgba(37, 99, 235, 0.18);
+}
+
+/* Facets ----------------------------------------------------------------- */
+
+.facetGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+/* Every facet shares one bordered card so the four groups read as the same
+   kind of control; only the long (searchable) groups add a search box. */
+.facet {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.facet legend {
+  padding: 0;
+  color: var(--subtle);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.facetSearch {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--foreground);
+  font: inherit;
+  padding: 0 10px;
+}
+
+.facetSearch:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+}
+
+.facetChips {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+}
+
+.facetChipsScroll {
+  max-height: 156px;
+  overflow-y: auto;
+}
+
+.toggleChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-strong);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  user-select: none;
+}
+
+.toggleChip:hover {
+  border-color: var(--border-hover);
+}
+
+.toggleChip:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.toggleChip:has(input:focus-visible) {
+  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline-offset: 2px;
+}
+
+.toggleChipEmpty {
+  opacity: 0.5;
+}
+
+.facetCount {
+  font-size: 0.7rem;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.facetEmpty {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.formActions {
+  display: flex;
 }
 
 .searchButton {
@@ -121,6 +238,121 @@
 }
 
 .searchButton:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Filter trigger + drawer (mobile, JS only) ------------------------------ */
+
+.filtersTrigger {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--foreground);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0 16px;
+}
+
+.drawerOverlay {
+  display: none;
+}
+
+.drawerHeader {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawerHeader h2 {
+  color: var(--foreground);
+  font-size: 1.1rem;
+}
+
+.drawerClose {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 4px 8px;
+}
+
+/* Active filter chips ---------------------------------------------------- */
+
+.activeFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.activeFiltersLabel {
+  color: var(--subtle);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--tag-border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-strong);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 5px 10px;
+}
+
+.chip:hover {
+  border-color: var(--border-hover);
+}
+
+.chip:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.chipCategory {
+  color: var(--subtle);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.chipRemove {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.clearAll {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.clearAll:focus-visible {
+  border-radius: 4px;
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
@@ -237,6 +469,22 @@
   padding: 6px 9px;
 }
 
+.dietaryBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+}
+
+.dietaryBadges li {
+  border-radius: 999px;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 6px 9px;
+}
+
 .state {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -252,6 +500,13 @@
 .state p {
   margin-top: 8px;
   color: var(--muted);
+}
+
+/* Desktop + JS: filters apply instantly on change, so the submit is hidden. */
+@media (min-width: 641px) {
+  .filters[data-enhanced] .formActions {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
@@ -275,7 +530,7 @@
     gap: 10px;
   }
 
-  .filterForm {
+  .searchRow {
     grid-template-columns: 1fr;
   }
 
@@ -286,15 +541,39 @@
   .grid {
     grid-template-columns: 1fr;
   }
-}
 
-@media (min-width: 641px) and (max-width: 900px) {
-  .filterForm {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* With JS, collapse the inline form behind a trigger that opens a sheet. */
+  .filters[data-enhanced] .filterForm {
+    display: none;
   }
 
-  .searchButton {
-    grid-column: 1 / -1;
+  .filters[data-enhanced] .filtersTrigger {
+    display: inline-flex;
+  }
+
+  .filters[data-enhanced][data-drawer-open] .drawerOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  .filters[data-enhanced][data-drawer-open] .drawerHeader {
+    display: flex;
+  }
+
+  .filters[data-enhanced][data-drawer-open] .filterForm {
+    display: flex;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 50;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 16px 16px 0 0;
+    background: var(--surface);
+    padding: 20px;
+    box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.25);
   }
 }
 

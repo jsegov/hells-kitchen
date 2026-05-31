@@ -70,8 +70,8 @@ describeWithDb("Neon-backed recipe repository", () => {
     expect(emptyRecipes).toEqual([]);
   });
 
-  test("filters recipes by ingredient id, name, fallback name, and category", async () => {
-    const tomatoRecipes = await getRecipeList({ ingredient: "diced tomatoes" });
+  test("filters recipes by exact ingredient id", async () => {
+    const tomatoRecipes = await getRecipeList({ ingredient: "tomato" });
     const soySauceIdRecipes = await getRecipeList({ ingredient: "soy_sauce" });
     const soySauceRecipes = await getRecipeList({ ingredient: "soy sauce" });
     const proteinRecipes = await getRecipeList({ ingredient: "protein" });
@@ -84,25 +84,15 @@ describeWithDb("Neon-backed recipe repository", () => {
       "Chicken Stir-Fry",
       "Stir-Fried Tofu",
     ]);
-    expect(soySauceRecipes.map((recipe) => recipe.title)).toEqual([
-      "Chicken Stir-Fry",
-      "Stir-Fried Tofu",
-    ]);
-    expect(proteinRecipes.map((recipe) => recipe.title)).toEqual([
-      "Chicken Stir-Fry",
-      "Beef Tacos",
-      "Pasta Carbonara",
-      "Stir-Fried Tofu",
-      "Grilled Salmon with Asparagus",
-      "Almond-Crusted Chicken",
-    ]);
+    expect(soySauceRecipes).toEqual([]);
+    expect(proteinRecipes).toEqual([]);
   });
 
   test("combines filters and ignores malformed filter values", async () => {
     const combinedRecipes = await getRecipeList({
       name: "salad",
       tag: "vegetarian",
-      ingredient: "tomato, feta",
+      ingredient: "tomato, feta_cheese",
     });
     const malformedRecipes = await getRecipeList({
       name: {
@@ -153,26 +143,27 @@ describeWithDb("Neon-backed recipe repository", () => {
       unit: "cups",
       category: "vegetable",
       nutrition: {
-        calories: 50,
-        protein: 3,
-        carbs: 10,
-        fat: 0.4,
+        calories: 120,
+        protein: 7.2,
+        carbs: 24,
+        fat: 1,
       },
     });
     expect(recipe.nutrition).toEqual({
       total: {
-        calories: 3669.5,
-        protein: 211.7,
-        carbs: 263.7,
-        fat: 199.5,
+        calories: 2132.4,
+        protein: 89.5,
+        carbs: 267,
+        fat: 78.7,
       },
       perServing: {
-        calories: 917.4,
-        protein: 52.9,
-        carbs: 65.9,
-        fat: 49.9,
+        calories: 533.1,
+        protein: 22.4,
+        carbs: 66.8,
+        fat: 19.7,
       },
       missingIngredientIds: [],
+      unconvertedIngredientIds: [],
     });
   });
 
@@ -192,5 +183,6 @@ describeWithDb("Neon-backed recipe repository", () => {
       recipe.ingredients.map((ingredient) => ingredient.ingredientId),
     ).toEqual(["tomato", "mozzarella", "basil", "flour", "olive_oil"]);
     expect(recipe.nutrition.missingIngredientIds).toEqual([]);
+    expect(recipe.nutrition.unconvertedIngredientIds).toEqual([]);
   });
 });

@@ -99,6 +99,35 @@
   padding: 6px 9px;
 }
 
+.dietaryBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  list-style: none;
+}
+
+.dietaryBadges li {
+  border-radius: 999px;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 6px 9px;
+}
+
+.allergenLine {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.allergenLine span {
+  color: var(--text-strong);
+  font-weight: 800;
+}
+
 .metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -145,6 +174,80 @@
   color: var(--foreground);
   font-size: 1.2rem;
   line-height: 1.2;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.servingControl {
+  display: grid;
+  gap: 6px;
+  min-width: min(260px, 100%);
+}
+
+.servingControl label {
+  color: var(--subtle);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.servingInputRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.servingInputRow input {
+  width: 82px;
+  min-height: 38px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 700;
+  padding: 0 10px;
+}
+
+.servingInputRow input:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+}
+
+.servingPresets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.servingPresets button {
+  min-width: 38px;
+  min-height: 38px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-strong);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 0 10px;
+}
+
+.servingPresets button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.servingPresets button:disabled,
+.servingInputRow input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .ingredients,
@@ -232,8 +335,15 @@
   font-size: 0.9rem;
 }
 
-.emptyState {
+.emptyState,
+.scaleNote {
   margin-top: 14px;
+}
+
+.scaleNote {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .state {
@@ -277,6 +387,10 @@
   .metrics,
   .nutritionGrid {
     grid-template-columns: 1fr;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
   }
 
   .ingredients li {
