@@ -19,6 +19,8 @@ test("renders the filtered empty recipe state", () => {
     screen.getByRole("heading", { name: "No matching recipes" }),
   ).toBeInTheDocument();
   expect(
-    screen.getByText("Try a different name, tag, or ingredient."),
+    screen.getByText(
+      "Try a different name, tag, ingredient, diet, or allergen filter.",
+    ),
   ).toBeInTheDocument();
 });

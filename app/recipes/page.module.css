@@ -70,7 +70,7 @@
 
 .filterForm {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: end;
   gap: 12px;
 }
@@ -88,7 +88,8 @@
   text-transform: uppercase;
 }
 
-.filterField input {
+.filterField input,
+.filterField select {
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--border-strong);
@@ -99,12 +100,58 @@
   padding: 0 12px;
 }
 
-.filterField input:focus {
+.filterField select {
+  appearance: none;
+}
+
+.filterField input:focus,
+.filterField select:focus {
   border-color: var(--accent);
   outline: 3px solid rgba(37, 99, 235, 0.18);
 }
 
+.filterGroup {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 10px;
+  min-width: 0;
+  border: 0;
+}
+
+.filterGroup legend {
+  color: var(--subtle);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.checkboxGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkboxField {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-strong);
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 6px 9px;
+}
+
+.checkboxField input {
+  accent-color: var(--accent);
+}
+
 .searchButton {
+  grid-column: 1 / -1;
+  justify-self: start;
   min-height: 44px;
   border: 0;
   border-radius: 8px;
@@ -237,6 +284,22 @@
   padding: 6px 9px;
 }
 
+.dietaryBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+}
+
+.dietaryBadges li {
+  border-radius: 999px;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 6px 9px;
+}
+
 .state {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -291,10 +354,6 @@
 @media (min-width: 641px) and (max-width: 900px) {
   .filterForm {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .searchButton {
-    grid-column: 1 / -1;
   }
 }
 

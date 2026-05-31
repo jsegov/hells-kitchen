@@ -4,6 +4,7 @@ import {
   getRecipes,
   hasRecipeFilters,
   normalizeRecipeFilters,
+  normalizeRecipeSort,
 } from "../app/recipes/recipeData";
 
 const recipeListItem = {
@@ -16,6 +17,9 @@ const recipeListItem = {
   difficulty: "easy",
   ingredientCount: 5,
   tags: ["italian", "vegetarian", "dinner"],
+  dateAdded: "2024-01-15T10:30:00Z",
+  dietary: ["vegetarian"],
+  allergens: ["dairy", "gluten", "wheat"],
 };
 
 const recipeDetail = {
@@ -27,6 +31,8 @@ const recipeDetail = {
   cookTime: "15 minutes",
   difficulty: "easy",
   tags: ["italian", "vegetarian", "dinner"],
+  dietary: ["vegetarian"],
+  allergens: ["dairy", "gluten", "wheat"],
   instructions: ["Prepare pizza dough with flour"],
   ingredients: [
     {
@@ -66,14 +72,36 @@ test("normalizeRecipeFilters trims and splits strings while ignoring malformed v
       name: "  salad  ",
       tag: ["vegetarian, dinner", "", 7],
       ingredient: null,
+      diet: ["VEGAN", "not-real"],
+      exclude: "tree nuts, peanuts",
     }),
   ).toEqual({
     name: ["salad"],
     tag: ["vegetarian", "dinner"],
     ingredient: [],
+    diet: ["vegan"],
+    exclude: ["tree nuts", "peanuts"],
   });
   expect(hasRecipeFilters({ name: "   " })).toBe(false);
   expect(hasRecipeFilters({ ingredient: "tomato" })).toBe(true);
+  expect(hasRecipeFilters({ diet: "vegetarian" })).toBe(true);
+});
+
+test("normalizeRecipeSort accepts known single values and falls back defensively", () => {
+  expect(
+    normalizeRecipeSort({
+      sort: "DATE-ADDED",
+      order: "DESC",
+    }),
+  ).toEqual({ sort: "date-added", order: "desc" });
+  expect(normalizeRecipeSort({ sort: ["title"], order: "asc" })).toEqual({
+    sort: "curated",
+    order: "asc",
+  });
+  expect(normalizeRecipeSort({ sort: "title", order: "sideways" })).toEqual({
+    sort: "title",
+    order: "asc",
+  });
 });
 
 test("getRecipes returns mapped recipes from the data layer", async () => {
@@ -103,7 +131,22 @@ test("getRecipes forwards filters to the data layer", async () => {
 
   await getRecipes({ filters, dataLayer });
 
-  expect(dataLayer.getRecipeList).toHaveBeenCalledWith(filters);
+  expect(dataLayer.getRecipeList).toHaveBeenCalledWith(filters, undefined);
+});
+
+test("getRecipes forwards sort to the data layer", async () => {
+  const sort = {
+    sort: "title",
+    order: "desc",
+  };
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => []),
+    getRecipeDetail: jest.fn(async () => null),
+  };
+
+  await getRecipes({ sort, dataLayer });
+
+  expect(dataLayer.getRecipeList).toHaveBeenCalledWith(undefined, sort);
 });
 
 test("getRecipes returns a visible error for invalid list items", async () => {

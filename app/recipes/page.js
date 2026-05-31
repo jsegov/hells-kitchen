@@ -6,6 +6,7 @@ import {
   getRecipes,
   hasRecipeFilters,
   normalizeRecipeFilters,
+  normalizeRecipeSort,
 } from "./recipeData";
 import styles from "./page.module.css";
 
@@ -18,9 +19,11 @@ export const metadata = {
  * @param {{ searchParams?: Promise<import("./recipeData").RecipeFilterInput> }} props
  */
 export default async function RecipesPage({ searchParams }) {
-  const filters = normalizeRecipeFilters(await searchParams);
+  const query = await searchParams;
+  const filters = normalizeRecipeFilters(query);
+  const sort = normalizeRecipeSort(query);
   const hasActiveFilters = hasRecipeFilters(filters);
-  const { recipes, error } = await getRecipes({ filters });
+  const { recipes, error } = await getRecipes({ filters, sort });
 
   return (
     <main className={styles.page}>
@@ -29,7 +32,7 @@ export default async function RecipesPage({ searchParams }) {
         recipeCount={recipes.length}
       />
 
-      <RecipeFilters filters={filters} />
+      <RecipeFilters filters={filters} sort={sort} />
 
       {error ? (
         <section className={styles.state} role="alert">

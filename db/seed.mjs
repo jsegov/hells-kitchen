@@ -4,7 +4,7 @@ import { dirname, join } from "node:path";
 
 import { neon } from "@neondatabase/serverless";
 
-import { parseRecipeAmount } from "../lib/recipes.js";
+import { parseDurationMinutes, parseRecipeAmount } from "../lib/recipes.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataPath = join(__dirname, "data.json");
@@ -22,17 +22,6 @@ const toSafeNumber = (value) =>
 
 const toStringArray = (value) =>
   Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
-
-const parseTimeMinutes = (value) => {
-  const match = toSafeString(value).match(/\d+(?:\.\d+)?/);
-
-  if (!match) {
-    return null;
-  }
-
-  const minutes = Number(match[0]);
-  return Number.isFinite(minutes) ? Math.round(minutes) : null;
-};
 
 const getDifficultyRank = (value) =>
   DIFFICULTY_RANKS.get(toSafeString(value).trim().toLowerCase()) ?? null;
@@ -120,8 +109,8 @@ const createSeedQueries = (sql, seedData) => {
         ${toSafeNumber(recipe?.servings)},
         ${toSafeString(recipe?.prepTime)},
         ${toSafeString(recipe?.cookTime)},
-        ${parseTimeMinutes(recipe?.prepTime)},
-        ${parseTimeMinutes(recipe?.cookTime)},
+        ${parseDurationMinutes(recipe?.prepTime)},
+        ${parseDurationMinutes(recipe?.cookTime)},
         ${toSafeString(recipe?.difficulty)},
         ${getDifficultyRank(recipe?.difficulty)},
         ${toStringArray(recipe?.instructions)},

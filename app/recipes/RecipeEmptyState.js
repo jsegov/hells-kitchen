@@ -9,7 +9,7 @@ export default function RecipeEmptyState({ hasActiveFilters }) {
       <h2>{hasActiveFilters ? "No matching recipes" : "No recipes found"}</h2>
       <p>
         {hasActiveFilters
-          ? "Try a different name, tag, or ingredient."
+          ? "Try a different name, tag, ingredient, diet, or allergen filter."
           : "Add recipes to the mock database to see them here."}
       </p>
     </section>

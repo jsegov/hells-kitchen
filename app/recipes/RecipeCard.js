@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatDifficulty } from "./recipeData";
+import { formatDietaryLabel, formatDifficulty } from "./recipeData";
 import styles from "./page.module.css";
 
 /**
@@ -40,6 +40,17 @@ export default function RecipeCard({ recipe }) {
           <ul className={styles.tags} aria-label={`${recipe.title} tags`}>
             {recipe.tags.map((tag) => (
               <li key={tag}>{tag}</li>
+            ))}
+          </ul>
+        ) : null}
+
+        {recipe.dietary?.length ? (
+          <ul
+            className={styles.dietaryBadges}
+            aria-label={`${recipe.title} dietary suitability`}
+          >
+            {recipe.dietary.map((diet) => (
+              <li key={diet}>{formatDietaryLabel(diet)}</li>
             ))}
           </ul>
         ) : null}

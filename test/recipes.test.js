@@ -34,8 +34,11 @@ test("toRecipeListItem maps only list-safe recipe fields", () => {
   }
 
   expect(Object.keys(item).sort()).toEqual([
+    "allergens",
     "cookTime",
+    "dateAdded",
     "description",
+    "dietary",
     "difficulty",
     "id",
     "ingredientCount",
@@ -48,7 +51,9 @@ test("toRecipeListItem maps only list-safe recipe fields", () => {
   expect(item.tags).toEqual(["dinner", "quick"]);
   expect(item).not.toHaveProperty("instructions");
   expect(item).not.toHaveProperty("ingredients");
-  expect(item).not.toHaveProperty("dateAdded");
+  expect(item.dateAdded).toBe("2024-01-01T00:00:00Z");
+  expect(item.dietary).toEqual([]);
+  expect(item.allergens).toEqual([]);
 });
 
 test("toRecipeListItem handles missing array fields defensively", () => {
@@ -190,8 +195,11 @@ test("getRecipeList returns list DTOs from the mock database", async () => {
   expect(recipes[0].title).toBe("Classic Margherita Pizza");
   expect(recipes[0].ingredientCount).toBe(5);
   expect(Object.keys(recipes[0]).sort()).toEqual([
+    "allergens",
     "cookTime",
+    "dateAdded",
     "description",
+    "dietary",
     "difficulty",
     "id",
     "ingredientCount",
@@ -274,8 +282,10 @@ test("getRecipeDetail returns a full recipe detail DTO from the mock database", 
   }
 
   expect(Object.keys(recipe).sort()).toEqual([
+    "allergens",
     "cookTime",
     "description",
+    "dietary",
     "difficulty",
     "id",
     "ingredients",
@@ -287,6 +297,8 @@ test("getRecipeDetail returns a full recipe detail DTO from the mock database", 
     "title",
   ]);
   expect(recipe).not.toHaveProperty("dateAdded");
+  expect(recipe.dietary).toEqual(["vegetarian"]);
+  expect(recipe.allergens).toEqual(["dairy", "gluten", "wheat"]);
   expect(recipe.title).toBe("Classic Margherita Pizza");
   expect(recipe.instructions).toEqual([
     "Prepare pizza dough with flour",

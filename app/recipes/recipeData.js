@@ -1,4 +1,12 @@
 import * as recipeLib from "../../lib/recipes";
+import {
+  ALLERGEN_OPTIONS,
+  DEFAULT_RECIPE_SORT,
+  DIETARY_OPTIONS,
+  RECIPE_SORT_OPTIONS,
+  RECIPE_SORT_ORDERS,
+  getOptionLabel,
+} from "../../lib/recipeOptions";
 
 /**
  * @typedef {object} RecipeListItem
@@ -11,6 +19,9 @@ import * as recipeLib from "../../lib/recipes";
  * @property {string} difficulty
  * @property {number} ingredientCount
  * @property {string[]} tags
+ * @property {string} dateAdded
+ * @property {string[]} dietary
+ * @property {string[]} allergens
  */
 
 /**
@@ -43,6 +54,8 @@ import * as recipeLib from "../../lib/recipes";
  * @property {string[]} tags
  * @property {string[]} instructions
  * @property {RecipeIngredientDetail[]} ingredients
+ * @property {string[]} dietary
+ * @property {string[]} allergens
  * @property {{ total: Nutrition, perServing: Nutrition, missingIngredientIds: string[] }} nutrition
  */
 
@@ -51,6 +64,10 @@ import * as recipeLib from "../../lib/recipes";
  * @property {unknown=} name
  * @property {unknown=} tag
  * @property {unknown=} ingredient
+ * @property {unknown=} diet
+ * @property {unknown=} exclude
+ * @property {unknown=} sort
+ * @property {unknown=} order
  */
 
 /**
@@ -58,13 +75,28 @@ import * as recipeLib from "../../lib/recipes";
  * @property {string[]} name
  * @property {string[]} tag
  * @property {string[]} ingredient
+ * @property {string[]} diet
+ * @property {string[]} exclude
+ */
+
+/**
+ * @typedef {object} RecipeSort
+ * @property {string} sort
+ * @property {string} order
  */
 
 /**
  * @typedef {object} RecipeDataLayer
- * @property {(filters?: RecipeFilterInput) => Promise<unknown[]>} getRecipeList
+ * @property {(filters?: RecipeFilterInput, sort?: RecipeSort) => Promise<unknown[]>} getRecipeList
  * @property {(id: string) => Promise<unknown>} getRecipeDetail
  */
+
+const DIETARY_VALUES = new Set(DIETARY_OPTIONS.map((option) => option.value));
+const ALLERGEN_VALUES = new Set(ALLERGEN_OPTIONS.map((option) => option.value));
+const SORT_VALUES = new Set(RECIPE_SORT_OPTIONS.map((option) => option.value));
+const SORT_ORDER_VALUES = new Set(
+  RECIPE_SORT_ORDERS.map((option) => option.value),
+);
 
 // Trims only — intentionally preserves the user's original casing for the
 // filter input display. The backend (recipes.js toSearchText) lowercases for
@@ -90,6 +122,20 @@ function normalizeFilterValues(value) {
 }
 
 /**
+ * @param {unknown} value
+ * @param {ReadonlySet<string>} allowedValues
+ */
+function normalizeKnownFilterValues(value, allowedValues) {
+  return Array.from(
+    new Set(
+      normalizeFilterValues(value)
+        .map((filterValue) => filterValue.toLowerCase())
+        .filter((filterValue) => allowedValues.has(filterValue)),
+    ),
+  );
+}
+
+/**
  * @param {RecipeFilterInput=} filters
  * @returns {RecipeFilters}
  */
@@ -99,6 +145,8 @@ export function normalizeRecipeFilters(filters = {}) {
       name: [],
       tag: [],
       ingredient: [],
+      diet: [],
+      exclude: [],
     };
   }
 
@@ -106,6 +154,44 @@ export function normalizeRecipeFilters(filters = {}) {
     name: normalizeFilterValues(filters.name),
     tag: normalizeFilterValues(filters.tag),
     ingredient: normalizeFilterValues(filters.ingredient),
+    diet: normalizeKnownFilterValues(filters.diet, DIETARY_VALUES),
+    exclude: normalizeKnownFilterValues(filters.exclude, ALLERGEN_VALUES),
+  };
+}
+
+/**
+ * @param {unknown} value
+ */
+function normalizeSortValue(value) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+/**
+ * @param {RecipeFilterInput=} input
+ * @returns {RecipeSort}
+ */
+export function normalizeRecipeSort(input = {}) {
+  if (!input || typeof input !== "object") {
+    return DEFAULT_RECIPE_SORT;
+  }
+
+  const sortValue = normalizeSortValue(
+    /** @type {{ sort?: unknown }} */ (input).sort,
+  );
+
+  if (!SORT_VALUES.has(sortValue)) {
+    return DEFAULT_RECIPE_SORT;
+  }
+
+  const orderValue = normalizeSortValue(
+    /** @type {{ order?: unknown }} */ (input).order,
+  );
+
+  return {
+    sort: sortValue,
+    order: SORT_ORDER_VALUES.has(orderValue)
+      ? orderValue
+      : DEFAULT_RECIPE_SORT.order,
   };
 }
 
@@ -118,7 +204,9 @@ export function hasRecipeFilters(filters = {}) {
   return (
     normalizedFilters.name.length > 0 ||
     normalizedFilters.tag.length > 0 ||
-    normalizedFilters.ingredient.length > 0
+    normalizedFilters.ingredient.length > 0 ||
+    normalizedFilters.diet.length > 0 ||
+    normalizedFilters.exclude.length > 0
   );
 }
 
@@ -173,7 +261,12 @@ function isRecipeListItem(value) {
     typeof recipe.ingredientCount === "number" &&
     Number.isFinite(recipe.ingredientCount) &&
     Array.isArray(recipe.tags) &&
-    recipe.tags.every((tag) => typeof tag === "string")
+    recipe.tags.every((tag) => typeof tag === "string") &&
+    typeof recipe.dateAdded === "string" &&
+    Array.isArray(recipe.dietary) &&
+    recipe.dietary.every((diet) => typeof diet === "string") &&
+    Array.isArray(recipe.allergens) &&
+    recipe.allergens.every((allergen) => typeof allergen === "string")
   );
 }
 
@@ -246,20 +339,25 @@ function isRecipeDetail(value) {
     ) &&
     Array.isArray(recipe.ingredients) &&
     recipe.ingredients.every(isRecipeIngredientDetail) &&
+    Array.isArray(recipe.dietary) &&
+    recipe.dietary.every((diet) => typeof diet === "string") &&
+    Array.isArray(recipe.allergens) &&
+    recipe.allergens.every((allergen) => typeof allergen === "string") &&
     isRecipeNutritionSummary(recipe.nutrition)
   );
 }
 
 /**
- * @param {{ filters?: RecipeFilterInput, dataLayer?: RecipeDataLayer }} [options]
+ * @param {{ filters?: RecipeFilterInput, sort?: RecipeSort, dataLayer?: RecipeDataLayer }} [options]
  * @returns {Promise<{ recipes: RecipeListItem[], error: string | null }>}
  */
 export async function getRecipes({
   filters,
+  sort,
   dataLayer = /** @type {RecipeDataLayer} */ (recipeLib),
 } = {}) {
   try {
-    const data = await dataLayer.getRecipeList(filters);
+    const data = await dataLayer.getRecipeList(filters, sort);
 
     if (!Array.isArray(data) || !data.every(isRecipeListItem)) {
       return {
@@ -339,4 +437,18 @@ export function formatDifficulty(difficulty) {
   return (
     normalizedDifficulty.charAt(0).toUpperCase() + normalizedDifficulty.slice(1)
   );
+}
+
+/**
+ * @param {string} value
+ */
+export function formatDietaryLabel(value) {
+  return getOptionLabel(DIETARY_OPTIONS, value);
+}
+
+/**
+ * @param {string} value
+ */
+export function formatAllergenLabel(value) {
+  return getOptionLabel(ALLERGEN_OPTIONS, value);
 }

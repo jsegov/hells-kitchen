@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import RecipeDetail from "../app/recipes/[id]/RecipeDetail";
 
 const recipe = {
@@ -10,6 +10,8 @@ const recipe = {
   cookTime: "15 minutes",
   difficulty: "easy",
   tags: ["italian", "vegetarian", "dinner"],
+  dietary: ["vegetarian"],
+  allergens: ["dairy", "gluten", "wheat"],
   instructions: [
     "Prepare pizza dough with flour",
     "Spread tomato sauce",
@@ -74,7 +76,7 @@ test("renders recipe detail hero and navigation", () => {
   expect(screen.getByText("Easy")).toBeInTheDocument();
   expect(screen.getByText("20 minutes")).toBeInTheDocument();
   expect(screen.getByText("15 minutes")).toBeInTheDocument();
-  expect(screen.getByText("4")).toBeInTheDocument();
+  expect(screen.getAllByText("4").length).toBeGreaterThan(0);
 });
 
 test("renders ingredients, instructions, tags, and nutrition", () => {
@@ -86,10 +88,23 @@ test("renders ingredients, instructions, tags, and nutrition", () => {
   expect(within(tags).getByText("italian")).toBeInTheDocument();
   expect(within(tags).getByText("vegetarian")).toBeInTheDocument();
   expect(within(tags).getByText("dinner")).toBeInTheDocument();
+  expect(
+    within(
+      screen.getByRole("list", {
+        name: "Classic Margherita Pizza dietary suitability",
+      }),
+    ).getByText("Vegetarian"),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/Dairy, Gluten, Wheat/)).toBeInTheDocument();
+  expect(
+    screen.getByText(/Always verify ingredients yourself/),
+  ).toBeInTheDocument();
 
-  const ingredients = screen.getByRole("heading", {
-    name: "Ingredients",
-  }).parentElement;
+  const ingredients = screen
+    .getByRole("heading", {
+      name: "Ingredients",
+    })
+    .closest("section");
   expect(ingredients).not.toBeNull();
   if (!ingredients) {
     throw new Error("Expected ingredients section.");
@@ -121,4 +136,19 @@ test("renders ingredients, instructions, tags, and nutrition", () => {
   ).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "Total" })).toBeInTheDocument();
   expect(screen.getByText("Nutrition excludes Basil.")).toBeInTheDocument();
+});
+
+test("rescales ingredients and nutrition from one serving control", () => {
+  render(<RecipeDetail recipe={recipe} />);
+
+  fireEvent.change(screen.getByLabelText("Target servings"), {
+    target: { value: "8" },
+  });
+
+  expect(screen.getByText("4 cups")).toBeInTheDocument();
+  expect(screen.getByText("20 leaves")).toBeInTheDocument();
+
+  const totalNutrition = screen.getByRole("region", { name: "Total" });
+  expect(within(totalNutrition).getByText("100")).toBeInTheDocument();
+  expect(within(totalNutrition).getByText("6g")).toBeInTheDocument();
 });

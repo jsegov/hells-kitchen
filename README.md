@@ -104,3 +104,45 @@ npm run check:full # Full deploy/PR gate combining all of the above
    - A link to a deployed version of the application (bonus points)
 
 Good luck! We're excited to see your implementation.
+
+## Candidate Notes
+
+#### Setup instructions
+
+No new setup requirements were added. Use the existing commands documented above.
+
+#### Implementation choices
+
+- Advanced list features share one `getRecipeList(filters, sort)` contract across the in-memory repository, Neon-backed repository, API route, and `/recipes` page.
+- Sort keys are defensively normalized and mapped to whitelisted SQL expressions; in-memory sorting uses matching parsers/comparators with nulls sorted last and stable curated-order tie breaks.
+- Dietary suitability is derived from ingredient metadata rather than recipe tags. Vegan ingredients imply vegetarian suitability; positive diet claims fail closed when ingredient metadata is missing.
+- Allergen exclusion uses exact tokens, not substring matching, and missing ingredient metadata fails safe when an allergen exclusion is active.
+- Serving-size scaling lives in a browser-safe pure math module and one client component that owns the target serving count for both ingredient quantities and nutrition totals.
+
+#### Completed features
+
+- Sorting by curated order, title, prep time, cook time, difficulty, servings, and date added, with ascending/descending order.
+- Dietary filters for vegetarian, vegan, gluten-free, keto, and high-protein.
+- Allergen exclusion for dairy, eggs, fish, gluten, nuts, peanuts, sesame, shellfish, soy, tree nuts, and wheat.
+- Derived dietary badges on recipe cards and detail pages.
+- Detail-page allergen summary with a verification note.
+- Serving-size control with presets and numeric input that scales ingredients and nutrition together.
+- Additional unit/render/API/DB coverage for sorting, dietary derivation, allergen filtering, and serving-size math.
+
+#### Assumptions
+
+- Recipe scaling is linear. Seasoning, leavening, and cook times still require cook judgment.
+- Current seed data is small enough that dietary/allergen post-filtering after SQL text filtering is appropriate and keeps derivation logic shared.
+- The hardcoded diet/allergen option lists intentionally define the public filter surface; tests guard against seed-data drift.
+
+#### Known limitations or bugs
+
+- Ingredient amounts that are ambiguous or not safely parseable, such as ranges or mixed numbers, are displayed unchanged during scaling.
+- Nutrition scaling starts from the validated recipe total exposed by the data layer, which is already rounded to one decimal place.
+- Allergen handling is informational and should not be treated as a medical safety guarantee.
+
+#### Additional features with more time
+
+- Parent/child allergen rules, such as optionally expanding nuts into peanuts and tree nuts.
+- Persisted favorite recipes or saved filter presets.
+- A shopping-list generator that combines scaled ingredients across selected recipes.
