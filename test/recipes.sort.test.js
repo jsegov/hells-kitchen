@@ -95,6 +95,34 @@ test("sorts recipes by whitelisted fields with nulls last", () => {
   ).toEqual(["Alpha", "Beta", "Charlie"]);
 });
 
+test("sorts missing servings last for in-memory sort parity", () => {
+  const data = {
+    ...sortData,
+    recipes: [
+      {
+        ...sortData.recipes[0],
+        id: "missing",
+        title: "Missing",
+        servings: undefined,
+      },
+      {
+        ...sortData.recipes[1],
+        id: "invalid",
+        title: "Invalid",
+        servings: Number.NaN,
+      },
+      { ...sortData.recipes[2], id: "one", title: "One", servings: 1 },
+      { ...sortData.recipes[0], id: "two", title: "Two", servings: 2 },
+    ],
+  };
+
+  expect(
+    toRecipeListItems(data, {}, { sort: "servings", order: "asc" }).map(
+      (recipe) => recipe.title,
+    ),
+  ).toEqual(["One", "Two", "Missing", "Invalid"]);
+});
+
 test("repository accepts the shared filters plus sort contract", async () => {
   const { getRecipeList } = createRecipeRepository(async () => sortData);
 
