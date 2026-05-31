@@ -1,13 +1,22 @@
 import {
-  DEFAULT_API_BASE_URL,
   formatDifficulty,
   getRecipe,
-  getRecipeUrl,
   getRecipes,
-  getRecipesUrl,
   hasRecipeFilters,
   normalizeRecipeFilters,
 } from "../app/recipes/recipeData";
+
+const recipeListItem = {
+  id: "1",
+  title: "Classic Margherita Pizza",
+  description: "Traditional Italian pizza with fresh basil",
+  servings: 4,
+  prepTime: "20 minutes",
+  cookTime: "15 minutes",
+  difficulty: "easy",
+  ingredientCount: 5,
+  tags: ["italian", "vegetarian", "dinner"],
+};
 
 const recipeDetail = {
   id: "1",
@@ -51,34 +60,6 @@ const recipeDetail = {
   },
 };
 
-test("getRecipesUrl builds the list API URL from the default base URL", () => {
-  expect(getRecipesUrl()).toBe(`${DEFAULT_API_BASE_URL}/api/recipes`);
-});
-
-test("getRecipesUrl handles a configured base URL with a trailing slash", () => {
-  expect(getRecipesUrl("http://example.test/")).toBe(
-    "http://example.test/api/recipes",
-  );
-});
-
-test("getRecipeUrl builds an encoded detail API URL", () => {
-  expect(getRecipeUrl("recipe with/slash", "http://example.test/")).toBe(
-    "http://example.test/api/recipes/recipe%20with%2Fslash",
-  );
-});
-
-test("getRecipesUrl encodes active recipe filters", () => {
-  expect(
-    getRecipesUrl("http://example.test/", {
-      name: " Pizza ",
-      tag: "vegetarian, dinner",
-      ingredient: "diced tomatoes",
-    }),
-  ).toBe(
-    "http://example.test/api/recipes?name=Pizza&tag=vegetarian&tag=dinner&ingredient=diced+tomatoes",
-  );
-});
-
 test("normalizeRecipeFilters trims and splits strings while ignoring malformed values", () => {
   expect(
     normalizeRecipeFilters({
@@ -95,84 +76,62 @@ test("normalizeRecipeFilters trims and splits strings while ignoring malformed v
   expect(hasRecipeFilters({ ingredient: "tomato" })).toBe(true);
 });
 
-test("getRecipes fetches recipes with no-store caching", async () => {
-  const recipeList = [
-    {
-      id: "1",
-      title: "Classic Margherita Pizza",
-      description: "Traditional Italian pizza with fresh basil",
-      servings: 4,
-      prepTime: "20 minutes",
-      cookTime: "15 minutes",
-      difficulty: "easy",
-      ingredientCount: 5,
-      tags: ["italian", "vegetarian", "dinner"],
-    },
-  ];
-  const fetchImpl = jest.fn(async () => ({
-    ok: true,
-    json: async () => recipeList,
-  }));
+test("getRecipes returns mapped recipes from the data layer", async () => {
+  const recipeList = [recipeListItem];
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => recipeList),
+    getRecipeDetail: jest.fn(async () => null),
+  };
 
-  const result = await getRecipes({
-    apiBaseUrl: "http://api.test",
-    fetchImpl,
-  });
+  const result = await getRecipes({ dataLayer });
 
-  expect(fetchImpl).toHaveBeenCalledWith("http://api.test/api/recipes", {
-    cache: "no-store",
-  });
   expect(result).toEqual({
     recipes: recipeList,
     error: null,
   });
 });
 
-test("getRecipes fetches filtered recipes with no-store caching", async () => {
-  const fetchImpl = jest.fn(async () => ({
-    ok: true,
-    json: async () => [],
-  }));
+test("getRecipes forwards filters to the data layer", async () => {
+  const filters = {
+    name: "Greek Salad",
+    ingredient: "feta",
+  };
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => []),
+    getRecipeDetail: jest.fn(async () => null),
+  };
 
-  await getRecipes({
-    apiBaseUrl: "http://api.test",
-    filters: {
-      name: "Greek Salad",
-      ingredient: "feta",
-    },
-    fetchImpl,
-  });
+  await getRecipes({ filters, dataLayer });
 
-  expect(fetchImpl).toHaveBeenCalledWith(
-    "http://api.test/api/recipes?name=Greek+Salad&ingredient=feta",
-    {
-      cache: "no-store",
-    },
-  );
+  expect(dataLayer.getRecipeList).toHaveBeenCalledWith(filters);
 });
 
-test("getRecipes returns a visible error for non-2xx responses", async () => {
-  const result = await getRecipes({
-    fetchImpl: async () => ({
-      ok: false,
-      status: 503,
-      json: async () => [],
-    }),
-  });
+test("getRecipes returns a visible error for invalid list items", async () => {
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => [
+      {
+        ...recipeListItem,
+        tags: ["italian", 42],
+      },
+    ]),
+    getRecipeDetail: jest.fn(async () => null),
+  };
+
+  const result = await getRecipes({ dataLayer });
 
   expect(result).toEqual({
     recipes: [],
-    error: "Unable to load recipes (503)",
+    error: "Invalid data format received from the recipe service.",
   });
 });
 
 test("getRecipes returns a visible error for non-array payloads", async () => {
-  const result = await getRecipes({
-    fetchImpl: async () => ({
-      ok: true,
-      json: async () => ({ recipes: [] }),
-    }),
-  });
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => /** @type {any} */ ({ recipes: [] })),
+    getRecipeDetail: jest.fn(async () => null),
+  };
+
+  const result = await getRecipes({ dataLayer });
 
   expect(result).toEqual({
     recipes: [],
@@ -180,75 +139,31 @@ test("getRecipes returns a visible error for non-array payloads", async () => {
   });
 });
 
-test("getRecipes returns a visible error for invalid list items", async () => {
-  const result = await getRecipes({
-    fetchImpl: async () => ({
-      ok: true,
-      json: async () => [
-        {
-          id: "1",
-          title: "Classic Margherita Pizza",
-          description: "Traditional Italian pizza with fresh basil",
-          servings: 4,
-          prepTime: "20 minutes",
-          cookTime: "15 minutes",
-          difficulty: "easy",
-          ingredientCount: 5,
-          tags: ["italian", 42],
-        },
-      ],
+test("getRecipes returns a service error when the data layer throws", async () => {
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => {
+      throw new Error("boom");
     }),
-  });
+    getRecipeDetail: jest.fn(async () => null),
+  };
+
+  const result = await getRecipes({ dataLayer });
 
   expect(result).toEqual({
     recipes: [],
-    error: "Invalid data format received from the recipe service.",
+    error: "Unable to load recipes.",
   });
 });
 
-test("getRecipes returns a data format error when JSON parsing fails", async () => {
-  const result = await getRecipes({
-    fetchImpl: async () => ({
-      ok: true,
-      json: async () => {
-        throw new SyntaxError("Unexpected end of JSON input");
-      },
-    }),
-  });
+test("getRecipe returns a recipe detail from the data layer", async () => {
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => []),
+    getRecipeDetail: jest.fn(async () => recipeDetail),
+  };
 
-  expect(result).toEqual({
-    recipes: [],
-    error: "Invalid data format received from the recipe service.",
-  });
-});
+  const result = await getRecipe("1", { dataLayer });
 
-test("getRecipes returns a service error when fetch throws", async () => {
-  const result = await getRecipes({
-    fetchImpl: async () => {
-      throw new Error("connection refused");
-    },
-  });
-
-  expect(result).toEqual({
-    recipes: [],
-    error: "Unable to reach the recipe service.",
-  });
-});
-
-test("getRecipe fetches a recipe detail with no-store caching", async () => {
-  const fetchImpl = jest.fn(async () => ({
-    ok: true,
-    json: async () => recipeDetail,
-  }));
-
-  const result = await getRecipe("1", {
-    apiBaseUrl: "http://api.test",
-    fetchImpl,
-  });
-
-  expect(fetchImpl).toHaveBeenCalledWith("http://api.test/api/recipes/1", {
-    cache: "no-store",
-  });
+  expect(dataLayer.getRecipeDetail).toHaveBeenCalledWith("1");
   expect(result).toEqual({
     recipe: recipeDetail,
     error: null,
@@ -256,14 +171,13 @@ test("getRecipe fetches a recipe detail with no-store caching", async () => {
   });
 });
 
-test("getRecipe returns a not found result for 404 responses", async () => {
-  const result = await getRecipe("not-real", {
-    fetchImpl: async () => ({
-      ok: false,
-      status: 404,
-      json: async () => ({ error: "Recipe not found" }),
-    }),
-  });
+test("getRecipe returns a not found result when the data layer returns null", async () => {
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => []),
+    getRecipeDetail: jest.fn(async () => null),
+  };
+
+  const result = await getRecipe("not-real", { dataLayer });
 
   expect(result).toEqual({
     recipe: null,
@@ -272,29 +186,16 @@ test("getRecipe returns a not found result for 404 responses", async () => {
   });
 });
 
-test("getRecipe returns a visible error for non-404 failed responses", async () => {
-  const result = await getRecipe("1", {
-    fetchImpl: async () => ({
-      ok: false,
-      status: 503,
-      json: async () => [],
-    }),
-  });
-
-  expect(result).toEqual({
-    recipe: null,
-    error: "Unable to load recipe (503)",
-    notFound: false,
-  });
-});
-
 test("getRecipe returns a visible error for invalid detail payloads", async () => {
-  const result = await getRecipe("1", {
-    fetchImpl: async () => ({
-      ok: true,
-      json: async () => ({ id: "1", title: "Missing fields" }),
-    }),
-  });
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => []),
+    getRecipeDetail: jest.fn(async () => ({
+      id: "1",
+      title: "Missing fields",
+    })),
+  };
+
+  const result = await getRecipe("1", { dataLayer });
 
   expect(result).toEqual({
     recipe: null,
@@ -303,33 +204,19 @@ test("getRecipe returns a visible error for invalid detail payloads", async () =
   });
 });
 
-test("getRecipe returns a data format error when JSON parsing fails", async () => {
-  const result = await getRecipe("1", {
-    fetchImpl: async () => ({
-      ok: true,
-      json: async () => {
-        throw new SyntaxError("Unexpected end of JSON input");
-      },
+test("getRecipe returns a service error when the data layer throws", async () => {
+  const dataLayer = {
+    getRecipeList: jest.fn(async () => []),
+    getRecipeDetail: jest.fn(async () => {
+      throw new Error("boom");
     }),
-  });
+  };
+
+  const result = await getRecipe("1", { dataLayer });
 
   expect(result).toEqual({
     recipe: null,
-    error: "Invalid data format received from the recipe service.",
-    notFound: false,
-  });
-});
-
-test("getRecipe returns a service error when fetch throws", async () => {
-  const result = await getRecipe("1", {
-    fetchImpl: async () => {
-      throw new Error("connection refused");
-    },
-  });
-
-  expect(result).toEqual({
-    recipe: null,
-    error: "Unable to reach the recipe service.",
+    error: "Unable to load the recipe.",
     notFound: false,
   });
 });

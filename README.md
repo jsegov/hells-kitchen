@@ -5,12 +5,12 @@ Create a recipe management application that allows users to view, search, and or
 
 ## Current Implementation
 
-- The app is implemented with a Next.js App Router frontend in `frontend-app` and an Express backend in `backend-app`.
+- The app is a single Next.js App Router application in `frontend-app`. Its JSON API is served by Next.js Route Handlers (the original Express `backend-app` has been folded in).
 - `/` redirects to `/recipes`.
 - `/recipes` displays recipe list cards and supports filtering by recipe name, tags, and ingredients through query parameters.
 - `/recipes/:id` displays ingredients with quantities, cooking instructions, tags, and nutrition totals/per-serving values calculated from ingredients.
-- The backend exposes `GET /api/recipes` for list-safe recipe data and `GET /api/recipes/:id` for full recipe detail data.
-- The mock database is `backend-app/db/data.json`.
+- Next.js Route Handlers expose `GET /api/recipes` for list-safe recipe data and `GET /api/recipes/:id` for full recipe detail data. Server Components call the same data layer (`frontend-app/lib/recipes.js`) directly, with no internal HTTP hop.
+- The mock database is `frontend-app/db/data.json`.
 
 ## Tips
 - Use whatever frameworks/tools you're most comfortable with
@@ -20,39 +20,30 @@ Create a recipe management application that allows users to view, search, and or
 
 ## Setup Instructions
 
-#### Backend setup
-```
-cd backend-app
-npm ci
-npm run dev # Starts express server on port 8080
-```
-
-#### Frontend setup
+#### Setup
 ```
 cd frontend-app
 npm ci
-npm run dev # Starts nextjs frontend server on port 3000, or the next available port
+npm run dev # Starts the Next.js app (pages + API) on port 3000, or the next available port
 ```
 
 #### Database setup
 ```
-The application uses `backend-app/db/data.json` as a mock database
+The application uses `frontend-app/db/data.json` as a mock database
 ```
 
 #### Environment variables
 
-- `API_BASE_URL`: frontend server-side API base URL. Defaults to `http://localhost:8080`.
-- `CORS_ORIGIN`: optional comma-separated backend CORS allowlist. Defaults to local frontend origins on ports `3000` and `3001`; use `*` to allow any origin.
+No environment variables are required for local development. (`API_BASE_URL` and `CORS_ORIGIN` are obsolete now that the API runs in-process within the Next.js app — there is no cross-service URL and no CORS.)
 
 #### Quality gates
 
 ```
-cd backend-app && npm run check
 cd frontend-app && npm run check
 cd frontend-app && npm run build
 ```
 
-**Note: This implementation uses the provided Next.js + Express scaffold.**
+**Note: The original Next.js + Express scaffold has been consolidated into a single Next.js app; the Express backend was folded into Route Handlers.**
 
 ## Requirements
 
