@@ -4,7 +4,6 @@ import RecipeFilters from "./RecipeFilters";
 import RecipeCard from "./RecipeCard";
 import RecipePageHeader from "./RecipePageHeader";
 import {
-  formatAllergenLabel,
   formatDietaryLabel,
   formatTagLabel,
   getRecipeFacets,
@@ -13,7 +12,11 @@ import {
   normalizeRecipeFilters,
   normalizeRecipeSort,
 } from "./recipeData";
-import { DEFAULT_RECIPE_SORT, toSortToken } from "../../lib/recipeOptions";
+import {
+  DEFAULT_RECIPE_SORT,
+  formatAllergenFreeLabel,
+  toSortToken,
+} from "../../lib/recipeOptions";
 import styles from "./page.module.css";
 
 export const metadata = {
@@ -106,7 +109,7 @@ function buildActiveChips(filters, facets, sortToken) {
   }
 
   for (const value of filters.exclude) {
-    push("exclude", "Exclude", value, formatAllergenLabel(value));
+    push("exclude", "Free from", value, formatAllergenFreeLabel(value));
   }
 
   return chips;

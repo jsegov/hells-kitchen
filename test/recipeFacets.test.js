@@ -22,13 +22,39 @@ test("derives facet vocabularies from the catalog and static lists", async () =>
 
   expect(facets.tags).toHaveLength(22);
   expect(facets.ingredients).toHaveLength(53);
-  expect(facets.diets).toHaveLength(5);
-  expect(facets.allergens).toHaveLength(11);
+  // Diets/allergens are narrowed to tokens the catalog actually carries.
+  expect(facets.diets).toHaveLength(3);
+  expect(facets.allergens).toHaveLength(9);
 
   // Ingredient options are keyed by id but labeled by name.
   expect(facets.ingredients.find((o) => o.value === "tomato")?.label).toBe(
     "Diced Tomatoes",
   );
+});
+
+test("omits diet/allergen options no recipe carries", async () => {
+  const facets = await getRecipeFacets({});
+  const dietValues = facets.diets.map((o) => o.value);
+  const allergenValues = facets.allergens.map((o) => o.value);
+
+  // keto/high-protein match nothing; every recipe is already peanut-free.
+  expect(dietValues).toEqual(["vegetarian", "vegan", "gluten-free"]);
+  expect(allergenValues).not.toContain("keto");
+  expect(allergenValues).not.toContain("peanuts");
+
+  // The "Gluten-free" diet already expresses gluten avoidance, so the
+  // free-from facet drops gluten to avoid a duplicate control.
+  expect(allergenValues).not.toContain("gluten");
+});
+
+test("labels allergen options as a positive 'free from' attribute", async () => {
+  const facets = await getRecipeFacets({});
+  /** @param {string} value */
+  const byValue = (value) => facets.allergens.find((o) => o.value === value);
+
+  expect(byValue("dairy")?.label).toBe("Dairy-free");
+  expect(byValue("eggs")?.label).toBe("Egg-free");
+  expect(byValue("tree nuts")?.label).toBe("Tree nut-free");
 });
 
 test("counts are drill-down (results if you also pick the option)", async () => {

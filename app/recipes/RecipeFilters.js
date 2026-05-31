@@ -67,7 +67,9 @@ function FacetGroup({ legend, name, options, selected, searchable = false }) {
       ) : null}
 
       <div
-        className={searchable ? styles.facetScroll : styles.facetChips}
+        className={`${styles.facetChips}${
+          searchable ? ` ${styles.facetChipsScroll}` : ""
+        }`}
         role="group"
         aria-label={legend}
       >
@@ -317,7 +319,7 @@ export default function RecipeFilters({ filters, sort, facets, resultCount }) {
             selected={filters.diet}
           />
           <FacetGroup
-            legend="Exclude allergens"
+            legend="Free from"
             name="exclude"
             options={facets.allergens}
             selected={filters.exclude}

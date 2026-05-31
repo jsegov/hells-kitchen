@@ -25,7 +25,7 @@ const facets = {
   tags: [{ value: "italian", label: "Italian", count: 2 }],
   ingredients: [{ value: "tomato", label: "Diced Tomatoes", count: 2 }],
   diets: [{ value: "vegetarian", label: "Vegetarian", count: 5 }],
-  allergens: [{ value: "peanuts", label: "Peanuts", count: 1 }],
+  allergens: [{ value: "dairy", label: "Dairy-free", count: 1 }],
 };
 
 test("renders the search box, single sort dropdown, and facet chips", () => {
@@ -36,7 +36,7 @@ test("renders the search box, single sort dropdown, and facet chips", () => {
         tag: [],
         ingredient: ["tomato"],
         diet: ["vegetarian"],
-        exclude: ["peanuts"],
+        exclude: ["dairy"],
       }}
       sort={{ sort: "title", order: "asc" }}
       facets={facets}
@@ -55,7 +55,7 @@ test("renders the search box, single sort dropdown, and facet chips", () => {
   expect(screen.getByLabelText("Sort")).toHaveValue("title-asc");
 
   expect(screen.getByRole("checkbox", { name: /Vegetarian/ })).toBeChecked();
-  expect(screen.getByRole("checkbox", { name: /Peanuts/ })).toBeChecked();
+  expect(screen.getByRole("checkbox", { name: /Dairy-free/ })).toBeChecked();
   expect(
     screen.getByRole("checkbox", { name: /Diced Tomatoes/ }),
   ).toBeChecked();

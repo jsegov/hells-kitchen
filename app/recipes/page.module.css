@@ -120,18 +120,23 @@
 
 .facetGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
 }
 
+/* Every facet shares one bordered card so the four groups read as the same
+   kind of control; only the long (searchable) groups add a search box. */
 .facet {
   display: grid;
   min-width: 0;
-  gap: 8px;
-  border: 0;
+  gap: 10px;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  padding: 12px;
 }
 
 .facet legend {
+  padding: 0;
   color: var(--subtle);
   font-size: 0.72rem;
   font-weight: 700;
@@ -140,7 +145,7 @@
 
 .facetSearch {
   width: 100%;
-  min-height: 38px;
+  min-height: 34px;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   background: var(--surface);
@@ -157,34 +162,28 @@
 .facetChips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-content: flex-start;
+  gap: 6px;
 }
 
-.facetScroll {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: 8px;
-  max-height: 176px;
+.facetChipsScroll {
+  max-height: 156px;
   overflow-y: auto;
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-  padding: 8px;
 }
 
 .toggleChip {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  min-height: 34px;
+  gap: 6px;
+  min-height: 30px;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
   background: var(--surface);
   color: var(--text-strong);
   cursor: pointer;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 4px 10px;
   user-select: none;
 }
 
@@ -208,7 +207,7 @@
 }
 
 .facetCount {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   opacity: 0.7;
 }
