@@ -1,4 +1,7 @@
-import { getRecipeIngredientAmountInGrams } from "../lib/recipes";
+import {
+  getRecipeIngredientAmountInGrams,
+  normalizeNutritionUnit,
+} from "../lib/recipes";
 
 const per100gIngredient = {
   id: "test",
@@ -64,6 +67,14 @@ test("uses ingredient-specific weights for volume and count units", () => {
       per100gIngredient,
     ),
   ).toEqual({ converted: true, grams: 5 });
+});
+
+test("normalizes unit aliases shared by runtime conversion and seed data", () => {
+  expect(normalizeNutritionUnit("Cups")).toBe("cup");
+  expect(normalizeNutritionUnit("tablespoons")).toBe("tbsp");
+  expect(normalizeNutritionUnit("oz.")).toBe("oz");
+  expect(normalizeNutritionUnit("leaves")).toBe("leaf");
+  expect(normalizeNutritionUnit("pinch")).toBe("");
 });
 
 test("refuses to guess unconvertible amounts", () => {

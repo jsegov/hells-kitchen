@@ -4,7 +4,11 @@ import { dirname, join } from "node:path";
 
 import { neon } from "@neondatabase/serverless";
 
-import { parseDurationMinutes, parseRecipeAmount } from "../lib/recipes.js";
+import {
+  normalizeNutritionUnit,
+  parseDurationMinutes,
+  parseRecipeAmount,
+} from "../lib/recipes.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataPath = join(__dirname, "data.json");
@@ -31,10 +35,11 @@ const toUnitWeightsJson = (value) => {
   const unitWeights = {};
 
   for (const [unit, weight] of Object.entries(value)) {
+    const normalizedUnit = normalizeNutritionUnit(unit);
     const numericWeight = Number(weight);
 
-    if (unit && Number.isFinite(numericWeight) && numericWeight > 0) {
-      unitWeights[unit] = numericWeight;
+    if (normalizedUnit && Number.isFinite(numericWeight) && numericWeight > 0) {
+      unitWeights[normalizedUnit] = numericWeight;
     }
   }
 

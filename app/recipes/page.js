@@ -124,10 +124,9 @@ export default async function RecipesPage({ searchParams }) {
   const sort = normalizeRecipeSort(query);
   const sortToken = toSortToken(sort);
   const hasActiveFilters = hasRecipeFilters(filters);
-  const [{ recipes, error }, { facets }] = await Promise.all([
-    getRecipes({ filters, sort }),
-    getRecipeFacets({ filters }),
-  ]);
+  const [{ recipes, error }, { facets, error: facetError }] = await Promise.all(
+    [getRecipes({ filters, sort }), getRecipeFacets({ filters })],
+  );
   const activeChips = buildActiveChips(filters, facets, sortToken);
 
   return (
@@ -146,6 +145,13 @@ export default async function RecipesPage({ searchParams }) {
 
       {!error ? (
         <ActiveFilterChips chips={activeChips} clearHref="/recipes" />
+      ) : null}
+
+      {facetError ? (
+        <section className={styles.state} role="alert">
+          <h2>Recipe filters are unavailable</h2>
+          <p>{facetError}</p>
+        </section>
       ) : null}
 
       {error ? (
