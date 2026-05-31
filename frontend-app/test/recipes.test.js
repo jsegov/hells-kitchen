@@ -1,10 +1,10 @@
-const {
+import {
   getRecipeDetail,
   getRecipeList,
   toRecipeDetail,
   toRecipeListItem,
   toRecipeListItems,
-} = require("../src/recipes");
+} from "../lib/recipes";
 
 test("toRecipeListItem maps only list-safe recipe fields", () => {
   const item = toRecipeListItem({

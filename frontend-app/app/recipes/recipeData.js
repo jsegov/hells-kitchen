@@ -1,4 +1,4 @@
-export const DEFAULT_API_BASE_URL = "http://localhost:8080";
+import * as recipeLib from "../../lib/recipes";
 
 /**
  * @typedef {object} RecipeListItem
@@ -47,17 +47,6 @@ export const DEFAULT_API_BASE_URL = "http://localhost:8080";
  */
 
 /**
- * @typedef {object} RecipesResponse
- * @property {boolean} ok
- * @property {number=} status
- * @property {() => Promise<unknown>} json
- */
-
-/**
- * @typedef {(url: string, options: { cache: "no-store" }) => Promise<RecipesResponse>} RecipesFetch
- */
-
-/**
  * @typedef {object} RecipeFilterInput
  * @property {unknown=} name
  * @property {unknown=} tag
@@ -72,11 +61,10 @@ export const DEFAULT_API_BASE_URL = "http://localhost:8080";
  */
 
 /**
- * @param {string=} apiBaseUrl
+ * @typedef {object} RecipeDataLayer
+ * @property {(filters?: RecipeFilterInput) => Promise<unknown[]>} getRecipeList
+ * @property {(id: string) => Promise<unknown>} getRecipeDetail
  */
-function getApiBaseUrl(apiBaseUrl = process.env.API_BASE_URL) {
-  return (apiBaseUrl || DEFAULT_API_BASE_URL).replace(/\/$/, "");
-}
 
 // Trims only — intentionally preserves the user's original casing for the
 // filter input display. The backend (recipes.js toSearchText) lowercases for
@@ -132,47 +120,6 @@ export function hasRecipeFilters(filters = {}) {
     normalizedFilters.tag.length > 0 ||
     normalizedFilters.ingredient.length > 0
   );
-}
-
-/**
- * @param {RecipeFilterInput=} filters
- */
-function getRecipesQueryString(filters = {}) {
-  const normalizedFilters = normalizeRecipeFilters(filters);
-  const params = new URLSearchParams();
-
-  for (const value of normalizedFilters.name) {
-    params.append("name", value);
-  }
-
-  for (const value of normalizedFilters.tag) {
-    params.append("tag", value);
-  }
-
-  for (const value of normalizedFilters.ingredient) {
-    params.append("ingredient", value);
-  }
-
-  return params.toString();
-}
-
-/**
- * @param {string=} apiBaseUrl
- * @param {RecipeFilterInput=} filters
- */
-export function getRecipesUrl(apiBaseUrl = process.env.API_BASE_URL, filters) {
-  const recipesUrl = `${getApiBaseUrl(apiBaseUrl)}/api/recipes`;
-  const queryString = getRecipesQueryString(filters);
-
-  return queryString ? `${recipesUrl}?${queryString}` : recipesUrl;
-}
-
-/**
- * @param {string} id
- * @param {string=} apiBaseUrl
- */
-export function getRecipeUrl(id, apiBaseUrl = process.env.API_BASE_URL) {
-  return `${getApiBaseUrl(apiBaseUrl)}/api/recipes/${encodeURIComponent(id)}`;
 }
 
 /**
@@ -304,35 +251,15 @@ function isRecipeDetail(value) {
 }
 
 /**
- * @param {{ apiBaseUrl?: string, filters?: RecipeFilterInput, fetchImpl?: RecipesFetch }} [options]
+ * @param {{ filters?: RecipeFilterInput, dataLayer?: RecipeDataLayer }} [options]
  * @returns {Promise<{ recipes: RecipeListItem[], error: string | null }>}
  */
 export async function getRecipes({
-  apiBaseUrl,
   filters,
-  fetchImpl = /** @type {RecipesFetch} */ (globalThis.fetch),
+  dataLayer = /** @type {RecipeDataLayer} */ (recipeLib),
 } = {}) {
   try {
-    const response = await fetchImpl(getRecipesUrl(apiBaseUrl, filters), {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      return {
-        recipes: [],
-        error: `Unable to load recipes (${response.status})`,
-      };
-    }
-
-    let data;
-    try {
-      data = await response.json();
-    } catch {
-      return {
-        recipes: [],
-        error: "Invalid data format received from the recipe service.",
-      };
-    }
+    const data = await dataLayer.getRecipeList(filters);
 
     if (!Array.isArray(data) || !data.every(isRecipeListItem)) {
       return {
@@ -345,55 +272,31 @@ export async function getRecipes({
       recipes: /** @type {RecipeListItem[]} */ (data),
       error: null,
     };
-  } catch (error) {
+  } catch {
     return {
       recipes: [],
-      error: "Unable to reach the recipe service.",
+      error: "Unable to load recipes.",
     };
   }
 }
 
 /**
  * @param {string} id
- * @param {{ apiBaseUrl?: string, fetchImpl?: RecipesFetch }} [options]
+ * @param {{ dataLayer?: RecipeDataLayer }} [options]
  * @returns {Promise<{ recipe: RecipeDetail | null, error: string | null, notFound: boolean }>}
  */
 export async function getRecipe(
   id,
-  {
-    apiBaseUrl,
-    fetchImpl = /** @type {RecipesFetch} */ (globalThis.fetch),
-  } = {},
+  { dataLayer = /** @type {RecipeDataLayer} */ (recipeLib) } = {},
 ) {
   try {
-    const response = await fetchImpl(getRecipeUrl(id, apiBaseUrl), {
-      cache: "no-store",
-    });
+    const data = await dataLayer.getRecipeDetail(id);
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return {
-          recipe: null,
-          error: null,
-          notFound: true,
-        };
-      }
-
+    if (data === null || data === undefined) {
       return {
         recipe: null,
-        error: `Unable to load recipe (${response.status})`,
-        notFound: false,
-      };
-    }
-
-    let data;
-    try {
-      data = await response.json();
-    } catch {
-      return {
-        recipe: null,
-        error: "Invalid data format received from the recipe service.",
-        notFound: false,
+        error: null,
+        notFound: true,
       };
     }
 
@@ -406,14 +309,14 @@ export async function getRecipe(
     }
 
     return {
-      recipe: data,
+      recipe: /** @type {RecipeDetail} */ (data),
       error: null,
       notFound: false,
     };
   } catch {
     return {
       recipe: null,
-      error: "Unable to reach the recipe service.",
+      error: "Unable to load the recipe.",
       notFound: false,
     };
   }
