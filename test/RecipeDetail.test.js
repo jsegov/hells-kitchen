@@ -77,7 +77,9 @@ test("renders recipe detail hero and navigation", () => {
   expect(screen.getByText("Easy")).toBeInTheDocument();
   expect(screen.getByText("20 minutes")).toBeInTheDocument();
   expect(screen.getByText("15 minutes")).toBeInTheDocument();
-  expect(screen.getAllByText("4").length).toBeGreaterThan(0);
+  // Yield is no longer duplicated in the header; the serving control is the
+  // single source of truth and defaults to the recipe's base servings.
+  expect(screen.getByLabelText("Target servings")).toHaveValue(4);
 });
 
 test("renders ingredients, instructions, tags, and nutrition", () => {

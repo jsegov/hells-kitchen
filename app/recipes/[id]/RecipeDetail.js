@@ -90,7 +90,6 @@ export default function RecipeDetail({ recipe }) {
             />
             <Metric label="Prep" value={recipe.prepTime} />
             <Metric label="Cook" value={recipe.cookTime} />
-            <Metric label="Serves" value={recipe.servings} />
           </dl>
         </header>
 
