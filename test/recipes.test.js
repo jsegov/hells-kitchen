@@ -76,6 +76,36 @@ test("toRecipeListItem handles missing array fields defensively", () => {
   expect(item.ingredientCount).toBe(0);
 });
 
+test("toRecipeListItem can reuse a precomputed dietary profile", () => {
+  const item = toRecipeListItem(
+    {
+      id: "recipe-profile",
+      title: "Profile Recipe",
+      description: "A recipe with a reusable profile",
+      servings: 2,
+      prepTime: "5 minutes",
+      cookTime: "0 minutes",
+      difficulty: "easy",
+      ingredients: [{ ingredientId: "milk", amount: "1", unit: "cup" }],
+      tags: [],
+    },
+    new Map(),
+    {
+      dietary: ["vegetarian"],
+      allergens: ["dairy"],
+      hasMissingIngredients: false,
+    },
+  );
+
+  expect(item).not.toBeNull();
+  if (!item) {
+    throw new Error("Expected a mapped recipe list item.");
+  }
+
+  expect(item.dietary).toEqual(["vegetarian"]);
+  expect(item.allergens).toEqual(["dairy"]);
+});
+
 test("toRecipeListItem normalizes non-string difficulty values", () => {
   const item = toRecipeListItem({
     id: "recipe-3",
