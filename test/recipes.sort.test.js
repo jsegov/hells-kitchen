@@ -88,6 +88,7 @@ test("normalizes the combined sort token from the single dropdown", () => {
 test("parses duration strings for in-memory sort parity", () => {
   expect(parseDurationMinutes("0 minutes")).toBe(0);
   expect(parseDurationMinutes("1 hour 15 minutes")).toBe(75);
+  expect(parseDurationMinutes("1h30m")).toBe(90);
   expect(parseDurationMinutes("90")).toBe(90);
   expect(parseDurationMinutes("")).toBeNull();
 });

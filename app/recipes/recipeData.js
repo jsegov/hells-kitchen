@@ -1,12 +1,8 @@
 import * as recipeLib from "../../lib/recipes";
 import {
   ALLERGEN_OPTIONS,
-  DEFAULT_RECIPE_SORT,
   DIETARY_OPTIONS,
-  RECIPE_SORT_OPTIONS,
-  RECIPE_SORT_ORDERS,
   getOptionLabel,
-  splitSortToken,
 } from "../../lib/recipeOptions";
 
 /**
@@ -110,10 +106,6 @@ import {
 
 const DIETARY_VALUES = new Set(DIETARY_OPTIONS.map((option) => option.value));
 const ALLERGEN_VALUES = new Set(ALLERGEN_OPTIONS.map((option) => option.value));
-const SORT_VALUES = new Set(RECIPE_SORT_OPTIONS.map((option) => option.value));
-const SORT_ORDER_VALUES = new Set(
-  RECIPE_SORT_ORDERS.map((option) => option.value),
-);
 
 // Trims only — intentionally preserves the user's original casing for the
 // filter input display. The backend (recipes.js toSearchText) lowercases for
@@ -177,41 +169,11 @@ export function normalizeRecipeFilters(filters = {}) {
 }
 
 /**
- * @param {unknown} value
- */
-function normalizeSortValue(value) {
-  return typeof value === "string" ? value.trim().toLowerCase() : "";
-}
-
-/**
  * @param {RecipeFilterInput=} input
  * @returns {RecipeSort}
  */
 export function normalizeRecipeSort(input = {}) {
-  if (!input || typeof input !== "object") {
-    return DEFAULT_RECIPE_SORT;
-  }
-
-  // The sort dropdown submits a combined `${sort}-${order}` token; fall back to
-  // legacy separate `sort`/`order` params for back-compat (matches lib/recipes).
-  const rawSort = /** @type {{ sort?: unknown }} */ (input).sort;
-  const combined = splitSortToken(rawSort);
-  const sortValue = combined ? combined.sort : normalizeSortValue(rawSort);
-
-  if (!SORT_VALUES.has(sortValue)) {
-    return DEFAULT_RECIPE_SORT;
-  }
-
-  const orderValue = combined
-    ? combined.order
-    : normalizeSortValue(/** @type {{ order?: unknown }} */ (input).order);
-
-  return {
-    sort: sortValue,
-    order: SORT_ORDER_VALUES.has(orderValue)
-      ? orderValue
-      : DEFAULT_RECIPE_SORT.order,
-  };
+  return recipeLib.normalizeRecipeListSort(input);
 }
 
 /**
