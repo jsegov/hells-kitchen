@@ -2,7 +2,7 @@
 
 Implementation plan to take this local-only app (separate Express API + Next.js frontend, `data.json` "database") to a single Vercel deployment backed by **Neon Postgres**, while preserving the existing defensive-mapping architecture and leaving clear runway for the README's "advanced features."
 
-> **Status:** plan only. No application code has been changed. Steps are ordered so each phase ends at a deployable, working state.
+> **Status:** Phase 1 is complete and Phase 2 is implemented in this working tree. Phase 3+ remain planned. Steps are ordered so each phase ends at a deployable, working state.
 
 ---
 
@@ -37,13 +37,13 @@ flowchart LR
 
 ## 2. Phase overview
 
-| Phase | Outcome | Deployable at end? |
-|------|---------|--------------------|
-| **0. Prep** | Accounts, CLI, repo root decision | n/a |
-| **1. Consolidate to one Next app** (still JSON-backed) | API moved into Next route handlers; CORS dropped; tests moved | ✅ single Vercel project, no DB |
-| **2. Add Neon + swap data source** | `getData()` reads Postgres; mappers/tests unchanged | ✅ Postgres-backed, identical behavior |
-| **3. Query-ability + caching** | Filters/sort pushed into SQL with indexes; ISR/`unstable_cache` | ✅ scalable + cached |
-| **4. Feature enablement (future)** | Hooks for favorites (writes/auth), pgvector (LLM), shopping list | incremental |
+| Phase                                                  | Outcome                                                          | Deployable at end?                     |
+| ------------------------------------------------------ | ---------------------------------------------------------------- | -------------------------------------- |
+| **0. Prep**                                            | Accounts, CLI, repo root decision                                | n/a                                    |
+| **1. Consolidate to one Next app** (still JSON-backed) | API moved into Next route handlers; CORS dropped; tests moved    | ✅ single Vercel project, no DB        |
+| **2. Add Neon + swap data source**                     | `getData()` reads Postgres; mappers/tests unchanged              | ✅ Postgres-backed, identical behavior |
+| **3. Query-ability + caching**                         | Filters/sort pushed into SQL with indexes; ISR/`unstable_cache`  | ✅ scalable + cached                   |
+| **4. Feature enablement (future)**                     | Hooks for favorites (writes/auth), pgvector (LLM), shopping list | incremental                            |
 
 Each phase is independently shippable. You can stop after Phase 1 and already have a working Vercel deployment.
 
@@ -53,7 +53,7 @@ Each phase is independently shippable. You can stop after Phase 1 and already ha
 
 - [ ] Vercel account + **Vercel CLI** (`npm i -g vercel`, min v47.0.5 for current Express/`vercel dev` support).
 - [ ] GitHub repo connected to Vercel (enables preview deployments).
-- [ ] Decide the **Vercel "Root Directory"**: set it to `frontend-app` in Project Settings (the Next app becomes the deployment root; `backend-app` is consumed/retired during Phase 1).
+- [ ] Leave the Vercel project root as the repository root; `backend-app` has already been consumed/retired.
 - [ ] Node 20+ locally (Neon serverless driver needs Node 19+).
 
 ---
@@ -64,11 +64,11 @@ Goal: a single Next.js app that serves the same API and pages, with **no behavio
 
 ### 4.1 Move the data logic into the Next app
 
-- Create `frontend-app/lib/recipes.js` from `backend-app/src/recipes.js`.
+- Create `lib/recipes.js` from `backend-app/src/recipes.js`.
   - Convert **CommonJS → ESM** (`require`→`import`, `module.exports`→`export`).
   - Keep every mapper/normalizer **unchanged** (`toRecipeListItem`, `toRecipeDetail`, `toIngredientMap`, `parseRecipeAmount`, nutrition math, filter helpers).
   - Keep `getData()` as the **only** data-access seam — for now it still reads JSON.
-- Move the data file: `backend-app/db/data.json` → `frontend-app/db/data.json` (becomes the seed source in Phase 2). Update the path in `getData()`.
+- Move the data file: `backend-app/db/data.json` → `db/data.json` (becomes the seed source in Phase 2). Update the path in `getData()`.
 
 > ⚠️ Reading a file at runtime on Vercel works only if it's traced into the bundle. This is a **temporary** Phase-1 state; Phase 2 removes file reads entirely. (If you want Phase 1 to be robust on Vercel, `import data from "../db/data.json"` instead of `fs.readFile`.)
 
@@ -76,7 +76,8 @@ Goal: a single Next.js app that serves the same API and pages, with **no behavio
 
 Create thin handlers that mirror `backend-app/src/server.js`:
 
-- `frontend-app/app/api/recipes/route.js`
+- `app/api/recipes/route.js`
+
   ```js
   import { NextResponse } from "next/server";
   import { getRecipeList } from "@/lib/recipes";
@@ -91,11 +92,16 @@ Create thin handlers that mirror `backend-app/src/server.js`:
       };
       return NextResponse.json(await getRecipeList(filters));
     } catch {
-      return NextResponse.json({ error: "Failed to fetch recipes" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch recipes" },
+        { status: 500 },
+      );
     }
   }
   ```
-- `frontend-app/app/api/recipes/[id]/route.js`
+
+- `app/api/recipes/[id]/route.js`
+
   ```js
   import { NextResponse } from "next/server";
   import { getRecipeDetail } from "@/lib/recipes";
@@ -103,17 +109,24 @@ Create thin handlers that mirror `backend-app/src/server.js`:
   export async function GET(_request, { params }) {
     try {
       const recipe = await getRecipeDetail(params.id);
-      if (!recipe) return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
+      if (!recipe)
+        return NextResponse.json(
+          { error: "Recipe not found" },
+          { status: 404 },
+        );
       return NextResponse.json(recipe);
     } catch {
-      return NextResponse.json({ error: "Failed to fetch recipe" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch recipe" },
+        { status: 500 },
+      );
     }
   }
   ```
 
 ### 4.3 Point the frontend at the in-process data layer
 
-Refactor `frontend-app/app/recipes/recipeData.js`:
+Refactor `app/recipes/recipeData.js`:
 
 - Replace the `fetch(API_BASE_URL/api/recipes...)` calls with **direct calls** to `lib/recipes.js` (`getRecipeList`, `getRecipeDetail`).
 - **Keep** the `{ recipes, error }` / `{ recipe, error, notFound }` return contracts so the pages (`app/recipes/page.js`, `app/recipes/[id]/page.js`) need **no changes**.
@@ -130,7 +143,7 @@ Refactor `frontend-app/app/recipes/recipeData.js`:
 
 ### 4.5 Move the tests
 
-- Port `backend-app/test/recipes.test.js` → `frontend-app/test/` (Jest is already configured in `frontend-app`). Update imports to the ESM `lib/recipes.js`. These are **pure-function tests** (no DB), so they move verbatim aside from import syntax.
+- Port `backend-app/test/recipes.test.js` → `test/` (Jest is configured at the repository root). Update imports to the ESM `lib/recipes.js`. These are **pure-function tests** (no DB), so they move verbatim aside from import syntax.
 - Add route-handler tests if desired (call the exported `GET` with a mock `Request`).
 
 ### 4.6 Retire the backend package
@@ -139,7 +152,7 @@ Refactor `frontend-app/app/recipes/recipeData.js`:
 
 ### 4.7 Verify & deploy (Phase 1 gate)
 
-- [ ] `cd frontend-app && npm run check` (typecheck + lint + format + tests) passes.
+- [ ] `npm run check` (typecheck + lint + format + tests) passes.
 - [ ] `npm run build` succeeds.
 - [ ] `vercel dev` locally: `/recipes`, `/recipes/:id`, filtering, not-found, and `/api/recipes*` all behave as before.
 - [ ] `vercel deploy` (preview) → smoke test the live URL.
@@ -148,40 +161,73 @@ Refactor `frontend-app/app/recipes/recipeData.js`:
 
 ## 5. Phase 2 — Add Neon Postgres and swap the data source
 
-Goal: replace `getData()`'s file read with Postgres queries that return the **identical `{ recipes, ingredients }` shape**. Everything downstream (mappers, filters, nutrition, validators, tests) stays unchanged. This is the literal "swap only the data source" step.
+Goal: replace `getData()`'s file read with Postgres queries that return the **identical `{ recipes, ingredients }` shape**. Everything downstream still receives the same DTO source shape, and Phase 3 remains responsible for pushing filters/caching deeper into SQL.
 
-### 5.1 Provision Neon via Vercel
+Research checked 2026-05-31 against official Vercel and Neon docs:
 
-- [ ] Vercel Dashboard → project → **Storage** → add **Neon** (Marketplace, Vercel-managed integration → billing inside Vercel).
-- [ ] Enable **Preview Branching** (each preview deployment gets an isolated DB branch).
-- [ ] Confirm injected env vars: `DATABASE_URL` (pooled, PgBouncer), `DATABASE_URL_UNPOOLED` (direct), plus `PG*` components.
-- [ ] Pull locally: `vercel env pull frontend-app/.env.local`. For local dev, use a **Neon dev branch** (the HTTP driver connects from anywhere).
+- Vercel Marketplace storage integrations provision resources from the dashboard and inject connection credentials as environment variables.
+- For a new database managed in Vercel, use the **Vercel-Managed Neon Integration**. It supports Preview Branching and creates a Neon project under the Vercel-managed Neon organization.
+- Preview Branching injects branch-specific env vars at deployment time; those dynamic preview values may not appear in the project's regular Environment Variables settings.
+- The Neon serverless **HTTP** driver is the right runtime default for this app's one-shot reads. It supports non-interactive transactions; use WebSocket `Pool`/`Client` only if a later feature needs session state or interactive transactions.
+
+### 5.1 Confirm Vercel + Neon wiring
+
+- [x] Neon database resource created in the Vercel dashboard for the `hells-kitchen` project (per current project status).
+- [ ] In Vercel Dashboard → project → **Storage**, confirm the Neon database is connected to this project for **Development**, **Preview**, and **Production** environments.
+- [ ] Under the Neon storage connection's deployment configuration, enable **Preview Branching** and keep **Resource must be active before deployment** enabled so preview builds wait for their database branch.
+- [ ] Confirm injected env vars in the connected environments: `DATABASE_URL` (pooled), `DATABASE_URL_UNPOOLED` (direct), and the optional `PG*` components.
+- [ ] Link/pull locally from the repository root:
+
+  ```bash
+  vercel link
+  vercel env pull .env.local --yes
+  ```
+
+- [ ] Verify local env without printing secrets:
+
+  ```bash
+  node --env-file=.env.local -e "for (const k of ['DATABASE_URL','DATABASE_URL_UNPOOLED']) console.log(k, process.env[k] ? 'set' : 'missing')"
+  ```
+
+`.env.local` remains untracked. Re-run `vercel env pull .env.local --yes` after changing the storage connection or environment scopes.
 
 ### 5.2 Add the driver
 
 ```bash
-cd frontend-app
 npm i @neondatabase/serverless
 ```
 
-Create `frontend-app/lib/db.js`:
+Create `lib/db.js` with lazy initialization. This avoids failing `next build` or tests just because the module was imported before `DATABASE_URL` was available.
+
 ```js
 import { neon } from "@neondatabase/serverless";
 
-// HTTP driver: ideal for serverless route handlers / Server Components.
-// No connection pool to exhaust under Fluid compute concurrency.
-export const sql = neon(process.env.DATABASE_URL);
+/** @type {ReturnType<typeof neon> | null} */
+let cachedSql = null;
+
+export function getSql() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is required to query Neon Postgres.");
+  }
+
+  if (!cachedSql) {
+    cachedSql = neon(process.env.DATABASE_URL);
+  }
+
+  return cachedSql;
+}
 ```
 
-> **Driver guidance.** Use the **HTTP** driver (`neon()`) for app reads — lowest latency, one-shot queries, non-interactive `transaction()` helper. Only reach for the **WebSocket** `Pool`/`Client` if you later need *interactive* transactions (open→use→close within one request handler). Use **`DATABASE_URL_UNPOOLED`** for migrations/seed (DDL + bulk insert); use pooled `DATABASE_URL`/HTTP for runtime.
+> **Driver guidance.** Use the **HTTP** driver (`neon()`) for app reads — lowest latency, one-shot queries, non-interactive `transaction()` helper. Only reach for the **WebSocket** `Pool`/`Client` if you later need _interactive_ transactions (open→use→close within one request handler). Use **`DATABASE_URL_UNPOOLED`** for migrations/seed (DDL + bulk insert); use pooled `DATABASE_URL`/HTTP for runtime.
 
 ### 5.3 Schema
 
-`frontend-app/db/schema.sql`:
+Create `db/schema.sql`. Keep this schema intentionally close to `db/data.json`: normalized enough for future SQL queries, but still tolerant of malformed recipe ingredient references.
+
 ```sql
 CREATE EXTENSION IF NOT EXISTS pg_trgm;   -- trigram index for name search
 
-CREATE TABLE ingredients (
+CREATE TABLE IF NOT EXISTS ingredients (
   id         TEXT PRIMARY KEY,
   name       TEXT    NOT NULL,
   category   TEXT    NOT NULL DEFAULT '',
@@ -193,7 +239,7 @@ CREATE TABLE ingredients (
   allergens  TEXT[]  NOT NULL DEFAULT '{}'
 );
 
-CREATE TABLE recipes (
+CREATE TABLE IF NOT EXISTS recipes (
   id                TEXT PRIMARY KEY,
   title             TEXT    NOT NULL,
   description       TEXT    NOT NULL DEFAULT '',
@@ -212,7 +258,7 @@ CREATE TABLE recipes (
 -- ingredient_id is intentionally NOT a foreign key: the app treats data as
 -- possibly-malformed and surfaces unresolved refs via nutrition.missingIngredientIds.
 -- A strict FK would forbid the "missing ingredient" cases the mappers/tests handle.
-CREATE TABLE recipe_ingredients (
+CREATE TABLE IF NOT EXISTS recipe_ingredients (
   recipe_id     TEXT    NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
   position      INTEGER NOT NULL,                  -- preserves order
   ingredient_id TEXT    NOT NULL DEFAULT '',
@@ -222,79 +268,137 @@ CREATE TABLE recipe_ingredients (
   PRIMARY KEY (recipe_id, position)
 );
 
-CREATE INDEX idx_recipes_tags        ON recipes           USING GIN (tags);
-CREATE INDEX idx_recipes_title_trgm  ON recipes           USING GIN (title gin_trgm_ops);
-CREATE INDEX idx_ingredients_dietary ON ingredients       USING GIN (dietary);
-CREATE INDEX idx_ri_recipe           ON recipe_ingredients (recipe_id);
-CREATE INDEX idx_ri_ingredient       ON recipe_ingredients (ingredient_id);
+CREATE INDEX IF NOT EXISTS idx_recipes_tags        ON recipes           USING GIN (tags);
+CREATE INDEX IF NOT EXISTS idx_recipes_title_trgm  ON recipes           USING GIN (title gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_ingredients_dietary ON ingredients       USING GIN (dietary);
+CREATE INDEX IF NOT EXISTS idx_ri_recipe           ON recipe_ingredients (recipe_id);
+CREATE INDEX IF NOT EXISTS idx_ri_ingredient       ON recipe_ingredients (ingredient_id);
 ```
 
-Run it (direct connection):
+Run it with the direct connection string pulled from `.env.local`:
+
 ```bash
-psql "$DATABASE_URL_UNPOOLED" -f frontend-app/db/schema.sql
+psql "$(node --env-file=.env.local -p "process.env.DATABASE_URL_UNPOOLED")" -v ON_ERROR_STOP=1 -f db/schema.sql
 ```
 
 > ORM is optional. Plain parameterized SQL via the Neon driver fits the existing "defensive mapping" style and adds no deps. If you later want typed queries, **Drizzle** is the lightweight choice — but its schema files are TypeScript, which cuts against this repo's "JSDoc-typed JS, no `.ts` source" convention, so plain SQL is the more in-keeping default here.
 
 ### 5.4 Seed from `data.json`
 
-`frontend-app/db/seed.mjs` — reads `db/data.json` and inserts. Reuse the existing parsing where possible:
-- `amount_value` ← reuse `parseRecipeAmount` (handles `"1/2"`, decimals).
+Create `db/seed.mjs`. It should read `db/data.json`, then insert rows in this order: `ingredients` → `recipes` → `recipe_ingredients`.
+
+- Use `fs/promises` to read `data.json`; do not rely on experimental JSON imports.
+- Use `neon(process.env.DATABASE_URL_UNPOOLED)` inside the seed script.
+- Reuse `parseRecipeAmount` from `lib/recipes.js` for `amount_value` (handles `"1/2"`, decimals, and numbers).
 - `prep_time_minutes` / `cook_time_minutes` ← small `"20 minutes" → 20` parser.
 - `difficulty_rank` ← `{ easy:1, medium:2, hard:3 }`.
 - `dietary` / `allergens` ← `ingredient.dietary` / `ingredient.commonAllergens`.
-- Make it **idempotent** (`TRUNCATE ... RESTART IDENTITY CASCADE` then insert, or `INSERT ... ON CONFLICT DO UPDATE`), wrapped in a transaction via the unpooled connection.
+- Make it idempotent for the take-home seed DB: `TRUNCATE recipe_ingredients, recipes, ingredients RESTART IDENTITY CASCADE`, then insert everything in a transaction.
+- Log only row counts, never connection strings.
 
-Add scripts to `frontend-app/package.json`:
+Add scripts to `package.json`. The `--env-file-if-exists` form keeps local usage convenient while allowing Vercel Preview builds to use dynamically injected Neon branch env vars:
+
 ```json
-"db:migrate": "psql \"$DATABASE_URL_UNPOOLED\" -f db/schema.sql",
-"db:seed": "node --env-file=.env.local db/seed.mjs"
+"db:migrate": "node --env-file-if-exists=.env.local db/migrate.mjs",
+"db:seed": "node --env-file-if-exists=.env.local db/seed.mjs",
+"db:reset": "npm run db:migrate && npm run db:seed"
 ```
+
+Do not put destructive seed/reset commands into the long-term Vercel build command once user-written data exists. For Phase 2's seed-only catalog, preview deploys can run `db:reset` before `next build` so each Vercel-created Neon preview branch is schema-current and seeded.
 
 ### 5.5 Swap `getData()` to Postgres
 
-In `lib/recipes.js`, replace only the body of `getData()` so it returns the same shape the mappers already expect:
+In `lib/recipes.js`, remove the JSON import and replace only the data-source body so it returns the same shape the mappers already expect:
+
 ```js
-import { sql } from "./db.js";
+import { getSql } from "./db.js";
 
 async function getData() {
-  const [ingredients, recipes, recipeIngredients] = await Promise.all([
-    sql`SELECT id, name, category, calories, protein, carbs, fat, dietary, allergens FROM ingredients`,
-    sql`SELECT id, title, description, servings, prep_time, cook_time, difficulty,
+  const sql = getSql();
+  const [ingredients, recipes, recipeIngredients] = await sql.transaction(
+    [
+      sql`SELECT id, name, category, calories, protein, carbs, fat, dietary, allergens FROM ingredients`,
+      sql`SELECT id, title, description, servings, prep_time, cook_time, difficulty,
                instructions, tags, date_added FROM recipes ORDER BY date_added DESC NULLS LAST`,
-    sql`SELECT recipe_id, ingredient_id, amount, unit FROM recipe_ingredients ORDER BY recipe_id, position`,
-  ]);
+      sql`SELECT recipe_id, ingredient_id, amount, unit FROM recipe_ingredients ORDER BY recipe_id, position`,
+    ],
+    { readOnly: true },
+  );
 
   // Reassemble the exact { recipes:[{...ingredients:[{ingredientId,amount,unit}]}], ingredients:[...] } shape.
   const byRecipe = new Map();
   for (const ri of recipeIngredients) {
     if (!byRecipe.has(ri.recipe_id)) byRecipe.set(ri.recipe_id, []);
-    byRecipe.get(ri.recipe_id).push({ ingredientId: ri.ingredient_id, amount: ri.amount, unit: ri.unit });
+    byRecipe.get(ri.recipe_id).push({
+      ingredientId: ri.ingredient_id,
+      amount: ri.amount,
+      unit: ri.unit,
+    });
   }
   return {
     ingredients: ingredients.map((i) => ({
-      id: i.id, name: i.name, category: i.category,
-      nutrition: { calories: +i.calories, protein: +i.protein, carbs: +i.carbs, fat: +i.fat },
-      dietary: i.dietary, commonAllergens: i.allergens,
+      id: i.id,
+      name: i.name,
+      category: i.category,
+      nutrition: {
+        calories: +i.calories,
+        protein: +i.protein,
+        carbs: +i.carbs,
+        fat: +i.fat,
+      },
+      dietary: i.dietary,
+      commonAllergens: i.allergens,
     })),
     recipes: recipes.map((r) => ({
-      id: r.id, title: r.title, description: r.description, servings: r.servings,
-      prepTime: r.prep_time, cookTime: r.cook_time, difficulty: r.difficulty,
-      instructions: r.instructions, tags: r.tags, dateAdded: r.date_added,
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      servings: r.servings,
+      prepTime: r.prep_time,
+      cookTime: r.cook_time,
+      difficulty: r.difficulty,
+      instructions: r.instructions,
+      tags: r.tags,
+      dateAdded:
+        typeof r.date_added === "string"
+          ? r.date_added
+          : (r.date_added?.toISOString?.() ?? ""),
       ingredients: byRecipe.get(r.id) ?? [],
     })),
   };
 }
 ```
+
 Everything else in `lib/recipes.js` (mappers, filters, nutrition) is **unchanged**. NUMERICs come back as strings from the driver → coerce with `+` (shown above) so `toSafeNumber` sees numbers.
 
-### 5.6 Verify & deploy (Phase 2 gate)
+### 5.6 Preserve testability
+
+Current tests include both pure mapper coverage and higher-level `getRecipeList()` / `getRecipeDetail()` / Route Handler coverage. After the data-source swap, those higher-level tests would hit Neon unless Phase 2 adds a seam.
+
+Recommended minimal seam:
+
+- Add `createRecipeRepository(readData)` in `lib/recipes.js`.
+- Keep public `getRecipeList` / `getRecipeDetail` using `createRecipeRepository(getData)` for runtime.
+- Update unit tests that assert seeded JSON behavior to call `createRecipeRepository(async () => recipeDatabase)` so default `npm test` stays fast and offline.
+- Move live Neon coverage into `test/recipes.postgres.test.js`, gated by `RUN_DB_TESTS=1` and required `DATABASE_URL`.
+- Either gate `test/api-recipes.test.js` with the DB tests or mock `lib/recipes.js` there; do not let the default route-handler tests require a live database unexpectedly.
+
+The DB integration test should verify at least:
+
+- `getRecipeList()` returns 15 recipes and preserves existing ordering.
+- `getRecipeList({ name: "PIZZA" })`, tag filters, ingredient filters, and combined filters match the current expectations.
+- `getRecipeDetail("1")` returns the same first ingredient and total/per-serving nutrition values as the JSON-backed contract.
+- `getRecipeDetail("not-real")` returns `null`.
+
+### 5.7 Verify & deploy (Phase 2 gate)
 
 - [ ] `npm run db:migrate && npm run db:seed` against a Neon dev branch.
-- [ ] Pure-function tests still green (they don't touch the DB).
-- [ ] Add **one integration test** that runs `getRecipeList()` / `getRecipeDetail()` against a seeded Neon test/preview branch (verifies the reassembly + coercion).
+- [ ] `npm run check` passes without requiring a live DB.
+- [ ] `RUN_DB_TESTS=1 npm test -- recipes.postgres.test.js` passes against the seeded Neon branch.
+- [ ] `npm run build` succeeds with `DATABASE_URL` present.
 - [ ] `vercel dev` → pages + `/api/recipes*` identical to Phase 1.
-- [ ] Deploy preview (gets its own Neon branch) → smoke test.
+- [ ] Seed the production Neon branch once before the first production deploy, or confirm the preview branch is copied from an already-seeded parent.
+- [ ] Deploy preview (gets its own Neon branch); the preview-only Vercel build command runs `npm run db:reset` before `npm run build`. Smoke test `/recipes`, `/recipes/1`, filters, not-found, and `/api/recipes*`.
 
 ---
 
@@ -318,14 +422,17 @@ Build the WHERE clause from normalized filter terms with parameterized fragments
 ### 6.2 Nutrition as SQL (optional optimization)
 
 The detail-page nutrition (join recipe ingredients × ingredient nutrition, scale by `amount_value`, sum, divide by servings) can become a SQL aggregation:
+
 ```sql
 SUM(i.calories * ri.amount_value) AS total_calories  -- etc., GROUP BY recipe
 ```
+
 with `missingIngredientIds` from `LEFT JOIN ... WHERE i.id IS NULL`. **Optional** — the JS `toRecipeDetail` math already works on the reassembled shape; only move it to SQL if profiling warrants.
 
 ### 6.3 Caching (replace `cache: "no-store"`)
 
 Now that data comes from direct DB calls (not `fetch`), cache with `unstable_cache` + tags:
+
 ```js
 import { unstable_cache } from "next/cache";
 export const getRecipeListCached = unstable_cache(
@@ -334,6 +441,7 @@ export const getRecipeListCached = unstable_cache(
   { revalidate: 3600, tags: ["recipes"] },
 );
 ```
+
 - Set `export const revalidate = 3600` on `app/recipes/page.js` and the detail page (ISR).
 - On future writes (favorites, admin edits), call `revalidateTag("recipes")` to invalidate immediately.
 - Keep dynamic only what must be (e.g. per-user favorite state once auth exists).
@@ -350,21 +458,22 @@ export const getRecipeListCached = unstable_cache(
 
 The schema is intentionally ready for the README's "Example advanced features." Each lands on Postgres with no new infrastructure:
 
-| Feature | What to add | Notes |
-|--------|-------------|-------|
-| **Dietary filters** (veg/vegan/GF) | Query `ingredients.dietary` (GIN-indexed); a recipe qualifies iff **all** its ingredients qualify | Data already seeded (`dietary`, `allergens`) |
-| **Sorting** (prep time, difficulty) | `ORDER BY prep_time_minutes` / `difficulty_rank` | Sortable columns already in schema |
-| **Calorie calculator / scaling** | Pure compute on existing nutrition + `servings` | No schema change |
-| **Favoriting / saving** | `favorites(user_id, recipe_id)` table + identity (**Neon Auth** or auth provider); `revalidateTag` on write | First feature that **requires writes** — the core reason for Postgres over Edge Config |
-| **Shopping list** | `GROUP BY ingredient, SUM(amount_value)` across selected recipes; optional `shopping_lists` table to persist | Aggregation query |
-| **LLM feature** | `CREATE EXTENSION vector;` (**pgvector**, Neon-supported) for embeddings → semantic search / "what can I cook with X"; store generated content | One extension, same DB |
-| **Types** | Already via JSDoc; an ORM would infer from schema | Optional |
+| Feature                             | What to add                                                                                                                                    | Notes                                                                                  |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Dietary filters** (veg/vegan/GF)  | Query `ingredients.dietary` (GIN-indexed); a recipe qualifies iff **all** its ingredients qualify                                              | Data already seeded (`dietary`, `allergens`)                                           |
+| **Sorting** (prep time, difficulty) | `ORDER BY prep_time_minutes` / `difficulty_rank`                                                                                               | Sortable columns already in schema                                                     |
+| **Calorie calculator / scaling**    | Pure compute on existing nutrition + `servings`                                                                                                | No schema change                                                                       |
+| **Favoriting / saving**             | `favorites(user_id, recipe_id)` table + identity (**Neon Auth** or auth provider); `revalidateTag` on write                                    | First feature that **requires writes** — the core reason for Postgres over Edge Config |
+| **Shopping list**                   | `GROUP BY ingredient, SUM(amount_value)` across selected recipes; optional `shopping_lists` table to persist                                   | Aggregation query                                                                      |
+| **LLM feature**                     | `CREATE EXTENSION vector;` (**pgvector**, Neon-supported) for embeddings → semantic search / "what can I cook with X"; store generated content | One extension, same DB                                                                 |
+| **Types**                           | Already via JSDoc; an ORM would infer from schema                                                                                              | Optional                                                                               |
 
 ---
 
 ## 8. File-by-file change map
 
-**New (in `frontend-app/`):**
+**New at the repository root:**
+
 - `lib/recipes.js` — ported data logic + mappers (from `backend-app/src/recipes.js`).
 - `lib/db.js` — Neon HTTP client.
 - `app/api/recipes/route.js`, `app/api/recipes/[id]/route.js` — route handlers.
@@ -373,11 +482,13 @@ The schema is intentionally ready for the README's "Example advanced features." 
 - `test/recipes.test.js` — moved unit tests; new integration + route-handler tests.
 
 **Modified:**
+
 - `app/recipes/recipeData.js` — direct data-layer calls; keep `{data,error}` contracts + validators; drop URL builders.
 - `package.json` — add `@neondatabase/serverless`; add `db:migrate` / `db:seed`.
 - `README.md` / `CLAUDE.md` — single-app setup, env vars, DB steps.
 
 **Removed:**
+
 - `backend-app/` (entire Express package, incl. `server.js`, `cors.js`).
 - `CORS_ORIGIN`, `API_BASE_URL` (internal) usage.
 
@@ -385,15 +496,15 @@ The schema is intentionally ready for the README's "Example advanced features." 
 
 ## 9. Environment variables (final state)
 
-| Var | Source | Use |
-|-----|--------|-----|
-| `DATABASE_URL` | Neon integration (pooled) | App runtime queries (HTTP driver) |
-| `DATABASE_URL_UNPOOLED` | Neon integration (direct) | Migrations + seed (DDL/bulk) |
-| `PGHOST` / `PGUSER` / `PGDATABASE` / `PGPASSWORD` | Neon integration | Optional raw access |
-| ~~`CORS_ORIGIN`~~ | removed | n/a after fold |
-| ~~`API_BASE_URL`~~ | removed | n/a after fold |
+| Var                                               | Source                    | Use                               |
+| ------------------------------------------------- | ------------------------- | --------------------------------- |
+| `DATABASE_URL`                                    | Neon integration (pooled) | App runtime queries (HTTP driver) |
+| `DATABASE_URL_UNPOOLED`                           | Neon integration (direct) | Migrations + seed (DDL/bulk)      |
+| `PGHOST` / `PGUSER` / `PGDATABASE` / `PGPASSWORD` | Neon integration          | Optional raw access               |
+| ~~`CORS_ORIGIN`~~                                 | removed                   | n/a after fold                    |
+| ~~`API_BASE_URL`~~                                | removed                   | n/a after fold                    |
 
-Pull locally with `vercel env pull frontend-app/.env.local`.
+Pull locally with `vercel env pull .env.local`.
 
 ---
 
@@ -413,7 +524,7 @@ Pull locally with `vercel env pull frontend-app/.env.local`.
 - [ ] Single Vercel project deploys from GitHub; previews get isolated Neon branches.
 - [ ] `/recipes`, `/recipes/:id`, filtering, not-found, and `/api/recipes*` behave identically to the local app.
 - [ ] Data served from Neon Postgres; `data.json` used only as seed.
-- [ ] `cd frontend-app && npm run check` and `npm run build` green.
+- [ ] `npm run check` and `npm run build` green.
 - [ ] Catalog cached (ISR/`unstable_cache`) with a working invalidation tag.
 - [ ] README/CLAUDE updated for the single-app + Neon workflow.
 
@@ -422,8 +533,8 @@ Pull locally with `vercel env pull frontend-app/.env.local`.
 ## 12. References
 
 - [Express on Vercel](https://vercel.com/docs/frameworks/backend/express) · [Fluid compute](https://vercel.com/docs/fluid-compute)
-- [Vercel Storage overview](https://vercel.com/docs/storage) (`@vercel/postgres` deprecated) · [Edge Config limits](https://vercel.com/docs/edge-config/edge-config-limits)
-- [Neon for Vercel (Marketplace)](https://vercel.com/marketplace/neon) · [Vercel-managed Neon integration](https://neon.com/docs/guides/vercel-managed-integration) · [Vercel Postgres → Neon transition](https://neon.com/docs/guides/vercel-postgres-transition-guide)
+- [Vercel Storage overview](https://vercel.com/docs/storage) (`@vercel/postgres` deprecated) · [Vercel Marketplace storage](https://vercel.com/docs/marketplace-storage) · [Vercel environment variables](https://vercel.com/docs/environment-variables)
+- [Neon for Vercel (Marketplace)](https://vercel.com/marketplace/neon) · [Neon + Vercel integration overview](https://neon.com/docs/guides/vercel-overview) · [Vercel-managed Neon integration](https://neon.com/docs/guides/vercel-managed-integration) · [Vercel Postgres → Neon transition](https://neon.com/docs/guides/vercel-postgres-transition-guide)
 - [Neon serverless driver (HTTP vs WebSocket)](https://neon.com/docs/serverless/serverless-driver)
 - [Next.js fetch caching/revalidating](https://nextjs.org/docs/app/api-reference/functions/fetch) · [ISR guide](https://nextjs.org/docs/app/guides/incremental-static-regeneration)
 - [Drizzle + Neon + Next.js](https://orm.drizzle.team/docs/tutorials/drizzle-nextjs-neon)

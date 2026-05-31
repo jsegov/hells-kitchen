@@ -1,0 +1,3 @@
+{
+  "buildCommand": "if [ \"$VERCEL_ENV\" = \"preview\" ]; then npm run db:reset; fi; npm run build"
+}

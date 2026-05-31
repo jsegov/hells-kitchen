@@ -4,7 +4,10 @@ import { describe, expect, it } from "@jest/globals";
 import { GET as listGET } from "../app/api/recipes/route";
 import { GET as detailGET } from "../app/api/recipes/[id]/route";
 
-describe("GET /api/recipes", () => {
+const describeWithDb =
+  process.env.RUN_DB_TESTS === "1" ? describe : describe.skip;
+
+describeWithDb("GET /api/recipes", () => {
   it("returns all recipes", async () => {
     const res = await listGET(new Request("http://localhost/api/recipes"));
     const data = await res.json();
@@ -26,7 +29,7 @@ describe("GET /api/recipes", () => {
   });
 });
 
-describe("GET /api/recipes/[id]", () => {
+describeWithDb("GET /api/recipes/[id]", () => {
   it("returns a recipe by id", async () => {
     const res = await detailGET(new Request("http://localhost/api/recipes/1"), {
       params: Promise.resolve({ id: "1" }),
