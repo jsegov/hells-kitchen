@@ -2,11 +2,11 @@
 
 ## Project Structure & Module Organization
 
-The repo is a single Next.js App Router app in `frontend-app/`: `app/` for pages and `app/api/` for Route Handlers, the data layer in `lib/recipes.js`, mock data in `db/data.json`, colocated styles, and Jest specs in `test/`. Shared agent guidance sits in `CLAUDE.md`; deployment planning lives in `VERCEL_DEPLOYMENT_PLAN.md`. (The former Express `backend-app/` has been folded in — see `VERCEL_DEPLOYMENT_PLAN.md`, Phase 1.)
+The repo is a single Next.js App Router app at the repository root: `app/` for pages and `app/api/` for Route Handlers, the data layer in `lib/recipes.js`, mock data in `db/data.json`, colocated styles, and Jest specs in `test/`. Shared agent guidance sits in `CLAUDE.md`; deployment planning lives in `VERCEL_DEPLOYMENT_PLAN.md`. (The former Express `backend-app/` has been folded in — see `VERCEL_DEPLOYMENT_PLAN.md`, Phase 1.)
 
 ## Build, Test, and Development Commands
 
-From `frontend-app/`: `npm ci`, `npm run dev` (Turbopack at :3000), `npm run build`, `npm test`, and `npm run check` (typecheck + lint + format + tests). Run `npm run check` before opening a PR.
+From the repository root: `npm ci`, `npm run dev` (Turbopack at :3000), `npm run build`, `npm test`, and `npm run check` (typecheck + lint + format + tests). Run `npm run check` before opening a PR.
 
 ## Coding Style & Naming Conventions
 
