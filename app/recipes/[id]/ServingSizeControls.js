@@ -7,6 +7,7 @@ import {
   scaleNutritionForServings,
   toValidServings,
 } from "../../../lib/servingMath";
+import Metric from "./Metric";
 import styles from "./page.module.css";
 
 /**
@@ -18,18 +19,6 @@ function formatNutritionNumber(value) {
   }
 
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
-}
-
-/**
- * @param {{ label: string, value: string | number }} props
- */
-function Metric({ label, value }) {
-  return (
-    <div>
-      <dt>{label}</dt>
-      <dd>{value}</dd>
-    </div>
-  );
 }
 
 /**
@@ -77,7 +66,7 @@ function createServingPresets(servings) {
         .map((value) => Math.round(value))
         .filter((value) => value > 0 && value <= 99),
     ),
-  );
+  ).sort((first, second) => first - second);
 }
 
 /**

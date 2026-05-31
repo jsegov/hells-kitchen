@@ -4,6 +4,7 @@ import {
   formatDietaryLabel,
   formatDifficulty,
 } from "../recipeData";
+import Metric from "./Metric";
 import ServingSizeControls from "./ServingSizeControls";
 import styles from "./page.module.css";
 
@@ -16,18 +17,6 @@ function formatIngredientId(ingredientId) {
     .filter(Boolean)
     .join(" ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-/**
- * @param {{ label: string, value: string | number }} props
- */
-function Metric({ label, value }) {
-  return (
-    <div>
-      <dt>{label}</dt>
-      <dd>{value}</dd>
-    </div>
-  );
 }
 
 /**

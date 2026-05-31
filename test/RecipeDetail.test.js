@@ -160,6 +160,18 @@ test("surfaces unconverted nutrition ingredients", () => {
   ).toBeInTheDocument();
 });
 
+test("renders serving presets in ascending order", () => {
+  render(<RecipeDetail recipe={{ ...recipe, servings: 24 }} />);
+
+  const servingPresets = screen.getByLabelText("Serving presets");
+
+  expect(
+    within(servingPresets)
+      .getAllByRole("button")
+      .map((button) => button.textContent),
+  ).toEqual(["8", "12", "24", "48"]);
+});
+
 test("rescales ingredients and nutrition from one serving control", () => {
   render(<RecipeDetail recipe={recipe} />);
 
