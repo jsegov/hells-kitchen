@@ -22,36 +22,67 @@ Create a recipe management application that allows users to view, search, and or
 
 ## Setup Instructions
 
-#### Setup
+#### Prerequisites
 
-```
-npm ci
-npm run db:reset # Applies schema and seeds Neon from db/data.json
-npm run dev # Starts the Next.js app (pages + API) on port 3000, or the next available port
-```
+- Node.js 20.9.0 or newer.
+- A Neon Postgres database. The app reads from `DATABASE_URL`; migrations and seeding use `DATABASE_URL_UNPOOLED`.
+- Optional: Vercel CLI if you want to pull environment variables from a linked Vercel project.
 
-Requires Node.js 20.9.0 or newer. For Vercel-linked projects, pull environment variables with `vercel env pull .env.local` before running database commands.
+#### Run locally
 
-#### Database setup
+1. Install dependencies:
 
-The application uses Neon Postgres at runtime. `db/data.json` is the seed source of truth, and `npm run db:reset` runs both `db:migrate` and `db:seed`.
+   ```bash
+   npm ci
+   ```
+
+2. Create `.env.local` in the repository root:
+
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+   Then fill in the Neon connection strings. `AI_GATEWAY_API_KEY` is optional unless you want the AI Overview form to return successful LLM responses.
+
+   If the project is linked to Vercel, you can instead pull these values:
+
+   ```bash
+   vercel env pull .env.local
+   ```
+
+3. Apply the database schema and seed data:
+
+   ```bash
+   npm run db:reset
+   ```
+
+   This runs `npm run db:migrate` and `npm run db:seed`. Seed data comes from `db/data.json`. The migration script uses `psql` when available and falls back to the Neon driver when `psql` is not installed.
+
+4. Start the Next.js app:
+
+   ```bash
+   npm run dev
+   ```
+
+   Open `http://localhost:3000/recipes`. Next.js may choose the next available port if `3000` is already in use.
 
 #### Environment variables
 
 - `DATABASE_URL` is required for the app runtime and DB-backed tests.
 - `DATABASE_URL_UNPOOLED` is required for `npm run db:migrate`, `npm run db:seed`, and `npm run db:reset`.
-- `AI_GATEWAY_API_KEY` or Vercel OIDC (`VERCEL_OIDC_TOKEN` from `vercel link && vercel env pull`) is **optional for core browsing** and required only for successful LLM responses. The AI Overview recommendation box is always visible on `/recipes`; Gateway credentials are read server-side only (never exposed to the browser, never `NEXT_PUBLIC_*`). When credentials are absent or invalid, submitting the AI form returns an inline error and the rest of `/recipes` is unchanged.
+- `AI_GATEWAY_API_KEY` or Vercel OIDC (`VERCEL_OIDC_TOKEN` from `vercel link && vercel env pull`) is optional for core browsing and required only for successful LLM responses. The AI Overview recommendation box is always visible on `/recipes`; Gateway credentials are read server-side only and are never exposed to the browser. When credentials are absent or invalid, submitting the AI form returns an inline error and the rest of `/recipes` is unchanged.
 - `API_BASE_URL` and `CORS_ORIGIN` are obsolete now that the API runs in-process within the Next.js app.
 
-#### Quality gates
+#### Local checks
 
+```bash
+npm test          # Unit and render tests
+npm run check     # Typecheck, lint, format check, unit/render tests
+npm run test:db   # DB-backed repository and API route tests; requires DATABASE_URL
+npm run build     # Production build
 ```
-npm run check      # Fast non-DB gate: typecheck, lint, format check, unit/render tests
-npm run test:db    # DB-backed repository and API route tests; requires DATABASE_URL
-npm run build
-npm audit --omit=dev
-npm run check:full # Full deploy/PR gate combining all of the above
-```
+
+Use `npm run check:full` before opening a PR. It combines `npm run check`, DB-backed tests, the production build, and `npm audit --omit=dev`.
 
 **Note: The original Next.js + Express scaffold has been consolidated into a single Next.js app; the Express backend was folded into Route Handlers.**
 
@@ -108,63 +139,134 @@ Good luck! We're excited to see your implementation.
 
 ## Candidate Notes
 
+#### Starting point
+
+This project started from the [SPRX-tax/hells-kitchen](https://github.com/SPRX-tax/hells-kitchen) scaffold: a split `frontend-app` Next.js app, a separate `backend-app` Express server, and `backend-app/db/data.json` as a mock database. The current implementation is a single root-level Next.js App Router app with Route Handlers, a Neon Postgres runtime data source, a larger seeded catalog, advanced browsing controls, and an AI Overview flow.
+
+Compared with the starter repo, the current code removes the `frontend-app`/`backend-app` split, deletes the Express server package, moves the Next.js app to the repository root, adds `lib/` and `db/` as first-class layers, and adds focused Jest coverage for data helpers, Route Handlers, render states, database behavior, and AI flows.
+
+The buildout was intentionally staged. I first got the required localhost MVP working against the original split app, then simplified deployment by removing Express, then moved the data source to Postgres, and only then layered on advanced UX and AI. That order kept each major decision constrained: requirements first, deployability second, data architecture third, and bonus features last.
+
 #### Setup instructions
 
-No new setup requirements were added. Use the existing commands documented above.
+Use the setup instructions above. The main added requirement is a Neon database with `DATABASE_URL` and `DATABASE_URL_UNPOOLED` in `.env.local`; `.env.local.example` documents the expected variables. `AI_GATEWAY_API_KEY` is optional for core browsing and only needed for successful AI Overview responses.
 
-#### Implementation choices
+#### 1. Core localhost MVP
 
-- Advanced list features share one `getRecipeList(filters, sort)` contract across the in-memory repository, Neon-backed repository, API route, and `/recipes` page.
-- Sort keys are defensively normalized and mapped to whitelisted SQL expressions; in-memory sorting uses matching parsers/comparators with nulls sorted last and stable curated-order tie breaks.
-- Dietary suitability is derived from ingredient metadata rather than recipe tags. Vegan ingredients imply vegetarian suitability; positive diet claims fail closed when ingredient metadata is missing.
-- Allergen exclusion uses exact tokens, not substring matching, and missing ingredient metadata fails safe when an allergen exclusion is active.
-- Serving-size scaling lives in a browser-safe pure math module and one client component that owns the target serving count for both ingredient quantities and nutrition totals.
+Reference PRs: [#1](https://github.com/jsegov/hells-kitchen/pull/1), [#2](https://github.com/jsegov/hells-kitchen/pull/2), [#3](https://github.com/jsegov/hells-kitchen/pull/3), [#4](https://github.com/jsegov/hells-kitchen/pull/4)
 
-##### Find-recipes panel redesign
+The first phase was about satisfying the README requirements without prematurely changing the scaffold. The frontend and Express backend remained separate, connected locally through `API_BASE_URL`, and I worked through the requirements one by one:
 
-- The filter panel presents one free-text search box (recipe name) plus four uniform multi-select facets — tag, ingredient, diet, and allergen — because all four are constrained, known vocabularies. Short lists (diet, allergen) render inline as toggle chips; long lists (tag, ingredient) gain a type-to-filter box. Every applied filter also appears as a removable chip above the results with a "Clear all" escape hatch.
-- The ingredient filter now matches by exact **ingredient id** instead of name substring, so a pick-list value like "Potato" can no longer also match "Sweet Potato" (or "Butter" → "Peanut Butter"). `name` stays a free-text title search.
-- Sort key and direction are merged into one dropdown with plain-language labels ("Difficulty: easiest", "Newest", "A–Z") submitted as a combined `sort=key-order` token; `normalizeRecipeListSort`/`normalizeRecipeSort` still accept the legacy separate `sort`/`order` params.
-- Per-facet result counts come from a new `getRecipeFacets(filters)` data-layer function (cached and dual-path like `getRecipeList`). Counts are drill-down ("results if you also pick this") and reuse the list matcher over the catalog, so a count can never disagree with the list it previews.
-- `RecipeFilters` is a progressively-enhanced client island: the real GET form is the no-JS baseline; with JS, desktop applies filters instantly via `router.replace` on change while mobile collapses the panel into a drawer that batches and applies with one button. Chip removal links are plain server-rendered anchors that work either way.
+- `/recipes` list page with responsive recipe cards and a narrow list DTO.
+- `/recipes/:id` detail page with ingredients, instructions, tags, and calculated nutrition.
+- Name, tag, and ingredient filtering through URL query parameters.
+- Loading, error, not-found, and empty states.
+- Defensive DTO mapping and frontend runtime guards for malformed data.
+- Backend/frontend Jest coverage, strict JS typechecking, linting, formatting, and local browser smoke tests.
 
-##### AI Overview (LLM recipe discovery)
+The main trade-off was keeping the original Express boundary longer than I ultimately wanted. That added `API_BASE_URL` and CORS concerns, but it let me prove the product surface and API contracts before changing deployment architecture. It also made the first milestone easy to verify locally: run the backend on `8080`, run Next.js on `3000`, and walk each required route.
 
-- A freeform "Ask for a recommendation" box on `/recipes` streams a short **provisional** AI overview paragraph and then renders **real `RecipeCard`s selected from our own 35-recipe catalog** only after server finalization — the Google-AI-Overview shape, constrained to the dataset. The box is always visible; with no key, submission fails through the same inline error state as provider failures. The no-JS GET fallback searches deterministic recipe browsing by name.
-- **The model never authors a final recipe card or link.** It only *names* catalog ids and provides structured filter hints in the streamed object; `POST /api/recipes/overview/resolve` validates the completed object against the real catalog, strips invalid filters, and resolves cards through the real data layer. If model ids are missing or invalid for a discovery request, the finalizer can still choose real cards from validated filters or exact catalog-title mentions. A hallucinated or non-existent id is never rendered. The model narrates; code computes (any nutrition mentioned comes from deterministic per-serving macros, with incomplete nutrition rows signaled to the prompt).
-- **Structured output with hand-written validation:** the `ai` SDK schema helper carries a hand-written JSON Schema while our existing typeguard convention stays the real validator; numeric/length bounds are kept off the model schema (the provider can 400 on them) and enforced during server finalization. The server model schema additionally constrains `recommendedRecipeIds` to the live catalog ids, but server validation remains the authority.
-- **Cost/perf:** the ~5-7K-token catalog is sent as its own content part to `google/gemini-3-flash` through Vercel AI Gateway with deterministic structured settings (`temperature: 0`, minimal Gemini thinking). `MAX_QUERY_LEN` (300 chars, enforced client- and server-side), Gateway cost tags, and a per-client in-memory rate limiter bound abuse and cost; responses are `no-store`.
-- **Honest empty/error states** are first-class: the model is instructed to return an empty recommendation set rather than invent a match, and over-constrained queries show a "nothing matched" note only after finalization and deterministic fallback cannot resolve real cards.
-- **Open decision (production):** the rate limiter is in-memory and therefore per-instance — on a serverless fleet it must be backed by a durable shared store (Upstash/Vercel KV) for a true global limit. This is documented in `lib/rateLimit.js` and left as a deliberate take-home-scope choice.
+#### 2. Deploy as one Vercel app
+
+Reference PRs: [#5](https://github.com/jsegov/hells-kitchen/pull/5), [#6](https://github.com/jsegov/hells-kitchen/pull/6)
+
+Once the required experience worked locally, I consolidated the app for Vercel. The former Express route layer was thin: most real logic already lived in pure recipe helpers. I moved that logic into `lib/recipes.js`, recreated the JSON API as Next.js Route Handlers under `app/api/recipes`, and changed Server Components to call the data layer directly instead of making an internal HTTP request.
+
+At this point the app was still backed by the original JSON catalog. The goal of this phase was deployment shape, not database behavior.
+
+I did research whether keeping Express on Vercel made sense. Vercel supports Express, but the docs describe an Express app as a single Vercel Function where the normal Function limits apply, including bundle-size and lifecycle/error-handling concerns. For this project, that extra server layer did not buy much. Next.js Route Handlers were the more natural fit because they live in the same App Router tree, use standard Web `Request`/`Response` APIs, support the HTTP methods this app needed, and deploy with the rest of the Next.js app.
+
+The trade-off is that the API is now coupled to the Next.js app instead of being a standalone Express service. I accepted that because the take-home app has one frontend, one JSON API, and one deployment target. In return, the repo became one npm package, one Vercel project, one environment-variable surface, no CORS allowlist, and no internal `API_BASE_URL` hop.
+
+#### 3. Move runtime data from JSON to Neon Postgres
+
+Reference PRs: [#7](https://github.com/jsegov/hells-kitchen/pull/7), [#8](https://github.com/jsegov/hells-kitchen/pull/8), [#9](https://github.com/jsegov/hells-kitchen/pull/9)
+
+After deployment was working, I replaced JSON runtime reads with Neon Postgres. `db/data.json` stayed valuable as seed data, but it stopped being the runtime database. The new database layer added:
+
+- `db/schema.sql`, `db/migrate.mjs`, `db/seed.mjs`, and `npm run db:reset`.
+- `DATABASE_URL` for runtime reads and DB-backed tests.
+- `DATABASE_URL_UNPOOLED` for migrations and seeding.
+- A Neon serverless driver wrapper in `lib/db.js`.
+- DB-backed Jest coverage through `npm run test:db`.
+- Postgres filtering, trigram indexes, cache headers, ISR/static params for details, and transient Neon read retries.
+
+This was a deliberate move even though the catalog is still mostly static. JSON is simpler, but Postgres gave the app query flexibility that later features needed: filtering by title, tags, ingredient ids/names/categories, diet/allergen metadata, parsed durations, difficulty ranks, and exact catalog ids. That same deterministic query layer later became important for AI Overview because the model can suggest recipe ids or filters, but the server still resolves cards, links, and nutrition from the real catalog.
+
+The trade-off is operational complexity: a database has secrets, provisioning, migrations, seeding, network failures, cache invalidation, and DB-backed tests. I mitigated that with an example env file, explicit `db:*` scripts, retry logic for idempotent reads, SQL whitelisting for sort expressions, and unit tests that can still exercise the in-memory repository path without requiring Neon.
+
+#### 4. Add advanced features after the foundation was deployed
+
+Reference PRs: [#10](https://github.com/jsegov/hells-kitchen/pull/10), [#11](https://github.com/jsegov/hells-kitchen/pull/11)
+
+I waited to build advanced features until the core app was deployed and the data layer was stable. If these had gone in before the Vercel and Neon decisions, they likely would have been rewritten during the backend consolidation and database migration.
+
+The advanced feature phase turned the list into a catalog experience:
+
+- Sort options for curated order, title, prep time, cook time, difficulty, servings, and date added.
+- Uniform multi-select facets for tags, ingredients, diets, and allergens.
+- Per-facet drill-down counts from `getRecipeFacets(filters)`.
+- Active filter chips, a clear-all action, instant desktop filtering, and a mobile drawer.
+- Exact ingredient-id filtering to avoid substring collisions such as "butter" matching "peanut butter".
+- Dietary derivation from ingredient metadata instead of trusting recipe tags.
+- Allergen exclusion using exact tokens and fail-safe behavior when metadata is missing.
+- Nutrition conversion to a `per_100g` basis with unit weights.
+- Serving-size controls that scale ingredients and total nutrition together.
+- A catalog expansion from 15 recipes to 35 recipes with better breakfast, lunch, dinner, and snack coverage.
+
+The main UX decision was to make filtering feel constrained and reliable rather than free-form everywhere. Name search remains text-based, but tags, ingredients, diets, and allergens are known vocabularies. That makes filters easier to scan, allows result counts, and avoids ambiguous matches. The trade-off is more metadata work in `db/data.json`, `lib/dietary.js`, and the seed pipeline, but that metadata supports both the UI and the AI grounding layer.
+
+#### 5. Add AI Overview last
+
+Reference PR: [#12](https://github.com/jsegov/hells-kitchen/pull/12)
+
+The AI Overview feature was intentionally last because it depends on the earlier decisions. It needs a real catalog, deterministic filters, stable card DTOs, and a server-side finalization path.
+
+The feature uses Vercel AI Gateway with `google/gemini-3-flash` and the AI SDK structured-output flow. The UI streams provisional overview prose, but final recipe cards are not model-authored. The model can name catalog ids and provide filter hints; `POST /api/recipes/overview/resolve` validates the completed object, strips invalid filters, ignores hallucinated ids, and resolves cards through the normal data layer.
+
+That design keeps the LLM in a narrow role: it translates a natural-language request into a recommendation narrative and structured hints. Code remains responsible for catalog membership, URLs, recipe cards, filters, and nutrition. This avoids showing non-existent recipes while still giving the user a more conversational discovery surface.
+
+The trade-offs are cost, latency, provider availability, and abuse controls. The implementation caps query length, uses `no-store` responses for AI routes, adds a per-client in-memory rate limiter, tags Gateway usage, and degrades gracefully when credentials are missing. The in-memory limiter is enough for a take-home demo but would need a shared durable store for production.
 
 #### Completed features
 
-- Sorting by curated order, title, prep time, cook time, difficulty, servings, and date added, with ascending/descending order — exposed as one plain-language dropdown.
-- Uniform multi-select facets for tag, ingredient, diet, and allergen, with type-to-filter for the long lists and per-option result counts.
-- Dietary filters for vegetarian, vegan, gluten-free, keto, and high-protein.
-- Allergen exclusion for dairy, eggs, fish, gluten, nuts, peanuts, sesame, shellfish, soy, tree nuts, and wheat.
-- Removable active-filter chips with "Clear all", a mobile filter drawer, and instant desktop filtering layered over a no-JS GET form.
-- Derived dietary badges on recipe cards and detail pages.
-- Detail-page allergen summary with a verification note.
-- Serving-size control with presets and numeric input that scales ingredients and nutrition together.
-- AI Overview: a streamed LLM recommendation box on `/recipes` that grounds its picks in real catalog recipes (server-side id resolution), uses Vercel AI Gateway with `google/gemini-3-flash`, degrades gracefully without Gateway credentials, and throttles per client.
-- Additional unit/render/API/DB coverage for sorting, dietary derivation, allergen filtering, facet counts, serving-size math, and the AI Overview (pure helpers, the streaming route with a mock model, the client island states, and the rate limiter).
+- Core recipe list, detail, and search/filter requirements.
+- Single Next.js App Router deployment with JSON API Route Handlers.
+- Neon Postgres runtime data source with migration/seed scripts and DB-backed tests.
+- Server-side filtering, sorting, cache headers, ISR/static params for detail pages, and transient read retries.
+- Advanced catalog facets for tag, ingredient, diet, and allergen filters.
+- Derived dietary badges and allergen summaries on cards/detail pages.
+- Nutrition totals and per-serving values calculated from ingredient data.
+- Serving-size scaling for ingredient amounts and nutrition totals.
+- Expanded 35-recipe seed catalog with richer ingredient metadata.
+- AI Overview recommendation box that streams provisional prose but resolves final cards from real catalog data.
+- Test coverage across pure helpers, Route Handlers, render states, DB-backed paths, serving math, dietary/allergen derivation, facets, sorting, rate limiting, and AI Overview flows.
 
-#### Assumptions
+#### Assumptions and limitations
 
-- Recipe scaling is linear. Seasoning, leavening, and cook times still require cook judgment.
-- Current seed data is small enough that dietary/allergen post-filtering after SQL text filtering is appropriate and keeps derivation logic shared.
-- The hardcoded diet/allergen option lists intentionally define the public filter surface; tests guard against seed-data drift.
-
-#### Known limitations or bugs
-
-- Ingredient amounts that are ambiguous or not safely parseable, such as ranges or mixed numbers, are displayed unchanged during scaling.
-- Nutrition scaling starts from the validated recipe total exposed by the data layer, which is already rounded to one decimal place.
+- Recipe scaling is linear. It works for quantities and nutrition, but seasonings, leavening, pan size, and cook time still require cook judgment.
 - Allergen handling is informational and should not be treated as a medical safety guarantee.
-- The AI Overview rate limiter is in-memory (per-instance), which is sufficient for the demo but not a true global limit across a serverless fleet — a durable store (Upstash/Vercel KV) is the production choice. Gateway usage/cost attribution is handled with the `feature:recipe-overview` tag.
+- Diet and allergen claims fail closed when ingredient metadata is missing. That is safer, but it can hide recipes until metadata is completed.
+- Some ambiguous ingredient amounts, such as ranges or mixed text, are displayed unchanged during scaling.
+- Nutrition scaling starts from validated data-layer totals that are rounded to one decimal place.
+- The AI Overview rate limiter is in-memory and therefore per-instance. A production version should use a shared durable store.
+- The AI Overview depends on Vercel AI Gateway credentials for successful LLM responses, but the rest of the app works without them.
 
 #### Additional features with more time
 
-- Parent/child allergen rules, such as optionally expanding nuts into peanuts and tree nuts.
-- Persisted favorite recipes or saved filter presets.
+- Durable global rate limiting for AI requests, likely backed by Redis or Vercel KV.
+- Persisted favorite recipes, saved filters, or user-specific recipe collections.
 - A shopping-list generator that combines scaled ingredients across selected recipes.
+- Parent/child allergen rules, such as optionally expanding nuts into peanuts and tree nuts.
+- Admin tooling or CI checks for validating new seed recipes before they reach the database.
+- Observability around slow database queries, AI latency/cost, and no-result searches.
+
+#### Research references
+
+- Starter repo: [SPRX-tax/hells-kitchen](https://github.com/SPRX-tax/hells-kitchen)
+- Implementation PRs: [#1](https://github.com/jsegov/hells-kitchen/pull/1), [#2](https://github.com/jsegov/hells-kitchen/pull/2), [#3](https://github.com/jsegov/hells-kitchen/pull/3), [#4](https://github.com/jsegov/hells-kitchen/pull/4), [#5](https://github.com/jsegov/hells-kitchen/pull/5), [#6](https://github.com/jsegov/hells-kitchen/pull/6), [#7](https://github.com/jsegov/hells-kitchen/pull/7), [#8](https://github.com/jsegov/hells-kitchen/pull/8), [#9](https://github.com/jsegov/hells-kitchen/pull/9), [#10](https://github.com/jsegov/hells-kitchen/pull/10), [#11](https://github.com/jsegov/hells-kitchen/pull/11), [#12](https://github.com/jsegov/hells-kitchen/pull/12)
+- Next.js Route Handlers: [route.js file convention](https://nextjs.org/docs/app/api-reference/file-conventions/route)
+- Vercel deployment trade-offs: [Express on Vercel](https://vercel.com/docs/frameworks/backend/express), [Vercel Functions limits](https://vercel.com/docs/functions/limitations)
+- Neon/Postgres: [Neon serverless driver](https://neon.com/docs/serverless/serverless-driver), [Neon with Vercel](https://neon.com/docs/guides/vercel/), [Neon connection pooling](https://neon.com/docs/connect/connection-pooling), [Postgres pattern matching](https://www.postgresql.org/docs/current/functions-matching.html), [Postgres trigram indexes](https://www.postgresql.org/docs/current/pgtrgm.html)
+- Next.js caching: [caching and revalidating](https://nextjs.org/docs/app/getting-started/caching)
+- AI: [Vercel AI Gateway](https://vercel.com/docs/ai-gateway), [AI SDK `useObject`](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object), [AI SDK structured output](https://ai-sdk.dev/docs/reference/ai-sdk-core/output)
