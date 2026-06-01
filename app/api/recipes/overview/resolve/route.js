@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { NO_STORE_HEADERS } from "../../../../../lib/apiCache";
 import { validateOverviewOutput } from "../../../../../lib/aiOverview";
+import { createRateLimiter } from "../../../../../lib/rateLimit";
 import {
   getRecipeList,
   getRecipeOverviewCatalog,
@@ -11,12 +12,32 @@ export const runtime = "nodejs";
 const MAX_FINALIZE_BODY_BYTES = 4_096;
 const MAX_RESOLVED_RECIPES = 25;
 const MAX_FALLBACK_RECIPES = 4;
+const RATE_LIMIT_MAX = 20;
+const RATE_LIMIT_WINDOW_MS = 60_000;
 
 /**
  * @typedef {object} OverviewResolveDeps
  * @property {() => Promise<import("../../../../../lib/recipes").RecipeListItem[]>} loadRecipes
  * @property {() => Promise<import("../../../../../lib/recipes").OverviewCatalogRow[]>} loadCatalog
+ * @property {import("../../../../../lib/rateLimit").RateLimiter=} rateLimiter
+ * @property {(request: Request) => string=} clientKey
  */
+
+/**
+ * @param {Request} request
+ * @returns {string}
+ */
+function clientKeyFromRequest(request) {
+  const forwardedFor = request.headers.get("x-vercel-forwarded-for");
+  if (forwardedFor) {
+    const first = forwardedFor.split(",")[0]?.trim();
+    if (first) {
+      return first;
+    }
+  }
+
+  return "anonymous";
+}
 
 /**
  * @param {Request} request
@@ -173,12 +194,38 @@ function selectFallbackRecipes({ validated, catalog, recipes, query }) {
  *
  * @param {OverviewResolveDeps} deps
  */
-export function createOverviewResolveHandler({ loadRecipes, loadCatalog }) {
+export function createOverviewResolveHandler({
+  loadRecipes,
+  loadCatalog,
+  rateLimiter = createRateLimiter({
+    limit: RATE_LIMIT_MAX,
+    windowMs: RATE_LIMIT_WINDOW_MS,
+  }),
+  clientKey = clientKeyFromRequest,
+}) {
   /**
    * @param {Request} request
    */
   return async function handleResolve(request) {
     try {
+      const limit = rateLimiter.check(clientKey(request));
+      if (!limit.allowed) {
+        const retryAfterSeconds = Math.max(
+          1,
+          Math.ceil((limit.resetAt - Date.now()) / 1000),
+        );
+        return NextResponse.json(
+          { error: "Too many requests. Please wait a moment and try again." },
+          {
+            status: 429,
+            headers: {
+              ...NO_STORE_HEADERS,
+              "Retry-After": String(retryAfterSeconds),
+            },
+          },
+        );
+      }
+
       const bodyResult = await readRawOverviewObject(request);
 
       if (!bodyResult.ok) {
@@ -199,7 +246,7 @@ export function createOverviewResolveHandler({ loadRecipes, loadCatalog }) {
       const { rawOverview, query } = parseResolveBody(bodyResult.body);
       const validated = validateOverviewOutput(rawOverview, catalog);
       const recommendedIds =
-        validated.intent !== "off_topic"
+        validated.intent === "discovery"
           ? validated.recommendedRecipeIds.slice(0, MAX_RESOLVED_RECIPES)
           : [];
 

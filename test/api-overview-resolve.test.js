@@ -6,6 +6,7 @@
  * against the catalog, suppresses non-discovery cards, and resolves real DTOs.
  */
 import { createOverviewResolveHandler } from "../app/api/recipes/overview/resolve/route";
+import { createRateLimiter } from "../lib/rateLimit";
 
 /**
  * @param {string} id
@@ -109,34 +110,78 @@ test("finalizes ids to the catalog subset and resolved cards", async () => {
   });
 });
 
-test("suppresses cards for non-discovery intents", async () => {
-  const handler = handlerWith();
+test.each(["off_topic", "analytics", "how_to"])(
+  "suppresses cards for non-discovery intent %s",
+  async (intent) => {
+    const handler = handlerWith();
 
-  const response = await handler(
-    postRequest({
-      overview: "I can help with recipe discovery instead.",
-      recommendedRecipeIds: ["r1"],
-      intent: "off_topic",
+    const response = await handler(
+      postRequest({
+        overview: "I can help with recipe discovery instead.",
+        recommendedRecipeIds: ["r1"],
+        intent,
+      }),
+    );
+
+    const finalized =
+      /** @type {{ intent: string, recommendedRecipeIds: string[], recipes: import("../lib/recipes").RecipeListItem[] }} */ (
+        await response.json()
+      );
+    expect(finalized.intent).toBe(intent);
+    expect(finalized.recommendedRecipeIds).toEqual([]);
+    expect(finalized.recipes).toEqual([]);
+  },
+);
+
+test("rate limits resolve requests before body parsing or catalog work", async () => {
+  let catalogLoads = 0;
+  const handler = createOverviewResolveHandler({
+    loadRecipes: () => Promise.resolve(recipes),
+    loadCatalog: () => {
+      catalogLoads += 1;
+      return Promise.resolve(overviewCatalog);
+    },
+    rateLimiter: createRateLimiter({ limit: 1, windowMs: 60_000 }),
+    clientKey: () => "test-client",
+  });
+
+  expect(
+    (
+      await handler(
+        postRequest({
+          overview: "One answer.",
+          recommendedRecipeIds: [],
+          intent: "discovery",
+        }),
+      )
+    ).status,
+  ).toBe(200);
+
+  const throttled = await handler(
+    new Request("http://localhost/api/recipes/overview/resolve", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "not json",
     }),
   );
 
-  const finalized =
-    /** @type {{ intent: string, recommendedRecipeIds: string[], recipes: import("../lib/recipes").RecipeListItem[] }} */ (
-      await response.json()
-    );
-  expect(finalized.intent).toBe("off_topic");
-  expect(finalized.recommendedRecipeIds).toEqual([]);
-  expect(finalized.recipes).toEqual([]);
+  expect(throttled.status).toBe(429);
+  expect(throttled.headers.get("Cache-Control")).toBe("no-store");
+  expect(Number(throttled.headers.get("Retry-After"))).toBeGreaterThan(0);
+  expect(await throttled.json()).toEqual({
+    error: "Too many requests. Please wait a moment and try again.",
+  });
+  expect(catalogLoads).toBe(1);
 });
 
-test("resolves valid ids for non-off-topic intents without fallback", async () => {
+test("discovery ids resolve to cards without fallback", async () => {
   const handler = handlerWith();
 
   const response = await handler(
     postRequest({
-      overview: "This is more of a cooking question, but Tomato Bowl applies.",
+      overview: "Tomato Bowl applies.",
       recommendedRecipeIds: ["r1"],
-      intent: "how_to",
+      intent: "discovery",
     }),
   );
 
@@ -144,7 +189,7 @@ test("resolves valid ids for non-off-topic intents without fallback", async () =
     /** @type {{ intent: string, recommendedRecipeIds: string[], recipes: import("../lib/recipes").RecipeListItem[] }} */ (
       await response.json()
     );
-  expect(finalized.intent).toBe("how_to");
+  expect(finalized.intent).toBe("discovery");
   expect(finalized.recommendedRecipeIds).toEqual(["r1"]);
   expect(finalized.recipes.map((recipe) => recipe.id)).toEqual(["r1"]);
 });
