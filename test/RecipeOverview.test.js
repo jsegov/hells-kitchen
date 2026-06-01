@@ -25,6 +25,7 @@ const hookState = {
   error: undefined,
   submit: jest.fn(),
   stop: jest.fn(),
+  clear: jest.fn(),
   /** @type {((event: { object: unknown, error: Error | undefined }) => void) | null} */
   onFinish: null,
 };
@@ -41,7 +42,7 @@ jest.mock("@ai-sdk/react", () => ({
       stop: hookState.stop,
       error: hookState.error,
       isLoading: hookState.isLoading,
-      clear: jest.fn(),
+      clear: hookState.clear,
     };
   },
 }));
@@ -88,6 +89,7 @@ beforeEach(() => {
   hookState.onFinish = null;
   hookState.submit.mockReset();
   hookState.stop.mockReset();
+  hookState.clear.mockReset();
   delete (/** @type {{ fetch?: unknown }} */ (global).fetch);
 });
 
@@ -103,6 +105,7 @@ test("submits the query, keeps focus on the input, and shows provisional streami
   expect(hookState.submit).toHaveBeenCalledWith({
     query: "a quick vegetarian dinner",
   });
+  expect(hookState.clear).toHaveBeenCalledTimes(1);
   // Focus stays on the input after submit (a11y).
   expect(input).toHaveFocus();
   expect(input).toHaveValue("a quick vegetarian dinner");
@@ -274,6 +277,8 @@ test("shows no-match only from a finalized discovery response", async () => {
 });
 
 test("does not show no-match after Stop", () => {
+  const resolveFetch = mockFinalizeFetch(finalizedPayload());
+  /** @type {{ fetch: unknown }} */ (global).fetch = resolveFetch;
   const { rerender } = render(<RecipeOverview />);
 
   fireEvent.change(screen.getByPlaceholderText(/Ask for a recommendation/i), {
@@ -288,7 +293,25 @@ test("does not show no-match after Stop", () => {
   fireEvent.click(screen.getByRole("button", { name: "Stop" }));
 
   expect(hookState.stop).toHaveBeenCalledTimes(1);
+  expect(hookState.clear).toHaveBeenCalledTimes(2);
   expect(screen.queryByText(/Nothing in the catalog matched/i)).toBeNull();
+
+  act(() => {
+    hookState.onFinish?.({
+      object: {
+        overview: "Tomato Bowl is the quickest.",
+        recommendedRecipeIds: ["r1"],
+        suggestedFilters: { diet: [], tag: [] },
+        intent: "discovery",
+      },
+      error: undefined,
+    });
+  });
+
+  expect(resolveFetch).not.toHaveBeenCalled();
+  expect(
+    screen.queryByRole("region", { name: "Recommended recipes" }),
+  ).not.toBeInTheDocument();
 });
 
 test("finalizes usable streamed partials after useObject schema errors", async () => {

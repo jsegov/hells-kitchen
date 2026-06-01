@@ -102,6 +102,11 @@ export default function RecipeOverview() {
   const latestStreamedRef = useRef(
     /** @type {PartialOverview | null} */ (null),
   );
+  const ignoredStreamedRef = useRef(
+    /** @type {PartialOverview | null} */ (null),
+  );
+  const ignoreFinishUntilFreshStreamRef = useRef(false);
+  const wasStoppedRef = useRef(false);
   const requestIdRef = useRef(0);
   const submittedQueryRef = useRef("");
   const [submittedQuery, setSubmittedQuery] = useState("");
@@ -116,10 +121,16 @@ export default function RecipeOverview() {
   // without flashing while tokens are still arriving).
   const [settled, setSettled] = useState(false);
 
-  const { object, submit, stop, error, isLoading } = useObject({
+  const { object, submit, stop, clear, error, isLoading } = useObject({
     api: "/api/recipes/overview",
     schema: OVERVIEW_SCHEMA,
     onFinish: ({ object: rawFinal, error: finishError }) => {
+      if (wasStoppedRef.current || ignoreFinishUntilFreshStreamRef.current) {
+        setIsResolving(false);
+        setSettled(true);
+        return;
+      }
+
       const requestId = requestIdRef.current;
       const rawOverview =
         rawFinal ??
@@ -184,8 +195,14 @@ export default function RecipeOverview() {
   const streamed = /** @type {PartialOverview | undefined} */ (object);
 
   useEffect(() => {
+    if (streamed && streamed === ignoredStreamedRef.current) {
+      return;
+    }
+
     if (hasUsablePartialOverview(streamed)) {
       latestStreamedRef.current = streamed ?? null;
+      ignoredStreamedRef.current = null;
+      ignoreFinishUntilFreshStreamRef.current = false;
     }
   }, [streamed]);
 
@@ -205,10 +222,14 @@ export default function RecipeOverview() {
       }
 
       // Reset per-request state; keep focus on the input (a11y, plan §8).
+      const needsFreshStreamBeforeFinish = wasStoppedRef.current;
       requestIdRef.current += 1;
       finalizeAbortRef.current?.abort();
       finalizeAbortRef.current = null;
+      ignoredStreamedRef.current = streamed ?? null;
       latestStreamedRef.current = null;
+      ignoreFinishUntilFreshStreamRef.current = needsFreshStreamBeforeFinish;
+      wasStoppedRef.current = false;
       submittedQueryRef.current = value;
       setSubmittedQuery(value);
       setFinalized(null);
@@ -217,22 +238,28 @@ export default function RecipeOverview() {
       setStreamFinishError(false);
       setWasStopped(false);
       setSettled(false);
+      clear();
       submit({ query: value.slice(0, MAX_QUERY_LEN) });
       inputRef.current?.focus();
     },
-    [submit],
+    [clear, streamed, submit],
   );
 
   const handleStop = useCallback(() => {
     requestIdRef.current += 1;
+    wasStoppedRef.current = true;
+    ignoreFinishUntilFreshStreamRef.current = true;
     stop();
     finalizeAbortRef.current?.abort();
     finalizeAbortRef.current = null;
+    ignoredStreamedRef.current = streamed ?? null;
     latestStreamedRef.current = null;
+    setFinalized(null);
     setIsResolving(false);
     setWasStopped(true);
+    clear();
     inputRef.current?.focus();
-  }, [stop]);
+  }, [clear, stop, streamed]);
 
   const streamedOverview =
     typeof streamed?.overview === "string" ? streamed.overview : "";
