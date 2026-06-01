@@ -651,6 +651,1035 @@
       ],
       "tags": ["vegetarian", "pasta", "italian"],
       "dateAdded": "2024-03-29T20:15:00Z"
+    },
+    {
+      "id": "16",
+      "title": "Shakshuka",
+      "description": "North African eggs simmered in spiced tomato peppers",
+      "servings": 4,
+      "prepTime": "15 minutes",
+      "cookTime": "25 minutes",
+      "difficulty": "medium",
+      "ingredients": [
+        {
+          "ingredientId": "tomato",
+          "amount": "3",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "eggs",
+          "amount": "4",
+          "unit": "large"
+        },
+        {
+          "ingredientId": "onion",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "bell_pepper",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "garlic",
+          "amount": "3",
+          "unit": "cloves"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "2",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "cumin",
+          "amount": "2",
+          "unit": "tsp"
+        },
+        {
+          "ingredientId": "paprika",
+          "amount": "2",
+          "unit": "tsp"
+        }
+      ],
+      "instructions": [
+        "Sauté onion and bell pepper until softened",
+        "Add garlic, cumin, and paprika",
+        "Simmer tomatoes until thickened",
+        "Nestle eggs into the sauce",
+        "Cover and cook until eggs are set"
+      ],
+      "tags": ["breakfast", "middle-eastern", "vegetarian", "gluten-free"],
+      "dateAdded": "2024-04-01T09:00:00Z"
+    },
+    {
+      "id": "17",
+      "title": "Besan Chilla",
+      "description": "Savory Indian chickpea flour pancakes with herbs",
+      "servings": 4,
+      "prepTime": "15 minutes",
+      "cookTime": "15 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "chickpea_flour",
+          "amount": "1.5",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "tomato",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "onion",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "cilantro",
+          "amount": "0.5",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "ginger",
+          "amount": "1",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "turmeric",
+          "amount": "1",
+          "unit": "tsp"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "2",
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Whisk chickpea flour with water into a thin batter",
+        "Fold in vegetables, herbs, and spices",
+        "Heat a lightly oiled skillet",
+        "Cook each pancake until browned on both sides",
+        "Serve warm with chutney or yogurt"
+      ],
+      "tags": ["breakfast", "indian", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-02T09:00:00Z"
+    },
+    {
+      "id": "18",
+      "title": "Masala Tofu Scramble",
+      "description": "Spiced tofu scramble with peppers and greens",
+      "servings": 2,
+      "prepTime": "10 minutes",
+      "cookTime": "12 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "tofu",
+          "amount": "14",
+          "unit": "oz"
+        },
+        {
+          "ingredientId": "spinach",
+          "amount": "2",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "bell_pepper",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "onion",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "turmeric",
+          "amount": "1",
+          "unit": "tsp"
+        },
+        {
+          "ingredientId": "nutritional_yeast",
+          "amount": "2",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "1",
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Crumble tofu into bite-sized pieces",
+        "Sauté onion and bell pepper until tender",
+        "Add tofu, turmeric, and nutritional yeast",
+        "Fold in spinach until wilted",
+        "Cook until the scramble is hot and lightly browned"
+      ],
+      "tags": [
+        "breakfast",
+        "indian",
+        "vegetarian",
+        "vegan",
+        "gluten-free",
+        "high-protein"
+      ],
+      "dateAdded": "2024-04-03T09:00:00Z"
+    },
+    {
+      "id": "19",
+      "title": "Overnight Oats",
+      "description": "Make-ahead oats with berries, banana, and chia",
+      "servings": 2,
+      "prepTime": "10 minutes",
+      "cookTime": "0 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "gluten_free_rolled_oats",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "almond_milk",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "chia_seeds",
+          "amount": "2",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "mixed_berries",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "banana",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "maple_syrup",
+          "amount": "1",
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Combine oats, almond milk, chia, and maple syrup",
+        "Cover and refrigerate overnight",
+        "Stir the chilled oats",
+        "Top with berries and sliced banana",
+        "Serve cold"
+      ],
+      "tags": ["breakfast", "american", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-04T09:00:00Z"
+    },
+    {
+      "id": "20",
+      "title": "Egg Muffin Cups",
+      "description": "Meal-prep egg cups with turkey sausage and spinach",
+      "servings": 6,
+      "prepTime": "15 minutes",
+      "cookTime": "20 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "eggs",
+          "amount": "8",
+          "unit": "large"
+        },
+        {
+          "ingredientId": "turkey_sausage",
+          "amount": "12",
+          "unit": "oz"
+        },
+        {
+          "ingredientId": "cheddar_cheese",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "spinach",
+          "amount": "2",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "bell_pepper",
+          "amount": "1",
+          "unit": "medium"
+        }
+      ],
+      "instructions": [
+        "Brown turkey sausage and drain excess fat",
+        "Whisk eggs until smooth",
+        "Divide sausage, spinach, pepper, and cheese into muffin cups",
+        "Pour egg over each cup",
+        "Bake until puffed and set"
+      ],
+      "tags": ["breakfast", "american", "gluten-free", "keto", "high-protein"],
+      "dateAdded": "2024-04-05T09:00:00Z"
+    },
+    {
+      "id": "21",
+      "title": "Arepa de Huevo",
+      "description": "Colombian corn arepas filled with egg",
+      "servings": 4,
+      "prepTime": "20 minutes",
+      "cookTime": "20 minutes",
+      "difficulty": "medium",
+      "ingredients": [
+        {
+          "ingredientId": "masarepa",
+          "amount": "2",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "eggs",
+          "amount": "4",
+          "unit": "large"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "4",
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Mix masarepa with warm water into a soft dough",
+        "Shape dough into flat rounds",
+        "Cook arepas until lightly puffed",
+        "Open each arepa and add an egg",
+        "Return to the skillet and cook until the egg is set"
+      ],
+      "tags": ["breakfast", "colombian", "vegetarian", "gluten-free"],
+      "dateAdded": "2024-04-06T09:00:00Z"
+    },
+    {
+      "id": "22",
+      "title": "Mushroom Congee",
+      "description": "Comforting rice porridge with mushrooms and ginger",
+      "servings": 4,
+      "prepTime": "10 minutes",
+      "cookTime": "45 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "white_rice",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "mushrooms",
+          "amount": "8",
+          "unit": "oz"
+        },
+        {
+          "ingredientId": "vegetable_broth",
+          "amount": "6",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "ginger",
+          "amount": "1",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "green_onion",
+          "amount": "0.5",
+          "unit": "cup"
+        }
+      ],
+      "instructions": [
+        "Rinse rice until the water runs mostly clear",
+        "Simmer rice with broth and ginger",
+        "Cook until the grains break down into porridge",
+        "Sauté mushrooms until tender",
+        "Top congee with mushrooms and green onion"
+      ],
+      "tags": ["breakfast", "chinese", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-07T09:00:00Z"
+    },
+    {
+      "id": "23",
+      "title": "Black Bean Burrito Bowl",
+      "description": "Southwestern rice bowl with beans, corn, and avocado",
+      "servings": 4,
+      "prepTime": "20 minutes",
+      "cookTime": "25 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "brown_rice",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "black_beans",
+          "amount": "1",
+          "unit": "can"
+        },
+        {
+          "ingredientId": "corn_kernels",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "avocado",
+          "amount": "1",
+          "unit": "whole"
+        },
+        {
+          "ingredientId": "tomato",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "lime",
+          "amount": "1",
+          "unit": "whole"
+        },
+        {
+          "ingredientId": "cilantro",
+          "amount": "0.5",
+          "unit": "cup"
+        }
+      ],
+      "instructions": [
+        "Cook brown rice until tender",
+        "Warm black beans and corn",
+        "Dice avocado and tomato",
+        "Divide rice among bowls",
+        "Top with beans, vegetables, lime, and cilantro"
+      ],
+      "tags": ["lunch", "mexican", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-08T09:00:00Z"
+    },
+    {
+      "id": "24",
+      "title": "Mujadara",
+      "description": "Middle Eastern lentils and rice with caramelized onions",
+      "servings": 6,
+      "prepTime": "15 minutes",
+      "cookTime": "45 minutes",
+      "difficulty": "medium",
+      "ingredients": [
+        {
+          "ingredientId": "brown_rice",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "lentils",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "onion",
+          "amount": "3",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "3",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "cumin",
+          "amount": "2",
+          "unit": "tsp"
+        }
+      ],
+      "instructions": [
+        "Cook lentils until just tender",
+        "Cook rice separately until fluffy",
+        "Caramelize sliced onions in olive oil",
+        "Season lentils and rice with cumin",
+        "Serve topped with the onions"
+      ],
+      "tags": ["lunch", "middle-eastern", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-09T09:00:00Z"
+    },
+    {
+      "id": "25",
+      "title": "Cold Peanut Noodle Salad",
+      "description": "Chilled rice noodles with peanut-lime dressing",
+      "servings": 4,
+      "prepTime": "20 minutes",
+      "cookTime": "5 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "rice_noodles",
+          "amount": "8",
+          "unit": "oz"
+        },
+        {
+          "ingredientId": "peanut_butter",
+          "amount": "4",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "tamari",
+          "amount": "3",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "cucumber",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "carrot",
+          "amount": "2",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "lime",
+          "amount": "1",
+          "unit": "whole"
+        },
+        {
+          "ingredientId": "sesame_oil",
+          "amount": "1",
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Cook rice noodles and rinse under cold water",
+        "Whisk peanut butter, tamari, lime, and sesame oil",
+        "Slice cucumber and carrots",
+        "Toss noodles with vegetables and dressing",
+        "Chill briefly before serving"
+      ],
+      "tags": ["lunch", "thai", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-10T09:00:00Z"
+    },
+    {
+      "id": "26",
+      "title": "Vietnamese Rice Paper Rolls",
+      "description": "Fresh rolls with tofu, herbs, and crisp vegetables",
+      "servings": 4,
+      "prepTime": "30 minutes",
+      "cookTime": "5 minutes",
+      "difficulty": "medium",
+      "ingredients": [
+        {
+          "ingredientId": "rice_paper",
+          "amount": "8",
+          "unit": "pieces"
+        },
+        {
+          "ingredientId": "rice_noodles",
+          "amount": "4",
+          "unit": "oz"
+        },
+        {
+          "ingredientId": "tofu",
+          "amount": "8",
+          "unit": "oz"
+        },
+        {
+          "ingredientId": "cucumber",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "carrot",
+          "amount": "2",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "mint",
+          "amount": "0.5",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "cilantro",
+          "amount": "0.5",
+          "unit": "cup"
+        }
+      ],
+      "instructions": [
+        "Cook noodles and cool them completely",
+        "Cut tofu and vegetables into thin strips",
+        "Soften rice paper sheets in warm water",
+        "Fill each sheet with noodles, tofu, vegetables, and herbs",
+        "Roll tightly and serve fresh"
+      ],
+      "tags": ["lunch", "vietnamese", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-11T09:00:00Z"
+    },
+    {
+      "id": "27",
+      "title": "Falafel Salad",
+      "description": "Crispy chickpea patties over fresh greens with tahini",
+      "servings": 4,
+      "prepTime": "25 minutes",
+      "cookTime": "20 minutes",
+      "difficulty": "medium",
+      "ingredients": [
+        {
+          "ingredientId": "chickpeas",
+          "amount": "2",
+          "unit": "can"
+        },
+        {
+          "ingredientId": "romaine",
+          "amount": "6",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "cucumber",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "tomato",
+          "amount": "2",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "tahini",
+          "amount": "4",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "parsley",
+          "amount": "0.5",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "cumin",
+          "amount": "2",
+          "unit": "tsp"
+        }
+      ],
+      "instructions": [
+        "Mash chickpeas with parsley and cumin",
+        "Shape the mixture into small patties",
+        "Bake patties until crisp",
+        "Arrange romaine, cucumber, and tomato in bowls",
+        "Top with falafel and tahini"
+      ],
+      "tags": ["lunch", "middle-eastern", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-12T09:00:00Z"
+    },
+    {
+      "id": "28",
+      "title": "Tuna Nicoise Salad",
+      "description": "French composed salad with tuna, potatoes, and eggs",
+      "servings": 4,
+      "prepTime": "20 minutes",
+      "cookTime": "15 minutes",
+      "difficulty": "medium",
+      "ingredients": [
+        {
+          "ingredientId": "canned_tuna",
+          "amount": "10",
+          "unit": "oz"
+        },
+        {
+          "ingredientId": "potato",
+          "amount": "2",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "green_beans",
+          "amount": "8",
+          "unit": "oz"
+        },
+        {
+          "ingredientId": "eggs",
+          "amount": "4",
+          "unit": "large"
+        },
+        {
+          "ingredientId": "tomato",
+          "amount": "2",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "kalamata_olives",
+          "amount": "0.5",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "2",
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Boil potatoes until tender",
+        "Blanch green beans until crisp-tender",
+        "Hard-boil and halve the eggs",
+        "Arrange vegetables, tuna, and eggs on plates",
+        "Drizzle with olive oil before serving"
+      ],
+      "tags": ["lunch", "french", "seafood", "gluten-free", "high-protein"],
+      "dateAdded": "2024-04-13T09:00:00Z"
+    },
+    {
+      "id": "29",
+      "title": "Thai Turkey Lettuce Wraps",
+      "description": "Low-carb lettuce cups with ginger turkey filling",
+      "servings": 4,
+      "prepTime": "15 minutes",
+      "cookTime": "15 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "ground_turkey",
+          "amount": "1.25",
+          "unit": "lb"
+        },
+        {
+          "ingredientId": "butter_lettuce",
+          "amount": "8",
+          "unit": "leaves"
+        },
+        {
+          "ingredientId": "carrot",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "tamari",
+          "amount": "2",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "lime",
+          "amount": "1",
+          "unit": "whole"
+        },
+        {
+          "ingredientId": "ginger",
+          "amount": "1",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "cilantro",
+          "amount": "0.5",
+          "unit": "cup"
+        }
+      ],
+      "instructions": [
+        "Brown turkey in a hot skillet",
+        "Stir in ginger and tamari",
+        "Fold in shredded carrot",
+        "Spoon filling into lettuce leaves",
+        "Finish with lime and cilantro"
+      ],
+      "tags": ["lunch", "thai", "gluten-free", "keto", "high-protein"],
+      "dateAdded": "2024-04-14T09:00:00Z"
+    },
+    {
+      "id": "30",
+      "title": "Misir Wat",
+      "description": "Ethiopian red lentil stew with berbere spice",
+      "servings": 6,
+      "prepTime": "15 minutes",
+      "cookTime": "35 minutes",
+      "difficulty": "medium",
+      "ingredients": [
+        {
+          "ingredientId": "red_lentils",
+          "amount": "2",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "onion",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "tomato",
+          "amount": "2",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "garlic",
+          "amount": "4",
+          "unit": "cloves"
+        },
+        {
+          "ingredientId": "ginger",
+          "amount": "1",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "berbere_spice",
+          "amount": "2",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "2",
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Sauté onion until soft",
+        "Add garlic, ginger, and berbere spice",
+        "Stir in red lentils and tomatoes",
+        "Simmer until lentils break down",
+        "Serve warm as a thick stew"
+      ],
+      "tags": ["dinner", "ethiopian", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-15T09:00:00Z"
+    },
+    {
+      "id": "31",
+      "title": "Jollof Rice with Plantain",
+      "description": "West African tomato rice with sweet fried plantain",
+      "servings": 6,
+      "prepTime": "20 minutes",
+      "cookTime": "40 minutes",
+      "difficulty": "medium",
+      "ingredients": [
+        {
+          "ingredientId": "long_grain_rice",
+          "amount": "2",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "plantain",
+          "amount": "2",
+          "unit": "whole"
+        },
+        {
+          "ingredientId": "tomato",
+          "amount": "2",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "onion",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "bell_pepper",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "vegetable_broth",
+          "amount": "2",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "3",
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Blend tomatoes, onion, and bell pepper into a sauce",
+        "Cook the sauce in olive oil until thickened",
+        "Add rice and vegetable broth",
+        "Simmer until rice is tender",
+        "Serve with browned plantain slices"
+      ],
+      "tags": ["dinner", "west-african", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-16T09:00:00Z"
+    },
+    {
+      "id": "32",
+      "title": "Spicy Garlic Edamame",
+      "description": "Japanese-style edamame tossed with garlic and tamari",
+      "servings": 2,
+      "prepTime": "5 minutes",
+      "cookTime": "8 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "edamame",
+          "amount": "12",
+          "unit": "oz"
+        },
+        {
+          "ingredientId": "garlic",
+          "amount": "2",
+          "unit": "cloves"
+        },
+        {
+          "ingredientId": "tamari",
+          "amount": "1",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "chili_flakes",
+          "amount": "1",
+          "unit": "tsp"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "1",
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Steam edamame until hot",
+        "Sauté garlic and chili flakes in oil",
+        "Add edamame to the skillet",
+        "Splash with tamari",
+        "Toss until coated and glossy"
+      ],
+      "tags": [
+        "snack",
+        "japanese",
+        "vegetarian",
+        "vegan",
+        "gluten-free",
+        "high-protein"
+      ],
+      "dateAdded": "2024-04-17T09:00:00Z"
+    },
+    {
+      "id": "33",
+      "title": "Crispy Roasted Chickpeas",
+      "description": "Crunchy spiced chickpeas for snacking",
+      "servings": 4,
+      "prepTime": "10 minutes",
+      "cookTime": "30 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "chickpeas",
+          "amount": "1",
+          "unit": "can"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "1",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "cumin",
+          "amount": "1",
+          "unit": "tsp"
+        },
+        {
+          "ingredientId": "paprika",
+          "amount": "1",
+          "unit": "tsp"
+        }
+      ],
+      "instructions": [
+        "Dry chickpeas thoroughly",
+        "Toss with oil, cumin, and paprika",
+        "Spread on a baking sheet",
+        "Roast until crisp",
+        "Cool before serving"
+      ],
+      "tags": ["snack", "indian", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-18T09:00:00Z"
+    },
+    {
+      "id": "34",
+      "title": "Pao de Queijo",
+      "description": "Brazilian gluten-free cheese bread bites",
+      "servings": 12,
+      "prepTime": "15 minutes",
+      "cookTime": "20 minutes",
+      "difficulty": "medium",
+      "ingredients": [
+        {
+          "ingredientId": "tapioca_flour",
+          "amount": "2",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "parmesan",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "eggs",
+          "amount": "2",
+          "unit": "large"
+        },
+        {
+          "ingredientId": "whole_milk",
+          "amount": "0.5",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "olive_oil",
+          "amount": "0.25",
+          "unit": "cup"
+        }
+      ],
+      "instructions": [
+        "Warm milk and oil together",
+        "Stir liquid into tapioca flour",
+        "Mix in eggs and parmesan",
+        "Portion dough into small rounds",
+        "Bake until puffed and lightly golden"
+      ],
+      "tags": ["snack", "brazilian", "vegetarian", "gluten-free"],
+      "dateAdded": "2024-04-19T09:00:00Z"
+    },
+    {
+      "id": "35",
+      "title": "Som Tam",
+      "description": "Thai green papaya salad with lime and peanuts",
+      "servings": 4,
+      "prepTime": "20 minutes",
+      "cookTime": "0 minutes",
+      "difficulty": "easy",
+      "ingredients": [
+        {
+          "ingredientId": "green_papaya",
+          "amount": "3",
+          "unit": "cups"
+        },
+        {
+          "ingredientId": "carrot",
+          "amount": "1",
+          "unit": "medium"
+        },
+        {
+          "ingredientId": "tomato",
+          "amount": "1",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "lime",
+          "amount": "2",
+          "unit": "whole"
+        },
+        {
+          "ingredientId": "roasted_peanuts",
+          "amount": "0.25",
+          "unit": "cup"
+        },
+        {
+          "ingredientId": "tamari",
+          "amount": "1",
+          "unit": "tbsp"
+        },
+        {
+          "ingredientId": "chili_flakes",
+          "amount": "1",
+          "unit": "tsp"
+        }
+      ],
+      "instructions": [
+        "Shred green papaya and carrot",
+        "Whisk lime juice with tamari and chili flakes",
+        "Toss papaya, carrot, and tomato with dressing",
+        "Let the salad stand briefly",
+        "Top with roasted peanuts"
+      ],
+      "tags": ["snack", "thai", "vegetarian", "vegan", "gluten-free"],
+      "dateAdded": "2024-04-20T09:00:00Z"
     }
   ],
   "ingredients": [
@@ -1553,6 +2582,723 @@
       "nutritionBasis": "per_100g",
       "unitWeights": {
         "tbsp": 5.2
+      }
+    },
+    {
+      "id": "cumin",
+      "name": "Ground Cumin",
+      "category": "spice",
+      "nutrition": {
+        "calories": 375,
+        "protein": 17.8,
+        "carbs": 44.2,
+        "fat": 22.3
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tsp": 2.1
+      }
+    },
+    {
+      "id": "paprika",
+      "name": "Paprika",
+      "category": "spice",
+      "nutrition": {
+        "calories": 282,
+        "protein": 14.1,
+        "carbs": 54,
+        "fat": 12.9
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tsp": 2.3
+      }
+    },
+    {
+      "id": "chickpea_flour",
+      "name": "Chickpea Flour",
+      "category": "grain",
+      "nutrition": {
+        "calories": 387,
+        "protein": 22.4,
+        "carbs": 57.8,
+        "fat": 6.7
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 92
+      }
+    },
+    {
+      "id": "turmeric",
+      "name": "Ground Turmeric",
+      "category": "spice",
+      "nutrition": {
+        "calories": 312,
+        "protein": 9.7,
+        "carbs": 67.1,
+        "fat": 3.3
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tsp": 3
+      }
+    },
+    {
+      "id": "spinach",
+      "name": "Baby Spinach",
+      "category": "vegetable",
+      "nutrition": {
+        "calories": 23,
+        "protein": 2.9,
+        "carbs": 3.6,
+        "fat": 0.4
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 30
+      }
+    },
+    {
+      "id": "nutritional_yeast",
+      "name": "Nutritional Yeast",
+      "category": "seasoning",
+      "nutrition": {
+        "calories": 325,
+        "protein": 45,
+        "carbs": 35,
+        "fat": 5
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tbsp": 5
+      }
+    },
+    {
+      "id": "gluten_free_rolled_oats",
+      "name": "Gluten-Free Rolled Oats",
+      "category": "grain",
+      "nutrition": {
+        "calories": 389,
+        "protein": 16.9,
+        "carbs": 66.3,
+        "fat": 6.9
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 80
+      }
+    },
+    {
+      "id": "almond_milk",
+      "name": "Unsweetened Almond Milk",
+      "category": "beverage",
+      "nutrition": {
+        "calories": 15,
+        "protein": 0.6,
+        "carbs": 0.3,
+        "fat": 1.2
+      },
+      "commonAllergens": ["tree nuts"],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 240
+      }
+    },
+    {
+      "id": "chia_seeds",
+      "name": "Chia Seeds",
+      "category": "seed",
+      "nutrition": {
+        "calories": 486,
+        "protein": 16.5,
+        "carbs": 42.1,
+        "fat": 30.7
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tbsp": 12
+      }
+    },
+    {
+      "id": "maple_syrup",
+      "name": "Maple Syrup",
+      "category": "sweetener",
+      "nutrition": {
+        "calories": 260,
+        "protein": 0,
+        "carbs": 67,
+        "fat": 0.1
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tbsp": 20
+      }
+    },
+    {
+      "id": "turkey_sausage",
+      "name": "Turkey Sausage",
+      "category": "protein",
+      "nutrition": {
+        "calories": 196,
+        "protein": 23,
+        "carbs": 1.5,
+        "fat": 11
+      },
+      "commonAllergens": [],
+      "dietary": ["gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {}
+    },
+    {
+      "id": "cheddar_cheese",
+      "name": "Cheddar Cheese",
+      "category": "dairy",
+      "nutrition": {
+        "calories": 403,
+        "protein": 24.9,
+        "carbs": 1.3,
+        "fat": 33.1
+      },
+      "commonAllergens": ["dairy"],
+      "dietary": ["vegetarian", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 113
+      }
+    },
+    {
+      "id": "masarepa",
+      "name": "Masarepa",
+      "category": "grain",
+      "nutrition": {
+        "calories": 360,
+        "protein": 7,
+        "carbs": 78,
+        "fat": 2
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 145
+      }
+    },
+    {
+      "id": "white_rice",
+      "name": "White Rice",
+      "category": "grain",
+      "nutrition": {
+        "calories": 365,
+        "protein": 7.1,
+        "carbs": 80,
+        "fat": 0.7
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 185
+      }
+    },
+    {
+      "id": "mushrooms",
+      "name": "Mushrooms",
+      "category": "vegetable",
+      "nutrition": {
+        "calories": 22,
+        "protein": 3.1,
+        "carbs": 3.3,
+        "fat": 0.3
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {}
+    },
+    {
+      "id": "vegetable_broth",
+      "name": "Vegetable Broth",
+      "category": "stock",
+      "nutrition": {
+        "calories": 5,
+        "protein": 0.2,
+        "carbs": 1,
+        "fat": 0.1
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 240
+      }
+    },
+    {
+      "id": "green_onion",
+      "name": "Green Onion",
+      "category": "vegetable",
+      "nutrition": {
+        "calories": 32,
+        "protein": 1.8,
+        "carbs": 7.3,
+        "fat": 0.2
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 100
+      }
+    },
+    {
+      "id": "brown_rice",
+      "name": "Brown Rice",
+      "category": "grain",
+      "nutrition": {
+        "calories": 370,
+        "protein": 7.9,
+        "carbs": 77.2,
+        "fat": 2.9
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 190
+      }
+    },
+    {
+      "id": "black_beans",
+      "name": "Black Beans",
+      "category": "legume",
+      "nutrition": {
+        "calories": 132,
+        "protein": 8.9,
+        "carbs": 23.7,
+        "fat": 0.5
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "can": 240
+      }
+    },
+    {
+      "id": "corn_kernels",
+      "name": "Corn Kernels",
+      "category": "vegetable",
+      "nutrition": {
+        "calories": 86,
+        "protein": 3.2,
+        "carbs": 19,
+        "fat": 1.2
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 164
+      }
+    },
+    {
+      "id": "lentils",
+      "name": "Brown Lentils",
+      "category": "legume",
+      "nutrition": {
+        "calories": 353,
+        "protein": 25.8,
+        "carbs": 60.1,
+        "fat": 1.1
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 192
+      }
+    },
+    {
+      "id": "rice_noodles",
+      "name": "Rice Noodles",
+      "category": "grain",
+      "nutrition": {
+        "calories": 364,
+        "protein": 5.9,
+        "carbs": 80.2,
+        "fat": 0.6
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {}
+    },
+    {
+      "id": "tamari",
+      "name": "Gluten-Free Tamari",
+      "category": "condiment",
+      "nutrition": {
+        "calories": 60,
+        "protein": 10,
+        "carbs": 5.6,
+        "fat": 0.1
+      },
+      "commonAllergens": ["soy"],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tbsp": 16
+      }
+    },
+    {
+      "id": "sesame_oil",
+      "name": "Sesame Oil",
+      "category": "oil",
+      "nutrition": {
+        "calories": 884,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 100
+      },
+      "commonAllergens": ["sesame"],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tbsp": 13.6
+      }
+    },
+    {
+      "id": "rice_paper",
+      "name": "Rice Paper Wrappers",
+      "category": "grain",
+      "nutrition": {
+        "calories": 329,
+        "protein": 5.9,
+        "carbs": 78,
+        "fat": 0.3
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "piece": 10
+      }
+    },
+    {
+      "id": "mint",
+      "name": "Fresh Mint",
+      "category": "herb",
+      "nutrition": {
+        "calories": 70,
+        "protein": 3.8,
+        "carbs": 14.9,
+        "fat": 0.9
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 25
+      }
+    },
+    {
+      "id": "romaine",
+      "name": "Romaine Lettuce",
+      "category": "vegetable",
+      "nutrition": {
+        "calories": 17,
+        "protein": 1.2,
+        "carbs": 3.3,
+        "fat": 0.3
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 47
+      }
+    },
+    {
+      "id": "parsley",
+      "name": "Fresh Parsley",
+      "category": "herb",
+      "nutrition": {
+        "calories": 36,
+        "protein": 3,
+        "carbs": 6.3,
+        "fat": 0.8
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 60
+      }
+    },
+    {
+      "id": "canned_tuna",
+      "name": "Canned Tuna",
+      "category": "protein",
+      "nutrition": {
+        "calories": 116,
+        "protein": 25.5,
+        "carbs": 0,
+        "fat": 0.8
+      },
+      "commonAllergens": ["fish"],
+      "dietary": ["gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {}
+    },
+    {
+      "id": "green_beans",
+      "name": "Green Beans",
+      "category": "vegetable",
+      "nutrition": {
+        "calories": 31,
+        "protein": 1.8,
+        "carbs": 7,
+        "fat": 0.2
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {}
+    },
+    {
+      "id": "kalamata_olives",
+      "name": "Kalamata Olives",
+      "category": "condiment",
+      "nutrition": {
+        "calories": 233,
+        "protein": 1,
+        "carbs": 6,
+        "fat": 22
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 135
+      }
+    },
+    {
+      "id": "ground_turkey",
+      "name": "Ground Turkey",
+      "category": "protein",
+      "nutrition": {
+        "calories": 170,
+        "protein": 21,
+        "carbs": 0,
+        "fat": 9
+      },
+      "commonAllergens": [],
+      "dietary": ["gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {}
+    },
+    {
+      "id": "butter_lettuce",
+      "name": "Butter Lettuce",
+      "category": "vegetable",
+      "nutrition": {
+        "calories": 13,
+        "protein": 1.4,
+        "carbs": 2.2,
+        "fat": 0.2
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "leaf": 14
+      }
+    },
+    {
+      "id": "red_lentils",
+      "name": "Red Lentils",
+      "category": "legume",
+      "nutrition": {
+        "calories": 352,
+        "protein": 24.6,
+        "carbs": 63.4,
+        "fat": 1.1
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 192
+      }
+    },
+    {
+      "id": "berbere_spice",
+      "name": "Berbere Spice",
+      "category": "spice",
+      "nutrition": {
+        "calories": 280,
+        "protein": 12,
+        "carbs": 50,
+        "fat": 10
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tbsp": 7
+      }
+    },
+    {
+      "id": "long_grain_rice",
+      "name": "Long-Grain Rice",
+      "category": "grain",
+      "nutrition": {
+        "calories": 365,
+        "protein": 7.1,
+        "carbs": 80,
+        "fat": 0.7
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 185
+      }
+    },
+    {
+      "id": "plantain",
+      "name": "Plantain",
+      "category": "fruit",
+      "nutrition": {
+        "calories": 122,
+        "protein": 1.3,
+        "carbs": 31.9,
+        "fat": 0.4
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "whole": 179
+      }
+    },
+    {
+      "id": "edamame",
+      "name": "Shelled Edamame",
+      "category": "legume",
+      "nutrition": {
+        "calories": 121,
+        "protein": 11.9,
+        "carbs": 8.9,
+        "fat": 5.2
+      },
+      "commonAllergens": ["soy"],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {}
+    },
+    {
+      "id": "chili_flakes",
+      "name": "Chili Flakes",
+      "category": "spice",
+      "nutrition": {
+        "calories": 282,
+        "protein": 12,
+        "carbs": 50,
+        "fat": 14
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "tsp": 1.8
+      }
+    },
+    {
+      "id": "tapioca_flour",
+      "name": "Tapioca Flour",
+      "category": "baking",
+      "nutrition": {
+        "calories": 358,
+        "protein": 0.2,
+        "carbs": 88.7,
+        "fat": 0
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 120
+      }
+    },
+    {
+      "id": "whole_milk",
+      "name": "Whole Milk",
+      "category": "dairy",
+      "nutrition": {
+        "calories": 61,
+        "protein": 3.2,
+        "carbs": 4.8,
+        "fat": 3.3
+      },
+      "commonAllergens": ["dairy"],
+      "dietary": ["vegetarian", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 244
+      }
+    },
+    {
+      "id": "green_papaya",
+      "name": "Green Papaya",
+      "category": "fruit",
+      "nutrition": {
+        "calories": 43,
+        "protein": 0.5,
+        "carbs": 10.8,
+        "fat": 0.3
+      },
+      "commonAllergens": [],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 145
+      }
+    },
+    {
+      "id": "roasted_peanuts",
+      "name": "Roasted Peanuts",
+      "category": "legume",
+      "nutrition": {
+        "calories": 585,
+        "protein": 23.7,
+        "carbs": 21.5,
+        "fat": 49.7
+      },
+      "commonAllergens": ["peanuts"],
+      "dietary": ["vegan", "gluten-free"],
+      "nutritionBasis": "per_100g",
+      "unitWeights": {
+        "cup": 146
       }
     }
   ]

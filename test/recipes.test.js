@@ -10,6 +10,22 @@ const { getRecipeDetail, getRecipeList } = createRecipeRepository(
   async () => recipeDatabase,
 );
 
+/** @param {string} tag */
+const getSeedTitlesWithTag = (tag) =>
+  recipeDatabase.recipes
+    .filter((recipe) => recipe.tags?.includes(tag))
+    .map((recipe) => recipe.title);
+
+/** @param {string} ingredientId */
+const getSeedTitlesWithIngredient = (ingredientId) =>
+  recipeDatabase.recipes
+    .filter((recipe) =>
+      recipe.ingredients?.some(
+        (ingredient) => ingredient.ingredientId === ingredientId,
+      ),
+    )
+    .map((recipe) => recipe.title);
+
 test("toRecipeListItem maps only list-safe recipe fields", () => {
   const item = toRecipeListItem({
     id: "recipe-1",
@@ -221,7 +237,7 @@ test("toRecipeListItems filters out invalid recipe records", () => {
 test("getRecipeList returns list DTOs from the mock database", async () => {
   const recipes = await getRecipeList();
 
-  expect(recipes).toHaveLength(15);
+  expect(recipes).toHaveLength(recipeDatabase.recipes.length);
   expect(recipes[0].title).toBe("Classic Margherita Pizza");
   expect(recipes[0].ingredientCount).toBe(5);
   expect(Object.keys(recipes[0]).sort()).toEqual([
@@ -250,7 +266,7 @@ test("getRecipeList filters recipes by name", async () => {
 test("getRecipeList filters recipes by tag", async () => {
   const recipes = await getRecipeList({ tag: "vegetarian" });
 
-  expect(recipes).toHaveLength(5);
+  expect(recipes).toHaveLength(getSeedTitlesWithTag("vegetarian").length);
   expect(recipes.every((recipe) => recipe.tags.includes("vegetarian"))).toBe(
     true,
   );
@@ -260,14 +276,12 @@ test("getRecipeList filters recipes by exact ingredient id", async () => {
   const tomatoRecipes = await getRecipeList({ ingredient: "tomato" });
   const soySauceRecipes = await getRecipeList({ ingredient: "soy_sauce" });
 
-  expect(tomatoRecipes.map((recipe) => recipe.title)).toEqual([
-    "Classic Margherita Pizza",
-    "Greek Salad",
-  ]);
-  expect(soySauceRecipes.map((recipe) => recipe.title)).toEqual([
-    "Chicken Stir-Fry",
-    "Stir-Fried Tofu",
-  ]);
+  expect(tomatoRecipes.map((recipe) => recipe.title)).toEqual(
+    getSeedTitlesWithIngredient("tomato"),
+  );
+  expect(soySauceRecipes.map((recipe) => recipe.title)).toEqual(
+    getSeedTitlesWithIngredient("soy_sauce"),
+  );
 });
 
 test("getRecipeList ingredient facet matches by id, not name substring", async () => {
@@ -307,15 +321,9 @@ test("getRecipeList ignores empty and malformed filter values", async () => {
     ingredient: null,
   });
 
-  expect(recipes.map((recipe) => recipe.title)).toEqual([
-    "Classic Margherita Pizza",
-    "Chicken Stir-Fry",
-    "Beef Tacos",
-    "Sushi Roll",
-    "Pasta Carbonara",
-    "Grilled Salmon with Asparagus",
-    "Almond-Crusted Chicken",
-  ]);
+  expect(recipes.map((recipe) => recipe.title)).toEqual(
+    getSeedTitlesWithTag("dinner"),
+  );
 });
 
 test("getRecipeDetail returns a full recipe detail DTO from the mock database", async () => {
@@ -415,6 +423,30 @@ test("seeded recipe nutrition is fully converted and plausible", async () => {
   expect(byTitle.get("Sushi Roll")?.calories).toBeLessThan(350);
   expect(byTitle.get("Vegetable Curry")?.calories).toBeLessThan(500);
   expect(byTitle.get("Pasta Carbonara")?.calories).toBeLessThan(1000);
+});
+
+test("macro diet filters are derived from complete recipe nutrition", async () => {
+  const highProtein = await getRecipeList({ diet: "high-protein" });
+  const keto = await getRecipeList({ diet: "keto" });
+
+  expect(highProtein.map((recipe) => recipe.title)).toEqual([
+    "Almond-Crusted Chicken",
+    "Masala Tofu Scramble",
+    "Egg Muffin Cups",
+    "Tuna Nicoise Salad",
+    "Thai Turkey Lettuce Wraps",
+    "Spicy Garlic Edamame",
+  ]);
+  expect(keto.map((recipe) => recipe.title)).toEqual([
+    "Egg Muffin Cups",
+    "Thai Turkey Lettuce Wraps",
+  ]);
+});
+
+test("expanded seed data balances breakfast, lunch, and snack tags", async () => {
+  await expect(getRecipeList({ tag: "breakfast" })).resolves.toHaveLength(8);
+  await expect(getRecipeList({ tag: "lunch" })).resolves.toHaveLength(8);
+  await expect(getRecipeList({ tag: "snack" })).resolves.toHaveLength(4);
 });
 
 test("getRecipeDetail returns null for missing recipe IDs", async () => {
