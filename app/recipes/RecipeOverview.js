@@ -267,7 +267,10 @@ export default function RecipeOverview() {
   const overview = finalized?.overview ?? streamedOverview;
   const cards = finalized?.recipes ?? [];
   const hasSubmitted = submittedQuery.length > 0;
-  const showError = Boolean(error) || finalizeError || streamFinishError;
+  const showError =
+    finalizeError ||
+    streamFinishError ||
+    (Boolean(error) && !isResolving && !finalized);
   // Honest empty state: a finished stream that yielded no grounded cards (the
   // model abstained, or every claimed id failed to resolve). Not an error.
   const showEmpty =

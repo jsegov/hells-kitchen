@@ -392,6 +392,43 @@ test("finalizes usable streamed partials after useObject schema errors", async (
   });
 });
 
+test("does not show a stream error once fallback finalization succeeds", async () => {
+  const resolveFetch = mockFinalizeFetch(finalizedPayload());
+  /** @type {{ fetch: unknown }} */ (global).fetch = resolveFetch;
+
+  const { rerender } = render(<RecipeOverview />);
+
+  fireEvent.change(screen.getByPlaceholderText(/Ask for a recommendation/i), {
+    target: { value: "a quick dinner" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+
+  hookState.object = {
+    overview: "Tomato Bowl is the quickest.",
+    recommendedRecipeIds: ["r1"],
+    suggestedFilters: { diet: [], tag: [] },
+    intent: "discovery",
+  };
+  rerender(<RecipeOverview />);
+
+  hookState.error = new Error("stream failed");
+
+  await act(async () => {
+    hookState.onFinish?.({
+      object: undefined,
+      error: new Error("schema failed"),
+    });
+  });
+
+  await waitFor(() => {
+    const cards = screen.getByRole("region", {
+      name: "Recommended recipes",
+    });
+    expect(within(cards).getByText("Tomato Bowl")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+});
+
 test("treats schema validation errors without usable partials as real errors", async () => {
   const resolveFetch = mockFinalizeFetch(finalizedPayload());
   /** @type {{ fetch: unknown }} */ (global).fetch = resolveFetch;
