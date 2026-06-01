@@ -10,7 +10,7 @@ Create a recipe management application that allows users to view, search, and or
 - `/` redirects to `/recipes`.
 - `/recipes` displays recipe list cards and supports filtering by recipe name, tags, and ingredients through query parameters.
 - `/recipes/:id` displays ingredients with quantities, cooking instructions, tags, and nutrition totals/per-serving values calculated from ingredients.
-- Next.js Route Handlers expose `GET /api/recipes` for list-safe recipe data and `GET /api/recipes/:id` for full recipe detail data. Server Components call the same data layer (`lib/recipes.js`) directly, with no internal HTTP hop.
+- Next.js Route Handlers expose `GET /api/recipes` for list-safe recipe data, `GET /api/recipes/:id` for full recipe detail data, and AI Overview endpoints for streamed prose plus server-side finalization. Server Components call the same data layer (`lib/recipes.js`) directly, with no internal HTTP hop.
 - Runtime data is served from Neon Postgres. `db/data.json` is retained as seed data for local and preview databases.
 
 ## Tips
@@ -40,6 +40,7 @@ The application uses Neon Postgres at runtime. `db/data.json` is the seed source
 
 - `DATABASE_URL` is required for the app runtime and DB-backed tests.
 - `DATABASE_URL_UNPOOLED` is required for `npm run db:migrate`, `npm run db:seed`, and `npm run db:reset`.
+- `AI_GATEWAY_API_KEY` or Vercel OIDC (`VERCEL_OIDC_TOKEN` from `vercel link && vercel env pull`) is **optional for core browsing** and required only for successful LLM responses. The AI Overview recommendation box is always visible on `/recipes`; Gateway credentials are read server-side only (never exposed to the browser, never `NEXT_PUBLIC_*`). When credentials are absent or invalid, submitting the AI form returns an inline error and the rest of `/recipes` is unchanged.
 - `API_BASE_URL` and `CORS_ORIGIN` are obsolete now that the API runs in-process within the Next.js app.
 
 #### Quality gates
@@ -127,6 +128,15 @@ No new setup requirements were added. Use the existing commands documented above
 - Per-facet result counts come from a new `getRecipeFacets(filters)` data-layer function (cached and dual-path like `getRecipeList`). Counts are drill-down ("results if you also pick this") and reuse the list matcher over the catalog, so a count can never disagree with the list it previews.
 - `RecipeFilters` is a progressively-enhanced client island: the real GET form is the no-JS baseline; with JS, desktop applies filters instantly via `router.replace` on change while mobile collapses the panel into a drawer that batches and applies with one button. Chip removal links are plain server-rendered anchors that work either way.
 
+##### AI Overview (LLM recipe discovery)
+
+- A freeform "Ask for a recommendation" box on `/recipes` streams a short **provisional** AI overview paragraph and then renders **real `RecipeCard`s selected from our own 35-recipe catalog** only after server finalization — the Google-AI-Overview shape, constrained to the dataset. The box is always visible; with no key, submission fails through the same inline error state as provider failures. The no-JS GET fallback searches deterministic recipe browsing by name.
+- **The model never authors a final recipe card or link.** It only *names* catalog ids and provides structured filter hints in the streamed object; `POST /api/recipes/overview/resolve` validates the completed object against the real catalog, strips invalid filters, and resolves cards through the real data layer. If model ids are missing or invalid for a discovery request, the finalizer can still choose real cards from validated filters or exact catalog-title mentions. A hallucinated or non-existent id is never rendered. The model narrates; code computes (any nutrition mentioned comes from deterministic per-serving macros, with incomplete nutrition rows signaled to the prompt).
+- **Structured output with hand-written validation:** the `ai` SDK schema helper carries a hand-written JSON Schema while our existing typeguard convention stays the real validator; numeric/length bounds are kept off the model schema (the provider can 400 on them) and enforced during server finalization. The server model schema additionally constrains `recommendedRecipeIds` to the live catalog ids, but server validation remains the authority.
+- **Cost/perf:** the ~5-7K-token catalog is sent as its own content part to `google/gemini-3-flash` through Vercel AI Gateway with deterministic structured settings (`temperature: 0`, minimal Gemini thinking). `MAX_QUERY_LEN` (300 chars, enforced client- and server-side), Gateway cost tags, and a per-client in-memory rate limiter bound abuse and cost; responses are `no-store`.
+- **Honest empty/error states** are first-class: the model is instructed to return an empty recommendation set rather than invent a match, and over-constrained queries show a "nothing matched" note only after finalization and deterministic fallback cannot resolve real cards.
+- **Open decision (production):** the rate limiter is in-memory and therefore per-instance — on a serverless fleet it must be backed by a durable shared store (Upstash/Vercel KV) for a true global limit. This is documented in `lib/rateLimit.js` and left as a deliberate take-home-scope choice.
+
 #### Completed features
 
 - Sorting by curated order, title, prep time, cook time, difficulty, servings, and date added, with ascending/descending order — exposed as one plain-language dropdown.
@@ -137,7 +147,8 @@ No new setup requirements were added. Use the existing commands documented above
 - Derived dietary badges on recipe cards and detail pages.
 - Detail-page allergen summary with a verification note.
 - Serving-size control with presets and numeric input that scales ingredients and nutrition together.
-- Additional unit/render/API/DB coverage for sorting, dietary derivation, allergen filtering, facet counts, and serving-size math.
+- AI Overview: a streamed LLM recommendation box on `/recipes` that grounds its picks in real catalog recipes (server-side id resolution), uses Vercel AI Gateway with `google/gemini-3-flash`, degrades gracefully without Gateway credentials, and throttles per client.
+- Additional unit/render/API/DB coverage for sorting, dietary derivation, allergen filtering, facet counts, serving-size math, and the AI Overview (pure helpers, the streaming route with a mock model, the client island states, and the rate limiter).
 
 #### Assumptions
 
@@ -150,6 +161,7 @@ No new setup requirements were added. Use the existing commands documented above
 - Ingredient amounts that are ambiguous or not safely parseable, such as ranges or mixed numbers, are displayed unchanged during scaling.
 - Nutrition scaling starts from the validated recipe total exposed by the data layer, which is already rounded to one decimal place.
 - Allergen handling is informational and should not be treated as a medical safety guarantee.
+- The AI Overview rate limiter is in-memory (per-instance), which is sufficient for the demo but not a true global limit across a serverless fleet — a durable store (Upstash/Vercel KV) is the production choice. Gateway usage/cost attribution is handled with the `feature:recipe-overview` tag.
 
 #### Additional features with more time
 

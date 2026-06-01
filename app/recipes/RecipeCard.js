@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatDietaryLabel, formatDifficulty } from "./recipeData";
+import { formatDietaryLabel, formatDifficulty } from "./recipeDisplay";
 import styles from "./page.module.css";
 
 /**

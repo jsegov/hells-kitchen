@@ -3,7 +3,7 @@ import {
   formatAllergenLabel,
   formatDietaryLabel,
   formatDifficulty,
-} from "../recipeData";
+} from "../recipeDisplay";
 import Metric from "./Metric";
 import ServingSizeControls from "./ServingSizeControls";
 import styles from "./page.module.css";
