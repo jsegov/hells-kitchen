@@ -105,10 +105,10 @@ export default function RecipeOverview() {
   const ignoredStreamedRef = useRef(
     /** @type {PartialOverview | null} */ (null),
   );
-  const ignoreFinishUntilFreshStreamRef = useRef(false);
   const wasStoppedRef = useRef(false);
   const requestIdRef = useRef(0);
   const submittedQueryRef = useRef("");
+  const stopRef = useRef(/** @type {(() => void) | null} */ (null));
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [finalized, setFinalized] = useState(
     /** @type {FinalizedOverview | null} */ (null),
@@ -125,7 +125,7 @@ export default function RecipeOverview() {
     api: "/api/recipes/overview",
     schema: OVERVIEW_SCHEMA,
     onFinish: ({ object: rawFinal, error: finishError }) => {
-      if (wasStoppedRef.current || ignoreFinishUntilFreshStreamRef.current) {
+      if (wasStoppedRef.current) {
         setIsResolving(false);
         setSettled(true);
         return;
@@ -202,12 +202,16 @@ export default function RecipeOverview() {
     if (hasUsablePartialOverview(streamed)) {
       latestStreamedRef.current = streamed ?? null;
       ignoredStreamedRef.current = null;
-      ignoreFinishUntilFreshStreamRef.current = false;
     }
   }, [streamed]);
 
   useEffect(() => {
+    stopRef.current = stop;
+  }, [stop]);
+
+  useEffect(() => {
     return () => {
+      stopRef.current?.();
       finalizeAbortRef.current?.abort();
     };
   }, []);
@@ -222,13 +226,11 @@ export default function RecipeOverview() {
       }
 
       // Reset per-request state; keep focus on the input (a11y, plan §8).
-      const needsFreshStreamBeforeFinish = wasStoppedRef.current;
       requestIdRef.current += 1;
       finalizeAbortRef.current?.abort();
       finalizeAbortRef.current = null;
       ignoredStreamedRef.current = streamed ?? null;
       latestStreamedRef.current = null;
-      ignoreFinishUntilFreshStreamRef.current = needsFreshStreamBeforeFinish;
       wasStoppedRef.current = false;
       submittedQueryRef.current = value;
       setSubmittedQuery(value);
@@ -248,7 +250,6 @@ export default function RecipeOverview() {
   const handleStop = useCallback(() => {
     requestIdRef.current += 1;
     wasStoppedRef.current = true;
-    ignoreFinishUntilFreshStreamRef.current = true;
     stop();
     finalizeAbortRef.current?.abort();
     finalizeAbortRef.current = null;
@@ -402,7 +403,10 @@ export default function RecipeOverview() {
               if (submittedQuery) {
                 requestIdRef.current += 1;
                 finalizeAbortRef.current?.abort();
+                finalizeAbortRef.current = null;
+                ignoredStreamedRef.current = streamed ?? null;
                 latestStreamedRef.current = null;
+                wasStoppedRef.current = false;
                 submittedQueryRef.current = submittedQuery;
                 setFinalized(null);
                 setIsResolving(false);
@@ -410,6 +414,7 @@ export default function RecipeOverview() {
                 setStreamFinishError(false);
                 setWasStopped(false);
                 setSettled(false);
+                clear();
                 submit({ query: submittedQuery.slice(0, MAX_QUERY_LEN) });
                 inputRef.current?.focus();
               }

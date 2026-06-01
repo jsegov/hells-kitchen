@@ -314,6 +314,47 @@ test("does not show no-match after Stop", () => {
   ).not.toBeInTheDocument();
 });
 
+test("finalizes a fresh ask submitted after Stop", async () => {
+  const resolveFetch = mockFinalizeFetch(finalizedPayload());
+  /** @type {{ fetch: unknown }} */ (global).fetch = resolveFetch;
+
+  const { rerender } = render(<RecipeOverview />);
+  const input = screen.getByPlaceholderText(/Ask for a recommendation/i);
+
+  fireEvent.change(input, { target: { value: "first query" } });
+  fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+
+  hookState.isLoading = true;
+  hookState.object = { overview: "First answer." };
+  rerender(<RecipeOverview />);
+
+  fireEvent.click(screen.getByRole("button", { name: "Stop" }));
+
+  hookState.isLoading = false;
+  hookState.object = undefined;
+  rerender(<RecipeOverview />);
+
+  fireEvent.change(input, { target: { value: "second query" } });
+  fireEvent.click(screen.getByRole("button", { name: "Ask again" }));
+
+  await act(async () => {
+    hookState.onFinish?.({
+      object: {
+        overview: "Tomato Bowl is the quickest.",
+        recommendedRecipeIds: ["r1"],
+        suggestedFilters: { diet: [], tag: [] },
+        intent: "discovery",
+      },
+      error: undefined,
+    });
+  });
+
+  expect(resolveFetch).toHaveBeenCalledTimes(1);
+  expect(JSON.parse(String(resolveFetch.mock.calls[0][1].body))).toMatchObject({
+    query: "second query",
+  });
+});
+
 test("finalizes usable streamed partials after useObject schema errors", async () => {
   const resolveFetch = mockFinalizeFetch(finalizedPayload());
   /** @type {{ fetch: unknown }} */ (global).fetch = resolveFetch;
@@ -497,10 +538,12 @@ test("aborts pending finalization when unmounted", async () => {
   });
 
   expect(finalizeSignal?.aborted).toBe(false);
+  expect(hookState.stop).not.toHaveBeenCalled();
 
   unmount();
 
   expect(finalizeSignal?.aborted).toBe(true);
+  expect(hookState.stop).toHaveBeenCalledTimes(1);
 });
 
 test("surfaces an inline stream error and retries the same query", () => {
@@ -511,7 +554,9 @@ test("surfaces an inline stream error and retries the same query", () => {
   });
   fireEvent.click(screen.getByRole("button", { name: "Ask" }));
   hookState.submit.mockClear();
+  hookState.clear.mockClear();
 
+  hookState.object = { overview: "Stale overview." };
   hookState.error = new Error("stream failed");
   rerender(<RecipeOverview />);
 
@@ -519,5 +564,6 @@ test("surfaces an inline stream error and retries the same query", () => {
   expect(within(alert).getByText(/Something went wrong/i)).toBeInTheDocument();
 
   fireEvent.click(within(alert).getByRole("button", { name: "Try again" }));
+  expect(hookState.clear).toHaveBeenCalledTimes(1);
   expect(hookState.submit).toHaveBeenCalledWith({ query: "a quick dinner" });
 });
