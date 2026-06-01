@@ -3,6 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { GET as listGET } from "../app/api/recipes/route";
 import { GET as detailGET } from "../app/api/recipes/[id]/route";
+import recipeDatabase from "../db/data.json";
 
 const describeWithDb =
   process.env.RUN_DB_TESTS === "1" ? describe : describe.skip;
@@ -16,7 +17,7 @@ describeWithDb("GET /api/recipes", () => {
     expect(res.headers.get("Cache-Control")).toContain("s-maxage=3600");
     expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(Array.isArray(data)).toBe(true);
-    expect(data).toHaveLength(15);
+    expect(data).toHaveLength(recipeDatabase.recipes.length);
   });
 
   it("filters recipes by name", async () => {

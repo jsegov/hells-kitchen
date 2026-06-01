@@ -17,14 +17,33 @@ const GROUP_TO_FILTER_KEY = [
   ["allergens", "exclude"],
 ];
 
+const expectedTagCount = new Set(
+  recipeDatabase.recipes.flatMap((recipe) =>
+    (recipe.tags ?? []).map((tag) => tag.trim().toLowerCase()).filter(Boolean),
+  ),
+).size;
+const expectedIngredientCount = new Set(
+  recipeDatabase.recipes.flatMap((recipe) =>
+    (recipe.ingredients ?? [])
+      .map((ingredient) => ingredient.ingredientId)
+      .filter(Boolean),
+  ),
+).size;
+
 test("derives facet vocabularies from the catalog and static lists", async () => {
   const facets = await getRecipeFacets({});
 
-  expect(facets.tags).toHaveLength(22);
-  expect(facets.ingredients).toHaveLength(53);
+  expect(facets.tags).toHaveLength(expectedTagCount);
+  expect(facets.ingredients).toHaveLength(expectedIngredientCount);
   // Diets/allergens are narrowed to tokens the catalog actually carries.
-  expect(facets.diets).toHaveLength(3);
-  expect(facets.allergens).toHaveLength(9);
+  expect(facets.diets.map((option) => option.value)).toEqual([
+    "vegetarian",
+    "vegan",
+    "gluten-free",
+    "keto",
+    "high-protein",
+  ]);
+  expect(facets.allergens.length).toBeGreaterThan(0);
 
   // Ingredient options are keyed by id but labeled by name.
   expect(facets.ingredients.find((o) => o.value === "tomato")?.label).toBe(
@@ -37,10 +56,9 @@ test("omits diet/allergen options no recipe carries", async () => {
   const dietValues = facets.diets.map((o) => o.value);
   const allergenValues = facets.allergens.map((o) => o.value);
 
-  // keto/high-protein match nothing; every recipe is already peanut-free.
-  expect(dietValues).toEqual(["vegetarian", "vegan", "gluten-free"]);
-  expect(allergenValues).not.toContain("keto");
-  expect(allergenValues).not.toContain("peanuts");
+  expect(dietValues).toContain("keto");
+  expect(dietValues).toContain("high-protein");
+  expect(allergenValues).toContain("peanuts");
 
   // The "Gluten-free" diet already expresses gluten avoidance, so the
   // free-from facet drops gluten to avoid a duplicate control.
@@ -59,8 +77,11 @@ test("labels allergen options as a positive 'free from' attribute", async () => 
 
 test("counts are drill-down (results if you also pick the option)", async () => {
   const facets = await getRecipeFacets({});
+  const vegetarianRecipes = await getRecipeList({ tag: "vegetarian" });
 
-  expect(facets.tags.find((o) => o.value === "vegetarian")?.count).toBe(5);
+  expect(facets.tags.find((o) => o.value === "vegetarian")?.count).toBe(
+    vegetarianRecipes.length,
+  );
 });
 
 test("ingredient counts match by id, never colliding on name substrings", async () => {

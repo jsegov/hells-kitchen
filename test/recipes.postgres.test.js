@@ -2,9 +2,32 @@
 import { describe, expect, test } from "@jest/globals";
 
 import { getData, getRecipeDetail, getRecipeList } from "../lib/recipes";
+import recipeDatabase from "../db/data.json";
 
 const describeWithDb =
   process.env.RUN_DB_TESTS === "1" ? describe : describe.skip;
+
+/** @param {string} tag */
+const getSeedTitlesWithTag = (tag) =>
+  recipeDatabase.recipes
+    .filter((recipe) => recipe.tags?.includes(tag))
+    .map((recipe) => recipe.title);
+
+/** @param {...string} tags */
+const getSeedTitlesWithAllTags = (...tags) =>
+  recipeDatabase.recipes
+    .filter((recipe) => tags.every((tag) => recipe.tags?.includes(tag)))
+    .map((recipe) => recipe.title);
+
+/** @param {string} ingredientId */
+const getSeedTitlesWithIngredient = (ingredientId) =>
+  recipeDatabase.recipes
+    .filter((recipe) =>
+      recipe.ingredients?.some(
+        (ingredient) => ingredient.ingredientId === ingredientId,
+      ),
+    )
+    .map((recipe) => recipe.title);
 
 describeWithDb("Neon-backed recipe repository", () => {
   beforeAll(() => {
@@ -20,14 +43,14 @@ describeWithDb("Neon-backed recipe repository", () => {
       recipes: expect.any(Array),
       ingredients: expect.any(Array),
     });
-    expect(data.recipes).toHaveLength(15);
-    expect(data.ingredients).toHaveLength(54);
+    expect(data.recipes).toHaveLength(recipeDatabase.recipes.length);
+    expect(data.ingredients).toHaveLength(recipeDatabase.ingredients.length);
   });
 
   test("returns list DTOs in the same order as the JSON seed", async () => {
     const recipes = await getRecipeList();
 
-    expect(recipes).toHaveLength(15);
+    expect(recipes).toHaveLength(recipeDatabase.recipes.length);
     expect(recipes[0]).toMatchObject({
       title: "Classic Margherita Pizza",
       ingredientCount: 5,
@@ -54,7 +77,7 @@ describeWithDb("Neon-backed recipe repository", () => {
   test("filters recipes by tag", async () => {
     const recipes = await getRecipeList({ tag: "vegetarian" });
 
-    expect(recipes).toHaveLength(5);
+    expect(recipes).toHaveLength(getSeedTitlesWithTag("vegetarian").length);
     expect(recipes.every((recipe) => recipe.tags.includes("vegetarian"))).toBe(
       true,
     );
@@ -62,11 +85,11 @@ describeWithDb("Neon-backed recipe repository", () => {
 
   test("filters recipes by multiple tag terms with AND semantics", async () => {
     const recipes = await getRecipeList({ tag: "dinner, vegetarian" });
-    const emptyRecipes = await getRecipeList({ tag: "dinner, vegan" });
+    const emptyRecipes = await getRecipeList({ tag: "dinner, breakfast" });
 
-    expect(recipes.map((recipe) => recipe.title)).toEqual([
-      "Classic Margherita Pizza",
-    ]);
+    expect(recipes.map((recipe) => recipe.title)).toEqual(
+      getSeedTitlesWithAllTags("dinner", "vegetarian"),
+    );
     expect(emptyRecipes).toEqual([]);
   });
 
@@ -76,14 +99,12 @@ describeWithDb("Neon-backed recipe repository", () => {
     const soySauceRecipes = await getRecipeList({ ingredient: "soy sauce" });
     const proteinRecipes = await getRecipeList({ ingredient: "protein" });
 
-    expect(tomatoRecipes.map((recipe) => recipe.title)).toEqual([
-      "Classic Margherita Pizza",
-      "Greek Salad",
-    ]);
-    expect(soySauceIdRecipes.map((recipe) => recipe.title)).toEqual([
-      "Chicken Stir-Fry",
-      "Stir-Fried Tofu",
-    ]);
+    expect(tomatoRecipes.map((recipe) => recipe.title)).toEqual(
+      getSeedTitlesWithIngredient("tomato"),
+    );
+    expect(soySauceIdRecipes.map((recipe) => recipe.title)).toEqual(
+      getSeedTitlesWithIngredient("soy_sauce"),
+    );
     expect(soySauceRecipes).toEqual([]);
     expect(proteinRecipes).toEqual([]);
   });
@@ -106,15 +127,9 @@ describeWithDb("Neon-backed recipe repository", () => {
 
     expect(combinedRecipes).toHaveLength(1);
     expect(combinedRecipes[0].title).toBe("Greek Salad");
-    expect(malformedRecipes.map((recipe) => recipe.title)).toEqual([
-      "Classic Margherita Pizza",
-      "Chicken Stir-Fry",
-      "Beef Tacos",
-      "Sushi Roll",
-      "Pasta Carbonara",
-      "Grilled Salmon with Asparagus",
-      "Almond-Crusted Chicken",
-    ]);
+    expect(malformedRecipes.map((recipe) => recipe.title)).toEqual(
+      getSeedTitlesWithTag("dinner"),
+    );
   });
 
   test("returns an empty list for unsatisfied AND combinations", async () => {
