@@ -154,7 +154,12 @@ export default function RecipeOverview() {
           }
         })
         .catch((cause) => {
-          if (cause instanceof DOMException && cause.name === "AbortError") {
+          if (
+            cause &&
+            typeof cause === "object" &&
+            "name" in cause &&
+            cause.name === "AbortError"
+          ) {
             return;
           }
           if (
@@ -183,6 +188,12 @@ export default function RecipeOverview() {
       latestStreamedRef.current = streamed ?? null;
     }
   }, [streamed]);
+
+  useEffect(() => {
+    return () => {
+      finalizeAbortRef.current?.abort();
+    };
+  }, []);
 
   const handleSubmit = useCallback(
     (/** @type {import("react").FormEvent<HTMLFormElement>} */ event) => {

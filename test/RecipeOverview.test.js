@@ -412,6 +412,74 @@ test("stale finalizer failures cannot poison a newer query", async () => {
   });
 });
 
+test("ignores cross-realm abort-shaped finalizer failures", async () => {
+  const resolveFetch = jest.fn(() =>
+    Promise.reject({
+      name: "AbortError",
+    }),
+  );
+  /** @type {{ fetch: unknown }} */ (global).fetch = resolveFetch;
+
+  render(<RecipeOverview />);
+
+  fireEvent.change(screen.getByPlaceholderText(/Ask for a recommendation/i), {
+    target: { value: "a quick dinner" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+
+  await act(async () => {
+    hookState.onFinish?.({
+      object: {
+        overview: "Tomato Bowl is the quickest.",
+        recommendedRecipeIds: ["r1"],
+        suggestedFilters: { diet: [], tag: [] },
+        intent: "discovery",
+      },
+      error: undefined,
+    });
+  });
+
+  await waitFor(() => {
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+});
+
+test("aborts pending finalization when unmounted", async () => {
+  let finalizeSignal = /** @type {AbortSignal | null} */ (null);
+  const resolveFetch = jest.fn(
+    async (/** @type {string} */ _url, /** @type {RequestInit} */ init) => {
+      finalizeSignal = init.signal instanceof AbortSignal ? init.signal : null;
+      return new Promise(() => {});
+    },
+  );
+  /** @type {{ fetch: unknown }} */ (global).fetch = resolveFetch;
+
+  const { unmount } = render(<RecipeOverview />);
+
+  fireEvent.change(screen.getByPlaceholderText(/Ask for a recommendation/i), {
+    target: { value: "a quick dinner" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+
+  await act(async () => {
+    hookState.onFinish?.({
+      object: {
+        overview: "Tomato Bowl is the quickest.",
+        recommendedRecipeIds: ["r1"],
+        suggestedFilters: { diet: [], tag: [] },
+        intent: "discovery",
+      },
+      error: undefined,
+    });
+  });
+
+  expect(finalizeSignal?.aborted).toBe(false);
+
+  unmount();
+
+  expect(finalizeSignal?.aborted).toBe(true);
+});
+
 test("surfaces an inline stream error and retries the same query", () => {
   const { rerender } = render(<RecipeOverview />);
 

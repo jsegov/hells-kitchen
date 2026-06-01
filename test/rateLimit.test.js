@@ -51,6 +51,7 @@ test("does not accumulate buckets for clients that have gone quiet", () => {
   const limiter = createRateLimiter({
     limit: 5,
     windowMs: 1_000,
+    sweepIntervalMs: 1_000,
     now: () => now,
   });
 

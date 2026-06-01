@@ -80,7 +80,7 @@ async function readJsonBody(request) {
     return { ok: false };
   }
 
-  if (new TextEncoder().encode(text).byteLength > MAX_BODY_BYTES) {
+  if (Buffer.byteLength(text) > MAX_BODY_BYTES) {
     return { ok: false, tooLarge: true };
   }
 

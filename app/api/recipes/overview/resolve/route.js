@@ -35,7 +35,7 @@ async function readRawOverviewObject(request) {
     return { ok: false };
   }
 
-  if (new TextEncoder().encode(text).byteLength > MAX_FINALIZE_BODY_BYTES) {
+  if (Buffer.byteLength(text) > MAX_FINALIZE_BODY_BYTES) {
     return { ok: false, tooLarge: true };
   }
 
