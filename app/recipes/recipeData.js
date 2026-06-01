@@ -1,9 +1,17 @@
 import * as recipeLib from "../../lib/recipes";
+import { ALLERGEN_OPTIONS, DIETARY_OPTIONS } from "../../lib/recipeOptions";
 import {
-  ALLERGEN_OPTIONS,
-  DIETARY_OPTIONS,
-  getOptionLabel,
-} from "../../lib/recipeOptions";
+  formatAllergenLabel,
+  formatDietaryLabel,
+  formatDifficulty,
+  formatTagLabel,
+} from "./recipeDisplay";
+export {
+  formatAllergenLabel,
+  formatDietaryLabel,
+  formatDifficulty,
+  formatTagLabel,
+} from "./recipeDisplay";
 
 /**
  * @typedef {object} RecipeListItem
@@ -54,6 +62,21 @@ import {
  * @property {string[]} dietary
  * @property {string[]} allergens
  * @property {{ total: Nutrition, perServing: Nutrition, missingIngredientIds: string[], unconvertedIngredientIds: string[] }} nutrition
+ */
+
+/**
+ * @typedef {object} OverviewCatalogRow
+ * @property {string} id
+ * @property {string} title
+ * @property {string[]} tags
+ * @property {string} difficulty
+ * @property {number|null} prepMinutes
+ * @property {number|null} cookMinutes
+ * @property {number} servings
+ * @property {string[]} dietary
+ * @property {string[]} allergens
+ * @property {boolean} nutritionComplete
+ * @property {Nutrition} perServing
  */
 
 /**
@@ -248,6 +271,46 @@ function isRecipeListItem(value) {
     recipe.dietary.every((diet) => typeof diet === "string") &&
     Array.isArray(recipe.allergens) &&
     recipe.allergens.every((allergen) => typeof allergen === "string")
+  );
+}
+
+/**
+ * Defensive guard for the nutrition-aware catalog the AI Overview prompts with.
+ * Mirrors the distrust-the-boundary ethos: even our own data layer's output is
+ * re-validated before it is trusted (plan §5/§14).
+ *
+ * @param {unknown} value
+ * @returns {value is OverviewCatalogRow}
+ */
+export function isOverviewCatalogRow(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const row = /** @type {Partial<OverviewCatalogRow>} */ (value);
+
+  return (
+    typeof row.id === "string" &&
+    row.id.trim().length > 0 &&
+    typeof row.title === "string" &&
+    row.title.trim().length > 0 &&
+    Array.isArray(row.tags) &&
+    row.tags.every((tag) => typeof tag === "string") &&
+    typeof row.difficulty === "string" &&
+    (row.prepMinutes === null ||
+      (typeof row.prepMinutes === "number" &&
+        Number.isFinite(row.prepMinutes))) &&
+    (row.cookMinutes === null ||
+      (typeof row.cookMinutes === "number" &&
+        Number.isFinite(row.cookMinutes))) &&
+    typeof row.servings === "number" &&
+    Number.isFinite(row.servings) &&
+    Array.isArray(row.dietary) &&
+    row.dietary.every((diet) => typeof diet === "string") &&
+    Array.isArray(row.allergens) &&
+    row.allergens.every((allergen) => typeof allergen === "string") &&
+    typeof row.nutritionComplete === "boolean" &&
+    isNutrition(row.perServing)
   );
 }
 
@@ -494,48 +557,4 @@ export async function getRecipe(
       notFound: false,
     };
   }
-}
-
-/**
- * @param {unknown} difficulty
- */
-export function formatDifficulty(difficulty) {
-  if (typeof difficulty !== "string") {
-    return "Unrated";
-  }
-
-  const normalizedDifficulty = difficulty.trim();
-
-  if (!normalizedDifficulty) {
-    return "Unrated";
-  }
-
-  return (
-    normalizedDifficulty.charAt(0).toUpperCase() + normalizedDifficulty.slice(1)
-  );
-}
-
-/**
- * @param {string} value
- */
-export function formatTagLabel(value) {
-  if (typeof value !== "string" || !value.trim()) {
-    return "";
-  }
-
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-/**
- * @param {string} value
- */
-export function formatDietaryLabel(value) {
-  return getOptionLabel(DIETARY_OPTIONS, value);
-}
-
-/**
- * @param {string} value
- */
-export function formatAllergenLabel(value) {
-  return getOptionLabel(ALLERGEN_OPTIONS, value);
 }

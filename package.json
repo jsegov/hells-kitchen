@@ -22,10 +22,13 @@
     "db:reset": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {
+    "@ai-sdk/react": "^3.0.195",
     "@neondatabase/serverless": "^1.1.0",
+    "ai": "^6.0.193",
     "next": "16.2.6",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "zod": "^3.25.76"
   },
   "overrides": {
     "postcss": "8.5.15"

@@ -2,10 +2,10 @@ import ActiveFilterChips from "./ActiveFilterChips";
 import RecipeEmptyState from "./RecipeEmptyState";
 import RecipeFilters from "./RecipeFilters";
 import RecipeCard from "./RecipeCard";
+import RecipeOverview from "./RecipeOverview";
 import RecipePageHeader from "./RecipePageHeader";
+import { formatDietaryLabel, formatTagLabel } from "./recipeDisplay";
 import {
-  formatDietaryLabel,
-  formatTagLabel,
   getRecipeFacets,
   getRecipes,
   hasRecipeFilters,
@@ -14,6 +14,7 @@ import {
 } from "./recipeData";
 import {
   DEFAULT_RECIPE_SORT,
+  buildRecipesHref as buildRecipesHrefFromGroups,
   formatAllergenFreeLabel,
   toSortToken,
 } from "../../lib/recipeOptions";
@@ -36,7 +37,6 @@ const DEFAULT_SORT_TOKEN = toSortToken(DEFAULT_RECIPE_SORT);
  * @param {{ key: string, value: string }} [omit]
  */
 function buildRecipesHref(filters, sortToken, omit) {
-  const params = new URLSearchParams();
   /** @type {[string, string[]][]} */
   const groups = [
     ["name", filters.name],
@@ -46,22 +46,11 @@ function buildRecipesHref(filters, sortToken, omit) {
     ["exclude", filters.exclude],
   ];
 
-  for (const [key, values] of groups) {
-    for (const value of values) {
-      if (omit && omit.key === key && omit.value === value) {
-        continue;
-      }
-
-      params.append(key, value);
-    }
-  }
-
-  if (sortToken && sortToken !== DEFAULT_SORT_TOKEN) {
-    params.set("sort", sortToken);
-  }
-
-  const queryString = params.toString();
-  return queryString ? `/recipes?${queryString}` : "/recipes";
+  return buildRecipesHrefFromGroups(groups, {
+    omit,
+    sortToken,
+    defaultSortToken: DEFAULT_SORT_TOKEN,
+  });
 }
 
 /**
@@ -135,6 +124,8 @@ export default async function RecipesPage({ searchParams }) {
         hasError={Boolean(error)}
         recipeCount={recipes.length}
       />
+
+      <RecipeOverview />
 
       <RecipeFilters
         facets={facets}

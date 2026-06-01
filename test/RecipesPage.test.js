@@ -2,6 +2,13 @@ import { render, screen } from "@testing-library/react";
 import RecipesPage from "../app/recipes/page";
 import { getRecipeFacets, getRecipes } from "../app/recipes/recipeData";
 
+jest.mock("../app/recipes/RecipeOverview", () => ({
+  __esModule: true,
+  default: function MockRecipeOverview() {
+    return <section aria-label="AI overview" />;
+  },
+}));
+
 jest.mock("../app/recipes/RecipeFilters", () => ({
   __esModule: true,
   default: function MockRecipeFilters() {
@@ -75,4 +82,26 @@ test("surfaces facet loading errors while keeping loaded recipes visible", async
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Unable to load recipe filters.",
   );
+});
+
+test("always mounts the AI overview entry point on the recipes page", async () => {
+  /** @type {jest.MockedFunction<typeof getRecipes>} */ (
+    getRecipes
+  ).mockResolvedValue({
+    recipes: [recipeListItem],
+    error: null,
+  });
+  /** @type {jest.MockedFunction<typeof getRecipeFacets>} */ (
+    getRecipeFacets
+  ).mockResolvedValue({
+    facets: emptyFacets,
+    error: null,
+  });
+
+  render(await RecipesPage({ searchParams: Promise.resolve({}) }));
+
+  expect(
+    screen.queryByText("AI recommendations aren't configured."),
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("region", { name: "AI overview" })).toBeVisible();
 });
